@@ -1,0 +1,35 @@
+[package]
+name = 'filecoindot'
+authors = ['matthias@chainsafe.io']
+description = 'Pallet that bridges Filecoin to substrate based chains.'
+version = '0.0.1'
+license = "GPL-3.0"
+homepage = 'https://github.com/ChainSafe/filecoindot'
+repository = 'https://github.com/ChainSafe/filecoindot'
+edition = '2018'
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
+[dependencies]
+codec = { package = 'parity-scale-codec', version = '2.0.0', features = ['derive'], default-features = false }
+
+frame-benchmarking = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false, optional = true }
+frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+
+[dev-dependencies]
+serde = { version = "1.0.119" }
+sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+sp-runtime = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+
+[features]
+default = ['std']
+runtime-benchmarks = ['frame-benchmarking']
+std = [
+	'codec/std',
+	'frame-support/std',
+	'frame-system/std',
+	'frame-benchmarking/std',
+]
