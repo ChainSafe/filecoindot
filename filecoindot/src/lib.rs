@@ -5,6 +5,8 @@
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 pub use pallet::*;
 
+mod types;
+
 #[cfg(test)]
 mod mock;
 
@@ -16,91 +18,172 @@ mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
-	use frame_system::pallet_prelude::*;
+    use crate::types::{ProposalDetail, ProposalStatus};
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
 
-	/// Configure the pallet by specifying the parameters and types on which it depends.
-	#[pallet::config]
-	pub trait Config: frame_system::Config {
-		/// Because this pallet emits events, it depends on the runtime's definition of an event.
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-	}
+    type ProposalId = u64;
 
-	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
-	pub struct Pallet<T>(_);
+    /// Configure the pallet by specifying the parameters and types on which it depends.
+    #[pallet::config]
+    pub trait Config: frame_system::Config {
+        /// The overarching event type.
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        /// Origin used to administer the pallet
+        /// TODO: Do we need dynamically change admin here?
+        type ManagerOrigin: EnsureOrigin<Self::Origin>;
+        /// The lifetime of a proposal
+        type ProposalLifetime: Get<Self::BlockNumber>;
+    }
 
-	// The pallet's runtime storage items.
-	// https://substrate.dev/docs/en/knowledgebase/runtime/storage
-	#[pallet::storage]
-	#[pallet::getter(fn something)]
-	// Learn more about declaring storage items:
-	// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
-	pub type Something<T> = StorageValue<_, u32>;
+    #[pallet::pallet]
+    #[pallet::generate_store(pub (super) trait Store)]
+    pub struct Pallet<T>(_);
 
-	// Pallets use events to inform users when important changes are made.
-	// https://substrate.dev/docs/en/knowledgebase/runtime/events
-	#[pallet::event]
-	#[pallet::metadata(T::AccountId = "AccountId")]
-	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
-		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [something, who]
-		SomethingStored(u32, T::AccountId),
-	}
+    #[pallet::storage]
+    pub type Relayers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
 
-	// Errors inform users that something went wrong.
-	#[pallet::error]
-	pub enum Error<T> {
-		/// Error names should be descriptive.
-		NoneValue,
-		/// Errors should have helpful documentation associated with them.
-		StorageOverflow,
-	}
+    #[pallet::storage]
+    pub(super) type RelayerCount<T: Config> = StorageValue<_, u32, ValueQuery>;
 
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+    #[pallet::storage]
+    pub(super) type RelayerThreshold<T: Config> = StorageValue<_, u32, ValueQuery>;
 
-	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
-	// These functions materialize as "extrinsics", which are often compared to transactions.
-	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
-	#[pallet::call]
-	impl<T: Config> Pallet<T> {
-		/// An example dispatchable that takes a singles value as a parameter, writes the value to
-		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResultWithPostInfo {
-			// Check that the extrinsic was signed and get the signer.
-			// This function will return an error if the extrinsic is not signed.
-			// https://substrate.dev/docs/en/knowledgebase/runtime/origin
-			let who = ensure_signed(origin)?;
+    #[pallet::event]
+    #[pallet::generate_deposit(pub (super) fn deposit_event)]
+    pub enum Event<T: Config> {
+        /// Relayer added to set
+        RelayerAdded(T::AccountId),
+        /// Relayer removed from set
+        RelayerRemoved(T::AccountId),
+    }
 
-			// Update storage.
-			<Something<T>>::put(something);
+    // Errors inform users that something went wrong.
+    #[pallet::error]
+    pub enum Error<T> {
+        /// Relayer already in set
+        RelayerAlreadyExists,
+        /// Provided accountId is not a relayer
+        RelayerInvalid,
+        /// Protected operation, must be performed by relayer
+        MustBeRelayer,
+        /// Proposal has already executed
+        ProposalAlreadyExecuted,
+        /// Proposal has already expired
+        ProposalExpired,
+    }
 
-			// Emit an event.
-			Self::deposit_event(Event::SomethingStored(something, who));
-			// Return a successful DispatchResultWithPostInfo
-			Ok(().into())
-		}
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-		/// An example dispatchable that may throw a custom error.
-		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn cause_error(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
-			let _who = ensure_signed(origin)?;
+    /// TODO: fix all the weights later on
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+        // **************** Relayer Add/Remove *****************
+        /// Adds a new relayer to the relayer set.
+        #[pallet::weight(0)]
+        pub fn add_relayer(origin: OriginFor<T>, v: T::AccountId) -> DispatchResult {
+            Self::ensure_admin(origin)?;
+            Self::register_relayer(v)
+        }
 
-			// Read a value from storage.
-			match <Something<T>>::get() {
-				// Return an error if the value has not been set.
-				None => Err(Error::<T>::NoneValue)?,
-				Some(old) => {
-					// Increment the value read from storage; will error in the event of overflow.
-					let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-					// Update the value in storage with the incremented result.
-					<Something<T>>::put(new);
-					Ok(().into())
-				},
-			}
-		}
-	}
+        /// Removes an existing relayer from the set.
+        #[pallet::weight(0)]
+        pub fn remove_relayer(origin: OriginFor<T>, v: T::AccountId) -> DispatchResult {
+            Self::ensure_admin(origin)?;
+            Self::unregister_relayer(v)
+        }
+
+        // **************** Voting Related ***************
+        // TODO： QUESTION - How does the lifecycle of proposal work again?
+
+        /// Commits a vote in favour of the provided proposal.
+        #[pallet::weight(0)]
+        pub fn vote_for_proposal(origin: OriginFor<T>, _proposal_id: ProposalId) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
+
+            Ok(())
+        }
+
+        /// Commits a vote in favour of the provided proposal.
+        #[pallet::weight(0)]
+        pub fn vote_against_proposal(
+            origin: OriginFor<T>,
+            _proposal_id: ProposalId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
+
+            Ok(())
+        }
+    }
+
+    impl<T: Config> Pallet<T> {
+        fn ensure_admin(o: OriginFor<T>) -> DispatchResult {
+            T::ManagerOrigin::try_origin(o)
+                .map(|_| ())
+                .or_else(ensure_root)?;
+            Ok(())
+        }
+
+        /// Adds a new relayer to the set.
+        /// Caller ensure the invoker has appropriate admin roles
+        fn register_relayer(relayer: T::AccountId) -> DispatchResult {
+            ensure!(
+                !Self::is_relayer(&relayer),
+                Error::<T>::RelayerAlreadyExists
+            );
+
+            <Relayers<T>>::insert(&relayer, true);
+            RelayerCount::<T>::mutate(|i| *i += 1);
+
+            Self::deposit_event(Event::RelayerAdded(relayer));
+            Ok(())
+        }
+
+        /// Removes a relayer from the set
+        /// Caller ensure the invoker has appropriate admin roles
+        fn unregister_relayer(relayer: T::AccountId) -> DispatchResult {
+            ensure!(Self::is_relayer(&relayer), Error::<T>::RelayerInvalid);
+
+            Relayers::<T>::remove(&relayer);
+            RelayerCount::<T>::mutate(|i| *i -= 1);
+
+            Self::deposit_event(Event::RelayerRemoved(relayer));
+            Ok(())
+        }
+
+        /// Checks if who is a relayer
+        fn is_relayer(who: &T::AccountId) -> bool {
+            Relayers::<T>::get(who).unwrap_or(false)
+        }
+
+        // ============== Voting Related =============
+        fn try_resolve_proposal(
+            prop_id: ProposalId,
+            prop: &mut ProposalDetail<T>,
+        ) -> DispatchResult {
+            let now = <frame_system::Pallet<T>>::block_number();
+
+            let status =
+                prop.try_resolve(RelayerThreshold::<T>::get(), RelayerCount::<T>::get(), now)?;
+            match status {
+                ProposalStatus::Approved => Self::finalize_execution(prop_id, prop),
+                ProposalStatus::Rejected => Self::cancel_execution(prop_id, prop),
+                _ => Ok(()),
+            }
+        }
+
+        fn finalize_execution(
+            _prop_id: ProposalId,
+            _prop: &mut ProposalDetail<T>,
+        ) -> DispatchResult {
+            Ok(())
+        }
+
+        fn cancel_execution(_prop_id: ProposalId, _prop: &mut ProposalDetail<T>) -> DispatchResult {
+            Ok(())
+        }
+    }
 }
