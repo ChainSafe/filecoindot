@@ -56,6 +56,8 @@ pub mod pallet {
         RelayerAdded(T::AccountId),
         /// Relayer removed from set
         RelayerRemoved(T::AccountId),
+        /// Relayer threshold updated to value
+        RelayerThresholdUpdate(u32),
     }
 
     // Errors inform users that something went wrong.
@@ -85,6 +87,16 @@ pub mod pallet {
         pub fn add_relayer(origin: OriginFor<T>, v: T::AccountId) -> DispatchResult {
             Self::ensure_admin(origin)?;
             Self::register_relayer(v)
+        }
+
+        /// Commits a vote in favour of the provided proposal.
+        #[pallet::weight(0)]
+        pub fn update_relayer_threshold(origin: OriginFor<T>, threshold: u32) -> DispatchResult {
+            Self::ensure_admin(origin)?;
+            RelayerThreshold::<T>::set(threshold);
+
+            Self::deposit_event(Event::RelayerThresholdUpdate(threshold));
+            Ok(())
         }
 
         /// Removes an existing relayer from the set.
