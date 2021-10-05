@@ -35,6 +35,8 @@ pub mod pallet {
         type ManagerOrigin: EnsureOrigin<Self::Origin>;
         /// The lifetime of a proposal
         type ProposalLifetime: Get<Self::BlockNumber>;
+        /// The weight for this pallet's extrinsics.
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -103,21 +105,21 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         // **************** Relayer Add/Remove *****************
         /// Adds a new relayer to the relayer set.
-        #[pallet::weight(0)]
+        #[pallet::weight(T::WeightInfo::add_relayer())]
         pub fn add_relayer(origin: OriginFor<T>, v: T::AccountId) -> DispatchResult {
             Self::ensure_admin(origin)?;
             Self::register_relayer(v)
         }
 
         /// Removes an existing relayer from the set.
-        #[pallet::weight(0)]
+        #[pallet::weight(T::WeightInfo::remove_relayer())]
         pub fn remove_relayer(origin: OriginFor<T>, v: T::AccountId) -> DispatchResult {
             Self::ensure_admin(origin)?;
             Self::unregister_relayer(v)
         }
 
         /// Commits a vote in favour of the provided proposal.
-        #[pallet::weight(0)]
+        #[pallet::weight(T::WeightInfo::update_relayer_threshold())]
         pub fn update_relayer_threshold(origin: OriginFor<T>, threshold: u32) -> DispatchResult {
             Self::ensure_admin(origin)?;
             RelayerThreshold::<T>::set(threshold);
@@ -127,8 +129,8 @@ pub mod pallet {
         }
 
         // ************** Proposal Lifecycle *************
-        #[pallet::weight(0)]
         /// TODO: who can create proposals?
+        #[pallet::weight(T::WeightInfo::new_proposal())]
         pub fn new_proposal(origin: OriginFor<T>, block_cid: Vec<u8>, message_root_cid: Vec<u8>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             // ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
@@ -151,7 +153,7 @@ pub mod pallet {
         // TODO： QUESTION - How does the lifecycle of proposal work again?
 
         /// Commits a vote in favour of the provided proposal.
-        #[pallet::weight(0)]
+        #[pallet::weight(T::WeightInfo::vote_for_proposal())]
         pub fn vote_for_proposal(origin: OriginFor<T>, proposal_id: ProposalId<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
@@ -167,7 +169,7 @@ pub mod pallet {
         }
 
         /// Commits a vote in favour of the provided proposal.
-        #[pallet::weight(0)]
+        #[pallet::weight(T::WeightInfo::vote_against_proposal())]
         pub fn vote_against_proposal(
             origin: OriginFor<T>,
             proposal_id: ProposalId<T>,
@@ -255,6 +257,42 @@ pub mod pallet {
 
         fn cancel_execution(_prop_id: ProposalId<T>, _prop: &mut ProposalDetail<T>) -> DispatchResult {
             Ok(())
+        }
+    }
+
+    pub trait WeightInfo {
+        fn add_relayer() -> Weight;
+        fn remove_relayer() -> Weight;
+        fn vote_against_proposal() -> Weight;
+        fn vote_for_proposal() -> Weight;
+        fn new_proposal() -> Weight;
+        fn update_relayer_threshold() -> Weight;
+    }
+
+    /// For backwards compatibility and tests
+    impl WeightInfo for () {
+        fn add_relayer() -> Weight {
+            Default::default()
+        }
+
+        fn remove_relayer() -> Weight {
+            Default::default()
+        }
+
+        fn vote_against_proposal() -> Weight {
+            Default::default()
+        }
+
+        fn vote_for_proposal() -> Weight {
+            Default::default()
+        }
+
+        fn new_proposal() -> Weight {
+            Default::default()
+        }
+
+        fn update_relayer_threshold() -> Weight {
+            Default::default()
         }
     }
 }
