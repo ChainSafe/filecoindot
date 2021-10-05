@@ -18,9 +18,10 @@ mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use crate::types::{ProposalDetail, ProposalStatus};
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
+
+    use crate::types::{ProposalDetail, ProposalStatus, QuorumStrategy};
 
     type ProposalId = u64;
 
@@ -42,6 +43,10 @@ pub mod pallet {
 
     #[pallet::storage]
     pub type Relayers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+
+    #[pallet::storage]
+    pub type Proposals<T: Config> =
+        StorageMap<_, Blake2_128Concat, ProposalId, ProposalDetail<T>, OptionQuery>;
 
     #[pallet::storage]
     pub(super) type RelayerCount<T: Config> = StorageValue<_, u32, ValueQuery>;
@@ -73,6 +78,10 @@ pub mod pallet {
         ProposalAlreadyExecuted,
         /// Proposal has already expired
         ProposalExpired,
+        /// Proposal invalid status
+        ProposalInvalidStatus(ProposalStatus),
+        /// Relayer has already voted
+        AlreadyVoted,
     }
 
     #[pallet::hooks]
@@ -89,6 +98,13 @@ pub mod pallet {
             Self::register_relayer(v)
         }
 
+        /// Removes an existing relayer from the set.
+        #[pallet::weight(0)]
+        pub fn remove_relayer(origin: OriginFor<T>, v: T::AccountId) -> DispatchResult {
+            Self::ensure_admin(origin)?;
+            Self::unregister_relayer(v)
+        }
+
         /// Commits a vote in favour of the provided proposal.
         #[pallet::weight(0)]
         pub fn update_relayer_threshold(origin: OriginFor<T>, threshold: u32) -> DispatchResult {
@@ -99,23 +115,22 @@ pub mod pallet {
             Ok(())
         }
 
-        /// Removes an existing relayer from the set.
-        #[pallet::weight(0)]
-        pub fn remove_relayer(origin: OriginFor<T>, v: T::AccountId) -> DispatchResult {
-            Self::ensure_admin(origin)?;
-            Self::unregister_relayer(v)
-        }
-
         // **************** Voting Related ***************
         // TODO： QUESTION - How does the lifecycle of proposal work again?
 
         /// Commits a vote in favour of the provided proposal.
         #[pallet::weight(0)]
-        pub fn vote_for_proposal(origin: OriginFor<T>, _proposal_id: ProposalId) -> DispatchResult {
+        pub fn vote_for_proposal(origin: OriginFor<T>, proposal_id: ProposalId) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
 
-            Ok(())
+            Proposals::<T>::try_mutate(proposal_id, |proposal| {
+                let mut proposal = proposal.ok_or(Error::RelayerAlreadyExists)?;
+
+                let now = <frame_system::Pallet<T>>::block_number();
+                proposal.vote_for(who, now);
+                Ok(())
+            })
         }
 
         /// Commits a vote in favour of the provided proposal.
@@ -127,7 +142,13 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
 
-            Ok(())
+            Proposals::<T>::try_mutate(proposal_id, |proposal| {
+                let mut proposal = proposal.ok_or(Error::RelayerAlreadyExists)?;
+
+                let now = <frame_system::Pallet<T>>::block_number();
+                proposal.vote_against(who, now);
+                Ok(())
+            })
         }
     }
 
@@ -178,9 +199,12 @@ pub mod pallet {
         ) -> DispatchResult {
             let now = <frame_system::Pallet<T>>::block_number();
 
-            let status =
-                prop.try_resolve(RelayerThreshold::<T>::get(), RelayerCount::<T>::get(), now)?;
-            match status {
+            let quorum_strategy = QuorumStrategy::Simple {
+                threshold: RelayerThreshold::<T>::get() as usize,
+                total: RelayerCount::<T>::get() as usize,
+            };
+
+            match prop.try_resolve(&quorum_strategy, now)? {
                 ProposalStatus::Approved => Self::finalize_execution(prop_id, prop),
                 ProposalStatus::Rejected => Self::cancel_execution(prop_id, prop),
                 _ => Ok(()),
