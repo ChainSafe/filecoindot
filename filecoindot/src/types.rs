@@ -25,6 +25,8 @@ pub(crate) enum ProposalStatus {
 
 #[derive(Encode, Decode, Eq, PartialEq, Clone, RuntimeDebug)]
 pub(crate) struct ProposalDetail<T: Config> {
+    /// The account that started this proposal
+    proposer: T::AccountId,
     /// The cid of the filecoin block.
     block_cid: Vec<u8>,
     /// The message root cid
@@ -46,12 +48,14 @@ pub(crate) struct ProposalDetail<T: Config> {
 
 impl<T: Config> ProposalDetail<T> {
     pub fn new(
+        proposer: T::AccountId,
         block_cid: Vec<u8>,
         message_root_cid: Vec<u8>,
         start_block: T::BlockNumber,
         end_block: T::BlockNumber,
     ) -> Self {
         ProposalDetail {
+            proposer,
             block_cid,
             message_root_cid,
             for_votes: Vec::new(),
@@ -70,7 +74,7 @@ impl<T: Config> ProposalDetail<T> {
 
     /// Derive the current proposal status.
     /// Need to pass in the current block number as the status is very time sensitive
-    pub fn status(&self, now: &T::BlockNumber) -> ProposalStatus {
+    pub fn status(&self, _now: &T::BlockNumber) -> ProposalStatus {
         // TODO: the logic here needs to be clarified
         todo!()
     }
@@ -83,10 +87,10 @@ impl<T: Config> ProposalDetail<T> {
 
         let status = self.status(now);
         if status != ProposalStatus::Active {
-            return Err(Error::<T>::ProposalInvalidStatus(status));
+            return Err(Error::<T>::ProposalInvalidStatus);
         }
 
-        self.for_votes.append(who);
+        self.for_votes.push(who);
         Ok(())
     }
 
@@ -102,10 +106,10 @@ impl<T: Config> ProposalDetail<T> {
 
         let status = self.status(now);
         if status != ProposalStatus::Active {
-            return Err(Error::<T>::ProposalInvalidStatus(status));
+            return Err(Error::<T>::ProposalInvalidStatus);
         }
 
-        self.against_votes.append(who);
+        self.against_votes.push(who);
         Ok(())
     }
 
@@ -118,7 +122,7 @@ impl<T: Config> ProposalDetail<T> {
         strategy: &QuorumStrategy,
         now: T::BlockNumber,
     ) -> Result<ProposalStatus, Error<T>> {
-        let status = self.status(now);
+        let status = self.status(&now);
 
         // TODO: we are not handling Canceled?
         // TODO: this is also very strange as the status can be Approved first then Rejected again?
@@ -152,10 +156,10 @@ impl QuorumStrategy {
     pub fn formed(&self, against_votes: usize, for_votes: usize) -> bool {
         match self {
             QuorumStrategy::Simple { total, threshold } => {
-                let min = threshold.max(&(total / 2));
+                let quorum = total / 2;
+                let min = threshold.max(&quorum);
                 against_votes + for_votes > *min
             }
-            _ => false,
         }
     }
 }

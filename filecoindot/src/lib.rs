@@ -23,7 +23,7 @@ pub mod pallet {
 
     use crate::types::{ProposalDetail, ProposalStatus, QuorumStrategy};
 
-    type ProposalId = u64;
+    type ProposalId<T> = <T as frame_system::Config>::Hash;
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
@@ -45,14 +45,17 @@ pub mod pallet {
     pub type Relayers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
 
     #[pallet::storage]
-    pub type Proposals<T: Config> =
-        StorageMap<_, Blake2_128Concat, ProposalId, ProposalDetail<T>, OptionQuery>;
+    pub(crate) type Proposals<T: Config> =
+    StorageMap<_, Blake2_128Concat, ProposalId<T>, ProposalDetail<T>, OptionQuery>;
 
     #[pallet::storage]
     pub(super) type RelayerCount<T: Config> = StorageValue<_, u32, ValueQuery>;
 
     #[pallet::storage]
     pub(super) type RelayerThreshold<T: Config> = StorageValue<_, u32, ValueQuery>;
+
+    #[pallet::storage]
+    pub(super) type VotingPeriod<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
 
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
@@ -63,6 +66,12 @@ pub mod pallet {
         RelayerRemoved(T::AccountId),
         /// Relayer threshold updated to value
         RelayerThresholdUpdate(u32),
+        /// Vote for the proposal casted
+        VoteForCasted(ProposalId<T>, T::AccountId),
+        /// Vote against the proposal casted
+        VoteAgainstCasted(ProposalId<T>, T::AccountId),
+        /// Proposal created
+        ProposalCreated(ProposalId<T>),
     }
 
     // Errors inform users that something went wrong.
@@ -79,7 +88,9 @@ pub mod pallet {
         /// Proposal has already expired
         ProposalExpired,
         /// Proposal invalid status
-        ProposalInvalidStatus(ProposalStatus),
+        ProposalInvalidStatus,
+        /// Proposal already exists
+        ProposalAlreadyExists,
         /// Relayer has already voted
         AlreadyVoted,
     }
@@ -115,20 +126,42 @@ pub mod pallet {
             Ok(())
         }
 
+        // ************** Proposal Lifecycle *************
+        #[pallet::weight(0)]
+        /// TODO: who can create proposals?
+        pub fn new_proposal(origin: OriginFor<T>, block_cid: Vec<u8>, message_root_cid: Vec<u8>) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            // ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
+
+            let start_block = <frame_system::Pallet<T>>::block_number();
+            let end_block = VotingPeriod::<T>::get();
+            let proposal: ProposalDetail<T> = ProposalDetail::new(who, block_cid, message_root_cid, start_block, end_block);
+
+            let proposal_id: ProposalId<T> = proposal.hash();
+            if Proposals::<T>::contains_key(proposal_id) {
+                return Err(Error::<T>::ProposalAlreadyExists.into());
+            }
+            Proposals::<T>::insert(proposal_id, proposal);
+            Self::deposit_event(Event::ProposalCreated(proposal_id));
+
+            Ok(())
+        }
+
         // **************** Voting Related ***************
         // TODO： QUESTION - How does the lifecycle of proposal work again?
 
         /// Commits a vote in favour of the provided proposal.
         #[pallet::weight(0)]
-        pub fn vote_for_proposal(origin: OriginFor<T>, proposal_id: ProposalId) -> DispatchResult {
+        pub fn vote_for_proposal(origin: OriginFor<T>, proposal_id: ProposalId<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
 
             Proposals::<T>::try_mutate(proposal_id, |proposal| {
-                let mut proposal = proposal.ok_or(Error::RelayerAlreadyExists)?;
+                let proposal = proposal.as_mut().ok_or(Error::<T>::RelayerAlreadyExists)?;
 
                 let now = <frame_system::Pallet<T>>::block_number();
-                proposal.vote_for(who, now);
+                proposal.vote_for(who.clone(), &now)?;
+                Self::deposit_event(Event::VoteForCasted(proposal_id, who));
                 Ok(())
             })
         }
@@ -137,16 +170,17 @@ pub mod pallet {
         #[pallet::weight(0)]
         pub fn vote_against_proposal(
             origin: OriginFor<T>,
-            _proposal_id: ProposalId,
+            proposal_id: ProposalId<T>,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
 
             Proposals::<T>::try_mutate(proposal_id, |proposal| {
-                let mut proposal = proposal.ok_or(Error::RelayerAlreadyExists)?;
+                let proposal = proposal.as_mut().ok_or(Error::<T>::RelayerAlreadyExists)?;
 
                 let now = <frame_system::Pallet<T>>::block_number();
-                proposal.vote_against(who, now);
+                proposal.vote_against(who.clone(), &now)?;
+                Self::deposit_event(Event::VoteAgainstCasted(proposal_id, who));
                 Ok(())
             })
         }
@@ -193,8 +227,9 @@ pub mod pallet {
         }
 
         // ============== Voting Related =============
+        /// TODO: who is calling this function?
         fn try_resolve_proposal(
-            prop_id: ProposalId,
+            prop_id: ProposalId<T>,
             prop: &mut ProposalDetail<T>,
         ) -> DispatchResult {
             let now = <frame_system::Pallet<T>>::block_number();
@@ -212,13 +247,13 @@ pub mod pallet {
         }
 
         fn finalize_execution(
-            _prop_id: ProposalId,
+            _prop_id: ProposalId<T>,
             _prop: &mut ProposalDetail<T>,
         ) -> DispatchResult {
             Ok(())
         }
 
-        fn cancel_execution(_prop_id: ProposalId, _prop: &mut ProposalDetail<T>) -> DispatchResult {
+        fn cancel_execution(_prop_id: ProposalId<T>, _prop: &mut ProposalDetail<T>) -> DispatchResult {
             Ok(())
         }
     }
