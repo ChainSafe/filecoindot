@@ -48,7 +48,7 @@ pub mod pallet {
 
     #[pallet::storage]
     pub(crate) type Proposals<T: Config> =
-    StorageMap<_, Blake2_128Concat, ProposalId<T>, ProposalDetail<T>, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, ProposalId<T>, ProposalDetail<T>, OptionQuery>;
 
     #[pallet::storage]
     pub(super) type RelayerCount<T: Config> = StorageValue<_, u32, ValueQuery>;
@@ -100,7 +100,6 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-    /// TODO: fix all the weights later on
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         // **************** Relayer Add/Remove *****************
@@ -129,15 +128,20 @@ pub mod pallet {
         }
 
         // ************** Proposal Lifecycle *************
-        /// TODO: who can create proposals?
+        /// TODO: who and when can create proposals?
         #[pallet::weight(T::WeightInfo::new_proposal())]
-        pub fn new_proposal(origin: OriginFor<T>, block_cid: Vec<u8>, message_root_cid: Vec<u8>) -> DispatchResult {
+        pub fn new_proposal(
+            origin: OriginFor<T>,
+            block_cid: Vec<u8>,
+            message_root_cid: Vec<u8>,
+        ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             // ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
 
             let start_block = <frame_system::Pallet<T>>::block_number();
             let end_block = VotingPeriod::<T>::get();
-            let proposal: ProposalDetail<T> = ProposalDetail::new(who, block_cid, message_root_cid, start_block, end_block);
+            let proposal: ProposalDetail<T> =
+                ProposalDetail::new(who, block_cid, message_root_cid, start_block, end_block);
 
             let proposal_id: ProposalId<T> = proposal.hash();
             if Proposals::<T>::contains_key(proposal_id) {
@@ -150,11 +154,13 @@ pub mod pallet {
         }
 
         // **************** Voting Related ***************
-        // TODO： QUESTION - How does the lifecycle of proposal work again?
-
+        // TODO： QUESTION - How does the lifecycle of proposal work again? This would lead to status transition
         /// Commits a vote in favour of the provided proposal.
         #[pallet::weight(T::WeightInfo::vote_for_proposal())]
-        pub fn vote_for_proposal(origin: OriginFor<T>, proposal_id: ProposalId<T>) -> DispatchResult {
+        pub fn vote_for_proposal(
+            origin: OriginFor<T>,
+            proposal_id: ProposalId<T>,
+        ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
 
@@ -255,7 +261,10 @@ pub mod pallet {
             Ok(())
         }
 
-        fn cancel_execution(_prop_id: ProposalId<T>, _prop: &mut ProposalDetail<T>) -> DispatchResult {
+        fn cancel_execution(
+            _prop_id: ProposalId<T>,
+            _prop: &mut ProposalDetail<T>,
+        ) -> DispatchResult {
             Ok(())
         }
     }
