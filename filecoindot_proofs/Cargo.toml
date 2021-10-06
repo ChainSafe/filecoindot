@@ -1,0 +1,15 @@
+[package]
+name = "filecoindot_proofs"
+authors = ['matthias@chainsafe.io']
+description = 'Proof Generation and Verification for filecoindot.'
+version = '0.0.1'
+license = "GPL-3.0"
+homepage = 'https://github.com/ChainSafe/filecoindot'
+repository = 'https://github.com/ChainSafe/filecoindot'
+edition = '2018'
+
+[dependencies]
+codec = { package = 'parity-scale-codec', version = '2.0.0', features = ['derive'], default-features = false }
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
