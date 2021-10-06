@@ -18,11 +18,9 @@ mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::dispatch::{Codec, Dispatchable, GetDispatchInfo, PostDispatchInfo};
+    use frame_support::dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo};
     use frame_support::pallet_prelude::*;
-    use frame_support::sp_runtime::traits::{
-        AccountIdConversion, CheckedAdd, One, Saturating, Zero,
-    };
+    use frame_support::sp_runtime::traits::{AccountIdConversion, Saturating};
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
 
@@ -45,15 +43,16 @@ pub mod pallet {
             + Dispatchable<Origin = Self::Origin, PostInfo = PostDispatchInfo>
             + From<frame_system::Call<Self>>
             + GetDispatchInfo;
-        /// A unique number assigned to each new instance of a proposal
-        type ProposalNonce: Parameter
-            + Member
-            + One
-            + Zero
-            + Codec
-            + Default
-            + MaybeSerializeDeserialize
-            + CheckedAdd;
+        /// Origin that is permitted to create proposals
+        type ProposalSubmissionOrigin: EnsureOrigin<
+            <Self as frame_system::Config>::Origin,
+            Success = <Self as frame_system::Config>::AccountId,
+        >;
+        /// Origin that is permitted to execute approved proposals
+        type ProposalExecutionOrigin: EnsureOrigin<
+            <Self as frame_system::Config>::Origin,
+            Success = <Self as frame_system::Config>::AccountId,
+        >;
         /// The lifetime of a proposal
         type ProposalLifetime: Get<Self::BlockNumber>;
         /// The weight for this pallet's extrinsics.
@@ -183,14 +182,13 @@ pub mod pallet {
             _block_cid: Vec<u8>,
             _message_root_cid: Vec<u8>,
         ) -> DispatchResult {
-            Ok(())
+            todo!()
         }
 
         /// TODO: who and when can create proposals?
         #[pallet::weight(T::WeightInfo::new_governance_proposal())]
         pub fn new_governance_proposal(origin: OriginFor<T>, action: T::Action) -> DispatchResult {
-            let who = ensure_signed(origin)?;
-            // ensure!(!Self::is_relayer(&who), Error::<T>::MustBeRelayer);
+            let who = T::ProposalSubmissionOrigin::ensure_origin(origin)?;
 
             let start_block: T::BlockNumber = <frame_system::Pallet<T>>::block_number();
             let end_block = start_block.saturating_add(VotingPeriod::<T>::get());
@@ -208,8 +206,7 @@ pub mod pallet {
         }
 
         // **************** Voting Related ***************
-        // TODO： QUESTION - How does the lifecycle of proposal work again? This would lead to status transition
-        /// Commits a vote in favour of the provided proposal.
+        /// Vote for a provided proposal.
         #[pallet::weight(T::WeightInfo::vote_governance_proposal())]
         pub fn vote_governance_proposal(
             origin: OriginFor<T>,
@@ -232,6 +229,18 @@ pub mod pallet {
                 }
             }
 
+            Self::try_resolve_proposal(proposal_id, proposal)
+        }
+
+        /// Close a governance proposal in case auto closing didn't complete
+        #[pallet::weight(T::WeightInfo::close_governance_proposal())]
+        pub fn close_governance_proposal(
+            origin: OriginFor<T>,
+            proposal_id: ProposalId<T>,
+        ) -> DispatchResult {
+            T::ProposalExecutionOrigin::ensure_origin(origin)?;
+            let proposal =
+                GovernanceProposals::<T>::get(proposal_id).ok_or(Error::<T>::ProposalNotExists)?;
             Self::try_resolve_proposal(proposal_id, proposal)
         }
     }
@@ -333,6 +342,7 @@ pub mod pallet {
         fn new_governance_proposal() -> Weight;
         fn update_relayer_threshold() -> Weight;
         fn new_submission() -> Weight;
+        fn close_governance_proposal() -> Weight;
     }
 
     /// For backwards compatibility and tests
@@ -358,6 +368,10 @@ pub mod pallet {
         }
 
         fn new_submission() -> Weight {
+            Default::default()
+        }
+
+        fn close_governance_proposal() -> Weight {
             Default::default()
         }
     }
