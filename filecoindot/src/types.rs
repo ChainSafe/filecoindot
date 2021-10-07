@@ -1,5 +1,4 @@
 use frame_support::pallet_prelude::*;
-use frame_support::sp_runtime::traits::Hash;
 
 use crate::{Config, Error};
 
@@ -22,10 +21,6 @@ pub(crate) struct VoteAggregate<T: Config> {
     start_block: T::BlockNumber,
     /// The block number that the proposal ended
     end_block: T::BlockNumber,
-    /// Whether the proposal is executed
-    is_executed: bool,
-    /// Whether the proposal is canceled
-    is_canceled: bool,
 }
 
 impl<T: Config> VoteAggregate<T> {
@@ -35,20 +30,12 @@ impl<T: Config> VoteAggregate<T> {
             against_votes: Vec::new(),
             start_block,
             end_block,
-            is_executed: false,
-            is_canceled: false,
         }
     }
 
     /// Derive the current proposal status.
     /// Need to pass in the current block number as the status is very time sensitive
     pub fn status(&self, now: &T::BlockNumber, threshold: u32) -> ProposalStatus {
-        if self.is_canceled {
-            return ProposalStatus::Canceled;
-        }
-        if self.is_executed {
-            return ProposalStatus::Executed;
-        }
         if self.is_active(now) {
             return ProposalStatus::Active;
         }
@@ -95,46 +82,26 @@ impl<T: Config> VoteAggregate<T> {
     }
 }
 
+/// The filecoin block submission proposal
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-/// This represents an instance of a proposal that can be voted on.
-/// It has been proposed and has an assigned nonce.
-/// This extra abstraction is required since it may be desirable construct
-/// multiple proposal instances out of a single proposal
-pub(crate) struct GovernanceProposal<T: Config> {
-    action: T::Action,
-    issuer: T::AccountId,
+pub(crate) struct BlockSubmissionProposal<T: Config> {
+    proposer: T::AccountId,
+    message_root: Vec<u8>,
     vote: VoteAggregate<T>,
 }
 
-impl<T: Config> GovernanceProposal<T> {
+impl<T: Config> BlockSubmissionProposal<T> {
     pub fn new(
-        action: T::Action,
-        issuer: T::AccountId,
+        proposer: T::AccountId,
+        message_root: Vec<u8>,
         start_block: T::BlockNumber,
         end_block: T::BlockNumber,
     ) -> Self {
         Self {
-            action,
-            issuer,
+            proposer,
+            message_root,
             vote: VoteAggregate::new(start_block, end_block),
         }
-    }
-
-    pub fn set_executed(&mut self) {
-        self.vote.is_executed = true;
-    }
-
-    pub fn set_canceled(&mut self) {
-        self.vote.is_canceled = true;
-    }
-
-    pub fn action(&self) -> T::Action {
-        // TODO: is clone here recommended?
-        self.action.clone()
-    }
-
-    pub fn hash(&self) -> <T as frame_system::Config>::Hash {
-        T::Hashing::hash_of(self)
     }
 
     /// Derive the current proposal status.
@@ -167,8 +134,4 @@ pub(crate) enum ProposalStatus {
     Approved,
     /// Proposal is rejected
     Rejected,
-    /// Proposal is cancelled
-    Canceled,
-    /// Proposal is executed
-    Executed,
 }

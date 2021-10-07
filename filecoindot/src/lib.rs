@@ -18,17 +18,14 @@ mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo};
     use frame_support::pallet_prelude::*;
-    use frame_support::sp_runtime::traits::{AccountIdConversion, Saturating};
-    use frame_support::PalletId;
+    use frame_support::sp_runtime::traits::Saturating;
     use frame_system::pallet_prelude::*;
 
-    use crate::types::{GovernanceProposal, ProposalStatus, VoteType};
+    use crate::types::{BlockSubmissionProposal, ProposalStatus, VoteType};
 
-    type ProposalId<T> = <T as frame_system::Config>::Hash;
-
-    const PALLET_ID: PalletId = PalletId(*b"cb/subfi");
+    // TODO: clarify the exact type, too many clones
+    type BlockCid = Vec<u8>;
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
@@ -36,25 +33,7 @@ pub mod pallet {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         /// Origin used to administer the pallet
-        /// TODO: Do we need dynamically change admin here?
         type ManagerOrigin: EnsureOrigin<Self::Origin>;
-        /// The outer call dispatch type.
-        type Action: Parameter
-            + Dispatchable<Origin = Self::Origin, PostInfo = PostDispatchInfo>
-            + From<frame_system::Call<Self>>
-            + GetDispatchInfo;
-        /// Origin that is permitted to create proposals
-        type ProposalSubmissionOrigin: EnsureOrigin<
-            <Self as frame_system::Config>::Origin,
-            Success = <Self as frame_system::Config>::AccountId,
-        >;
-        /// Origin that is permitted to execute approved proposals
-        type ProposalExecutionOrigin: EnsureOrigin<
-            <Self as frame_system::Config>::Origin,
-            Success = <Self as frame_system::Config>::AccountId,
-        >;
-        /// The lifetime of a proposal
-        type ProposalLifetime: Get<Self::BlockNumber>;
         /// The weight for this pallet's extrinsics.
         type WeightInfo: WeightInfo;
     }
@@ -67,10 +46,15 @@ pub mod pallet {
     #[pallet::storage]
     pub type Relayers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
 
-    /// Track the governance related proposals stored
+    /// Track the block submission related proposals stored
     #[pallet::storage]
-    pub(crate) type GovernanceProposals<T: Config> =
-        StorageMap<_, Blake2_128Concat, ProposalId<T>, GovernanceProposal<T>, OptionQuery>;
+    pub(crate) type BlockSubmissionProposals<T: Config> =
+        StorageMap<_, Blake2_128Concat, BlockCid, BlockSubmissionProposal<T>, OptionQuery>;
+
+    /// Track the blocks that have been verified
+    #[pallet::storage]
+    pub(crate) type VerifiedBlocks<T: Config> =
+        StorageMap<_, Blake2_128Concat, BlockCid, bool, ValueQuery>;
 
     /// Count the total number of relayers
     #[pallet::storage]
@@ -78,7 +62,7 @@ pub mod pallet {
 
     /// The threshold of votes required for a proposal to be qualified for approval resolution
     #[pallet::storage]
-    pub(super) type RelayerThreshold<T: Config> = StorageValue<_, u32, ValueQuery>;
+    pub(super) type VoteThreshold<T: Config> = StorageValue<_, u32, ValueQuery>;
 
     /// The voting period of a proposal
     #[pallet::storage]
@@ -96,25 +80,25 @@ pub mod pallet {
         RelayerRemoved(T::AccountId),
         /// Relayer threshold updated to value
         /// \[RelayerThreshold\]
-        RelayerThresholdUpdate(u32),
+        VoteThresholdChanged(u32),
         /// Vote for the proposal casted
-        /// \[ProposalId, AccountId\]
-        VoteForCasted(ProposalId<T>, T::AccountId),
+        /// \[BlockCid, AccountId\]
+        VoteForCasted(BlockCid, T::AccountId),
         /// The proposal is approved
-        /// \[ProposalId\]
-        ProposalApproved(ProposalId<T>),
+        /// \[BlockCid\]
+        ProposalApproved(BlockCid),
         /// The proposal is executed
-        /// \[ProposalId\]
-        ProposalExecuted(ProposalId<T>),
+        /// \[BlockCid\]
+        ProposalExecuted(BlockCid),
         /// The proposal is rejected
-        /// \[ProposalId\]
-        ProposalRejected(ProposalId<T>),
+        /// \[BlockCid\]
+        ProposalRejected(BlockCid),
         /// Vote against the proposal casted
-        /// \[ProposalId, AccountId\]
-        VoteAgainstCasted(ProposalId<T>, T::AccountId),
+        /// \[BlockCid, AccountId\]
+        VoteAgainstCasted(BlockCid, T::AccountId),
         /// Proposal created
-        /// \[ProposalId\]
-        ProposalCreated(ProposalId<T>),
+        /// \[BlockCid\]
+        ProposalCreated(BlockCid),
     }
 
     // Errors inform users that something went wrong.
@@ -138,6 +122,8 @@ pub mod pallet {
         ProposalNotExists,
         /// Relayer has already voted
         AlreadyVoted,
+        /// The block has already been verified
+        BlockAlreadyVerified,
     }
 
     #[pallet::hooks]
@@ -161,87 +147,49 @@ pub mod pallet {
         }
 
         /// Commits a vote in favour of the provided proposal.
-        #[pallet::weight(T::WeightInfo::update_relayer_threshold())]
-        pub fn update_relayer_threshold(origin: OriginFor<T>, threshold: u32) -> DispatchResult {
+        #[pallet::weight(T::WeightInfo::set_vote_threshold())]
+        pub fn set_vote_threshold(origin: OriginFor<T>, threshold: u32) -> DispatchResult {
             Self::ensure_admin(origin)?;
             ensure!(
                 threshold > 0 && threshold < RelayerCount::<T>::get(),
                 "Invalid threshold"
             );
-            RelayerThreshold::<T>::set(threshold);
+            VoteThreshold::<T>::set(threshold);
 
-            Self::deposit_event(Event::RelayerThresholdUpdate(threshold));
+            Self::deposit_event(Event::VoteThresholdChanged(threshold));
             Ok(())
         }
 
         // ************** Proposal Lifecycle *************
         /// TODO: who and when can create proposals?
-        #[pallet::weight(T::WeightInfo::new_submission())]
-        pub fn new_submission(
-            _origin: OriginFor<T>,
-            _block_cid: Vec<u8>,
-            _message_root_cid: Vec<u8>,
-        ) -> DispatchResult {
-            todo!()
-        }
-
-        /// TODO: who and when can create proposals?
-        #[pallet::weight(T::WeightInfo::new_governance_proposal())]
-        pub fn new_governance_proposal(origin: OriginFor<T>, action: T::Action) -> DispatchResult {
-            let who = T::ProposalSubmissionOrigin::ensure_origin(origin)?;
-
-            let start_block: T::BlockNumber = <frame_system::Pallet<T>>::block_number();
-            let end_block = start_block.saturating_add(VotingPeriod::<T>::get());
-            let proposal: GovernanceProposal<T> =
-                GovernanceProposal::new(action, who, start_block, end_block);
-
-            let proposal_id: ProposalId<T> = proposal.hash();
-            if GovernanceProposals::<T>::contains_key(proposal_id) {
-                return Err(Error::<T>::ProposalAlreadyExists.into());
-            }
-            GovernanceProposals::<T>::insert(proposal_id, proposal);
-            Self::deposit_event(Event::ProposalCreated(proposal_id));
-
-            Ok(())
-        }
-
-        // **************** Voting Related ***************
-        /// Vote for a provided proposal.
-        #[pallet::weight(T::WeightInfo::vote_governance_proposal())]
-        pub fn vote_governance_proposal(
+        #[pallet::weight(T::WeightInfo::submit_block_vote())]
+        pub fn submit_block_vote(
             origin: OriginFor<T>,
-            proposal_id: ProposalId<T>,
+            block_cid: Vec<u8>,
+            message_root_cid: Vec<u8>,
             vote_type: VoteType,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::is_relayer(&who), Error::<T>::MustBeRelayer);
+            ensure!(
+                !VerifiedBlocks::<T>::contains_key(block_cid.clone()),
+                Error::<T>::BlockAlreadyVerified
+            );
 
-            let mut proposal =
-                GovernanceProposals::<T>::get(proposal_id).ok_or(Error::<T>::ProposalNotExists)?;
-
-            let now = <frame_system::Pallet<T>>::block_number();
-            proposal.vote(who.clone(), &now, &vote_type)?;
-
-            match vote_type {
-                VoteType::For => Self::deposit_event(Event::VoteForCasted(proposal_id, who)),
-                VoteType::Against => {
-                    Self::deposit_event(Event::VoteAgainstCasted(proposal_id, who))
-                }
+            if !BlockSubmissionProposals::<T>::contains_key(block_cid.clone()) {
+                let start_block: T::BlockNumber = <frame_system::Pallet<T>>::block_number();
+                let end_block = start_block.saturating_add(VotingPeriod::<T>::get());
+                let proposal = BlockSubmissionProposal::new(
+                    who.clone(),
+                    message_root_cid,
+                    start_block,
+                    end_block,
+                );
+                BlockSubmissionProposals::<T>::insert(block_cid.clone(), proposal);
+                Self::deposit_event(Event::ProposalCreated(block_cid.clone()));
             }
 
-            Self::try_resolve_proposal(proposal_id, proposal)
-        }
-
-        /// Close a governance proposal in case auto closing didn't complete
-        #[pallet::weight(T::WeightInfo::close_governance_proposal())]
-        pub fn close_governance_proposal(
-            origin: OriginFor<T>,
-            proposal_id: ProposalId<T>,
-        ) -> DispatchResult {
-            T::ProposalExecutionOrigin::ensure_origin(origin)?;
-            let proposal =
-                GovernanceProposals::<T>::get(proposal_id).ok_or(Error::<T>::ProposalNotExists)?;
-            Self::try_resolve_proposal(proposal_id, proposal)
+            Self::vote_block_proposal(block_cid, who, vote_type)
         }
     }
 
@@ -286,63 +234,69 @@ pub mod pallet {
         }
 
         // ============== Voting Related =============
+        pub fn vote_block_proposal(
+            block_cid: Vec<u8>,
+            who: T::AccountId,
+            vote_type: VoteType,
+        ) -> DispatchResult {
+            ensure!(Self::is_relayer(&who), Error::<T>::MustBeRelayer);
+
+            let mut proposal = BlockSubmissionProposals::<T>::get(block_cid.clone())
+                .ok_or(Error::<T>::ProposalNotExists)?;
+
+            let now = <frame_system::Pallet<T>>::block_number();
+            proposal.vote(who.clone(), &now, &vote_type)?;
+
+            match vote_type {
+                VoteType::For => Self::deposit_event(Event::VoteForCasted(block_cid.clone(), who)),
+                VoteType::Against => {
+                    Self::deposit_event(Event::VoteAgainstCasted(block_cid.clone(), who))
+                }
+            }
+
+            Self::try_resolve_proposal(block_cid, proposal)
+        }
+
         fn try_resolve_proposal(
-            prop_id: ProposalId<T>,
-            prop: GovernanceProposal<T>,
+            block_cid: BlockCid,
+            prop: BlockSubmissionProposal<T>,
         ) -> DispatchResult {
             let now = <frame_system::Pallet<T>>::block_number();
 
-            let threshold = RelayerThreshold::<T>::get();
+            let threshold = VoteThreshold::<T>::get();
             match prop.status(&now, threshold) {
-                ProposalStatus::Approved => Self::finalize_execution(prop_id, prop),
-                ProposalStatus::Rejected => Self::cancel_execution(prop_id, prop),
+                ProposalStatus::Approved => Self::finalize_execution(block_cid),
+                ProposalStatus::Rejected => Self::cancel_execution(block_cid),
                 _ => Ok(()),
             }
         }
 
-        fn finalize_execution(
-            prop_id: ProposalId<T>,
-            mut prop: GovernanceProposal<T>,
-        ) -> DispatchResult {
-            Self::deposit_event(Event::ProposalApproved(prop_id));
-            prop.action()
-                .dispatch(frame_system::RawOrigin::Signed(Self::account_id()).into())
-                .map(|_| ())
-                .map_err(|e| e.error)?;
+        fn finalize_execution(block_cid: BlockCid) -> DispatchResult {
+            Self::deposit_event(Event::ProposalApproved(block_cid.clone()));
 
-            prop.set_executed();
-            GovernanceProposals::<T>::insert(prop_id, prop);
+            BlockSubmissionProposals::<T>::remove(&block_cid);
+            VerifiedBlocks::<T>::insert(block_cid.clone(), true);
 
-            Self::deposit_event(Event::ProposalExecuted(prop_id));
+            Self::deposit_event(Event::ProposalExecuted(block_cid));
 
             Ok(())
         }
 
-        fn cancel_execution(
-            prop_id: ProposalId<T>,
-            mut prop: GovernanceProposal<T>,
-        ) -> DispatchResult {
-            prop.set_canceled();
-            GovernanceProposals::<T>::insert(prop_id, prop);
-            Self::deposit_event(Event::ProposalRejected(prop_id));
+        fn cancel_execution(block_cid: BlockCid) -> DispatchResult {
+            BlockSubmissionProposals::<T>::remove(&block_cid);
+            VerifiedBlocks::<T>::insert(block_cid.clone(), false);
+            Self::deposit_event(Event::ProposalRejected(block_cid));
             Ok(())
-        }
-
-        /// Provides an AccountId for the pallet.
-        /// This is used both as an origin check and deposit/withdrawal account.
-        pub fn account_id() -> T::AccountId {
-            PALLET_ID.into_account()
         }
     }
 
     pub trait WeightInfo {
         fn add_relayer() -> Weight;
         fn remove_relayer() -> Weight;
-        fn vote_governance_proposal() -> Weight;
-        fn new_governance_proposal() -> Weight;
-        fn update_relayer_threshold() -> Weight;
+        fn submit_block_vote() -> Weight;
+        fn set_vote_threshold() -> Weight;
         fn new_submission() -> Weight;
-        fn close_governance_proposal() -> Weight;
+        fn close_block_submission() -> Weight;
     }
 
     /// For backwards compatibility and tests
@@ -355,15 +309,11 @@ pub mod pallet {
             Default::default()
         }
 
-        fn vote_governance_proposal() -> Weight {
+        fn submit_block_vote() -> Weight {
             Default::default()
         }
 
-        fn new_governance_proposal() -> Weight {
-            Default::default()
-        }
-
-        fn update_relayer_threshold() -> Weight {
+        fn set_vote_threshold() -> Weight {
             Default::default()
         }
 
@@ -371,7 +321,7 @@ pub mod pallet {
             Default::default()
         }
 
-        fn close_governance_proposal() -> Weight {
+        fn close_block_submission() -> Weight {
             Default::default()
         }
     }
