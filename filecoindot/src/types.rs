@@ -1,123 +1,92 @@
 use frame_support::pallet_prelude::*;
+use frame_support::sp_std::collections::btree_map::BTreeMap;
+use frame_support::sp_std::collections::btree_set::BTreeSet;
 
 use crate::{Config, Error};
 
-/// Possible votes a member can cast
+/// The filecoin block submission proposal
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-pub enum VoteType {
-    For,
-    Against,
-}
-
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, Default)]
-/// Info for keeping track of a motion being voted on.
-/// Default is empty vectors for all votes
-pub(crate) struct VoteAggregate<T: Config> {
-    /// The accounts with `for` votes
-    for_votes: Vec<T::AccountId>,
-    /// The accounts with `against` votes
-    against_votes: Vec<T::AccountId>,
+pub(crate) struct BlockSubmissionProposal<T: Config> {
+    proposer: T::AccountId,
+    /// The accounts with voted
+    voted: BTreeSet<T::AccountId>,
+    /// The status of the proposal
+    status: ProposalStatus,
+    /// Message root tracker
+    message_root_counter: BTreeMap<Vec<u8>, u32>,
     /// The block number that the proposal started
     start_block: T::BlockNumber,
     /// The block number that the proposal ended
     end_block: T::BlockNumber,
 }
 
-impl<T: Config> VoteAggregate<T> {
-    pub fn new(start_block: T::BlockNumber, end_block: T::BlockNumber) -> Self {
-        VoteAggregate {
-            for_votes: Vec::new(),
-            against_votes: Vec::new(),
+impl<T: Config> BlockSubmissionProposal<T> {
+    pub fn new(
+        proposer: T::AccountId,
+        start_block: T::BlockNumber,
+        end_block: T::BlockNumber,
+    ) -> Self {
+        BlockSubmissionProposal {
+            proposer,
+            voted: BTreeSet::new(),
+            status: ProposalStatus::Active,
+            message_root_counter: BTreeMap::new(),
             start_block,
             end_block,
         }
     }
 
-    /// Derive the current proposal status.
-    /// Need to pass in the current block number as the status is very time sensitive
-    pub fn status(&self, now: &T::BlockNumber, threshold: u32) -> ProposalStatus {
-        if self.is_active(now) {
-            return ProposalStatus::Active;
-        }
-
-        // TODO: here the checking might not be sufficient
-        // TODO: what if both num(YES) and num(NO) >= threshold? Are we saying threshold > total / 2?
-        if self.for_votes.len() > threshold as usize {
-            return ProposalStatus::Approved;
-        }
-        ProposalStatus::Rejected
+    /// Get the status of the proposal
+    pub fn get_status(&self) -> &ProposalStatus {
+        &self.status
     }
 
     /// Vote for the proposal. Will reject the operation is status is invalid
-    pub fn vote(
+    /// The content of the vote is actually the message root of the block
+    pub fn vote_with_resolve(
         &mut self,
         who: T::AccountId,
+        message_root: Vec<u8>,
         when: &T::BlockNumber,
-        what: &VoteType,
-    ) -> Result<(), Error<T>> {
-        if self.is_voted(&who) {
-            return Err(Error::<T>::AlreadyVoted);
+        threshold: u32,
+    ) -> DispatchResult {
+        ensure!(!self.is_voted(&who), Error::<T>::AlreadyVoted);
+        ensure!(
+            self.status == ProposalStatus::Active,
+            Error::<T>::ProposalCompleted
+        );
+
+        // when expired, we set the status to be rejected
+        if self.is_expired(when) {
+            self.status = ProposalStatus::Rejected;
+            return Err(Error::<T>::ProposalExpired.into());
         }
 
-        if !self.is_active(when) {
-            return Err(Error::<T>::ProposalInvalidStatus);
+        // add `clone` to make clippy happy
+        let mut count = *self
+            .message_root_counter
+            .get(&message_root)
+            .unwrap_or(&0);
+        count = count.saturating_add(1);
+
+        if count > threshold {
+            self.status = ProposalStatus::Approved;
         }
 
-        match what {
-            VoteType::For => self.for_votes.push(who),
-            VoteType::Against => self.against_votes.push(who),
-        }
+        self.message_root_counter.insert(message_root, count);
+        self.voted.insert(who);
 
         Ok(())
     }
 
     /// Checks if the account has already voted
     fn is_voted(&self, who: &T::AccountId) -> bool {
-        self.for_votes.contains(who) || self.against_votes.contains(who)
+        self.voted.contains(who)
     }
 
     /// Whether the proposal is still active, i.e. can vote
-    fn is_active(&self, now: &T::BlockNumber) -> bool {
-        now.le(&self.end_block)
-    }
-}
-
-/// The filecoin block submission proposal
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-pub(crate) struct BlockSubmissionProposal<T: Config> {
-    proposer: T::AccountId,
-    message_root: Vec<u8>,
-    vote: VoteAggregate<T>,
-}
-
-impl<T: Config> BlockSubmissionProposal<T> {
-    pub fn new(
-        proposer: T::AccountId,
-        message_root: Vec<u8>,
-        start_block: T::BlockNumber,
-        end_block: T::BlockNumber,
-    ) -> Self {
-        Self {
-            proposer,
-            message_root,
-            vote: VoteAggregate::new(start_block, end_block),
-        }
-    }
-
-    /// Derive the current proposal status.
-    /// Need to pass in the current block number as the status is very time sensitive
-    pub fn status(&self, now: &T::BlockNumber, threshold: u32) -> ProposalStatus {
-        self.vote.status(now, threshold)
-    }
-
-    /// Vote for the proposal. Will reject the operation is status is invalid
-    pub fn vote(
-        &mut self,
-        who: T::AccountId,
-        when: &T::BlockNumber,
-        what: &VoteType,
-    ) -> Result<(), Error<T>> {
-        self.vote.vote(who, when, what)
+    fn is_expired(&self, now: &T::BlockNumber) -> bool {
+        now.gt(&self.end_block)
     }
 }
 

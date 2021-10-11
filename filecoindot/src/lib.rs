@@ -22,7 +22,7 @@ pub mod pallet {
     use frame_support::sp_runtime::traits::Saturating;
     use frame_system::pallet_prelude::*;
 
-    use crate::types::{BlockSubmissionProposal, ProposalStatus, VoteType};
+    use crate::types::{BlockSubmissionProposal, ProposalStatus};
 
     // TODO: clarify the exact type, too many clones
     type BlockCid = Vec<u8>;
@@ -83,13 +83,10 @@ pub mod pallet {
         VoteThresholdChanged(u32),
         /// Vote for the proposal casted
         /// \[BlockCid, AccountId\]
-        VoteForCasted(BlockCid, T::AccountId),
+        VoteCasted(BlockCid, T::AccountId),
         /// The proposal is approved
         /// \[BlockCid\]
         ProposalApproved(BlockCid),
-        /// The proposal is executed
-        /// \[BlockCid\]
-        ProposalExecuted(BlockCid),
         /// The proposal is rejected
         /// \[BlockCid\]
         ProposalRejected(BlockCid),
@@ -112,6 +109,8 @@ pub mod pallet {
         MustBeRelayer,
         /// Proposal has already executed
         ProposalAlreadyExecuted,
+        /// Proposal has already completed
+        ProposalCompleted,
         /// Proposal has already expired
         ProposalExpired,
         /// Proposal invalid status
@@ -161,13 +160,11 @@ pub mod pallet {
         }
 
         // ************** Proposal Lifecycle *************
-        /// TODO: who and when can create proposals?
         #[pallet::weight(T::WeightInfo::submit_block_vote())]
         pub fn submit_block_vote(
             origin: OriginFor<T>,
             block_cid: Vec<u8>,
             message_root_cid: Vec<u8>,
-            vote_type: VoteType,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::is_relayer(&who), Error::<T>::MustBeRelayer);
@@ -176,20 +173,34 @@ pub mod pallet {
                 Error::<T>::BlockAlreadyVerified
             );
 
-            if !BlockSubmissionProposals::<T>::contains_key(block_cid.clone()) {
-                let start_block: T::BlockNumber = <frame_system::Pallet<T>>::block_number();
-                let end_block = start_block.saturating_add(VotingPeriod::<T>::get());
-                let proposal = BlockSubmissionProposal::new(
-                    who.clone(),
-                    message_root_cid,
-                    start_block,
-                    end_block,
-                );
-                BlockSubmissionProposals::<T>::insert(block_cid.clone(), proposal);
-                Self::deposit_event(Event::ProposalCreated(block_cid.clone()));
-            }
+            BlockSubmissionProposals::<T>::try_mutate(
+                block_cid.clone(),
+                |maybe_proposal| -> Result<(), DispatchError> {
+                    match maybe_proposal {
+                        Some(_) => {}
+                        None => {
+                            let start_block: T::BlockNumber =
+                                <frame_system::Pallet<T>>::block_number();
+                            let end_block = start_block.saturating_add(VotingPeriod::<T>::get());
+                            let r =
+                                BlockSubmissionProposal::new(who.clone(), start_block, end_block);
+                            Self::deposit_event(Event::ProposalCreated(block_cid.clone()));
+                            *maybe_proposal = Some(r)
+                        }
+                    };
 
-            Self::vote_block_proposal(block_cid, who, vote_type)
+                    Self::vote_block_proposal(
+                        block_cid,
+                        message_root_cid,
+                        maybe_proposal.as_mut().unwrap(),
+                        who,
+                    )?;
+
+                    Ok(())
+                },
+            )?;
+
+            Ok(())
         }
     }
 
@@ -234,58 +245,49 @@ pub mod pallet {
         }
 
         // ============== Voting Related =============
-        pub fn vote_block_proposal(
+        fn vote_block_proposal(
             block_cid: Vec<u8>,
+            message_root_cid: Vec<u8>,
+            proposal: &mut BlockSubmissionProposal<T>,
             who: T::AccountId,
-            vote_type: VoteType,
         ) -> DispatchResult {
-            ensure!(Self::is_relayer(&who), Error::<T>::MustBeRelayer);
-
-            let mut proposal = BlockSubmissionProposals::<T>::get(block_cid.clone())
-                .ok_or(Error::<T>::ProposalNotExists)?;
-
             let now = <frame_system::Pallet<T>>::block_number();
-            proposal.vote(who.clone(), &now, &vote_type)?;
+            let threshold = VoteThreshold::<T>::get();
 
-            match vote_type {
-                VoteType::For => Self::deposit_event(Event::VoteForCasted(block_cid.clone(), who)),
-                VoteType::Against => {
-                    Self::deposit_event(Event::VoteAgainstCasted(block_cid.clone(), who))
-                }
-            }
+            proposal.vote_with_resolve(who.clone(), message_root_cid, &now, threshold)?;
+            Self::deposit_event(Event::VoteCasted(block_cid.clone(), who));
 
             Self::try_resolve_proposal(block_cid, proposal)
         }
 
         fn try_resolve_proposal(
             block_cid: BlockCid,
-            prop: BlockSubmissionProposal<T>,
+            prop: &BlockSubmissionProposal<T>,
         ) -> DispatchResult {
-            let now = <frame_system::Pallet<T>>::block_number();
-
-            let threshold = VoteThreshold::<T>::get();
-            match prop.status(&now, threshold) {
-                ProposalStatus::Approved => Self::finalize_execution(block_cid),
-                ProposalStatus::Rejected => Self::cancel_execution(block_cid),
+            match prop.get_status() {
+                ProposalStatus::Approved => Self::finalize_block(block_cid),
+                ProposalStatus::Rejected => Self::reject_block(block_cid),
                 _ => Ok(()),
             }
         }
 
-        fn finalize_execution(block_cid: BlockCid) -> DispatchResult {
-            Self::deposit_event(Event::ProposalApproved(block_cid.clone()));
-
+        fn finalize_block(block_cid: BlockCid) -> DispatchResult {
             BlockSubmissionProposals::<T>::remove(&block_cid);
             VerifiedBlocks::<T>::insert(block_cid.clone(), true);
 
-            Self::deposit_event(Event::ProposalExecuted(block_cid));
+            Self::deposit_event(Event::ProposalApproved(block_cid));
 
             Ok(())
         }
 
-        fn cancel_execution(block_cid: BlockCid) -> DispatchResult {
+        fn reject_block(block_cid: BlockCid) -> DispatchResult {
             BlockSubmissionProposals::<T>::remove(&block_cid);
+
+            // TODO: do we need to save false here?
             VerifiedBlocks::<T>::insert(block_cid.clone(), false);
+
             Self::deposit_event(Event::ProposalRejected(block_cid));
+
             Ok(())
         }
     }
