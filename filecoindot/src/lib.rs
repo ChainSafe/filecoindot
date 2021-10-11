@@ -105,6 +105,8 @@ pub mod pallet {
         RelayerAlreadyExists,
         /// Provided accountId is not a relayer
         RelayerInvalid,
+        /// Not enough relayers
+        NotEnoughRelayer,
         /// Protected operation, must be performed by relayer
         MustBeRelayer,
         /// Proposal has already executed
@@ -232,8 +234,13 @@ pub mod pallet {
         fn unregister_relayer(relayer: T::AccountId) -> DispatchResult {
             ensure!(Self::is_relayer(&relayer), Error::<T>::RelayerInvalid);
 
+            let threshold = VoteThreshold::<T>::get();
+            RelayerCount::<T>::try_mutate(|i| -> DispatchResult {
+                let i = i.saturating_sub(1);
+                ensure!(i > threshold, Error::<T>::NotEnoughRelayer);
+                Ok(())
+            })?;
             Relayers::<T>::remove(&relayer);
-            RelayerCount::<T>::mutate(|i| (*i).saturating_sub(1));
 
             Self::deposit_event(Event::RelayerRemoved(relayer));
             Ok(())
