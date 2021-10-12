@@ -1,8 +1,7 @@
 use frame_support::pallet_prelude::*;
-use frame_support::sp_std::collections::btree_map::BTreeMap;
 use frame_support::sp_std::collections::btree_set::BTreeSet;
 
-use crate::{Config, Error};
+use crate::{pallet, Config, Error, MessageRootCidCounter};
 
 /// The filecoin block submission proposal
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
@@ -12,8 +11,6 @@ pub(crate) struct BlockSubmissionProposal<T: Config> {
     voted: BTreeSet<T::AccountId>,
     /// The status of the proposal
     status: ProposalStatus,
-    /// Message root tracker
-    message_root_counter: BTreeMap<Vec<u8>, u32>,
     /// The block number that the proposal started
     start_block: T::BlockNumber,
     /// The block number that the proposal ended
@@ -30,7 +27,6 @@ impl<T: Config> BlockSubmissionProposal<T> {
             proposer,
             voted: BTreeSet::new(),
             status: ProposalStatus::Active,
-            message_root_counter: BTreeMap::new(),
             start_block,
             end_block,
         }
@@ -41,15 +37,16 @@ impl<T: Config> BlockSubmissionProposal<T> {
         &self.status
     }
 
-    /// Vote for the proposal. Will reject the operation is status is invalid
+    /// Vote for the proposal. Will reject the operation if its status is invalid
     /// The content of the vote is actually the message root of the block
-    pub fn vote_with_resolve(
+    pub fn vote(
         &mut self,
+        block_cid: pallet::BlockCid,
+        message_root: pallet::MessageRootCid,
         who: T::AccountId,
-        message_root: Vec<u8>,
         when: &T::BlockNumber,
         threshold: u32,
-    ) -> DispatchResult {
+    ) -> Result<(), Error<T>> {
         ensure!(!self.is_voted(&who), Error::<T>::AlreadyVoted);
         ensure!(
             self.status == ProposalStatus::Active,
@@ -62,18 +59,14 @@ impl<T: Config> BlockSubmissionProposal<T> {
             return Err(Error::<T>::ProposalExpired.into());
         }
 
-        // add `clone` to make clippy happy
-        let mut count = *self
-            .message_root_counter
-            .get(&message_root)
-            .unwrap_or(&0);
-        count = count.saturating_add(1);
-
-        if count > threshold {
+        // MessageRootCidCounter leaked into the struct, well not the best way for encapsulation
+        // but works for now, come back later to fix this.
+        let count = 1 + MessageRootCidCounter::<T>::get(&block_cid, &message_root).unwrap_or(0);
+        if count >= threshold {
             self.status = ProposalStatus::Approved;
         }
 
-        self.message_root_counter.insert(message_root, count);
+        MessageRootCidCounter::<T>::insert(&block_cid, &message_root, count);
         self.voted.insert(who);
 
         Ok(())

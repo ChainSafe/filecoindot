@@ -8,9 +8,6 @@ pub use pallet::*;
 mod types;
 
 #[cfg(test)]
-mod mock;
-
-#[cfg(test)]
 mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -24,8 +21,13 @@ pub mod pallet {
 
     use crate::types::{BlockSubmissionProposal, ProposalStatus};
 
+    pub(crate) const DEFAULT_VOTE_THRESHOLD: u32 = 1;
+
     // TODO: clarify the exact type, too many clones
-    type BlockCid = Vec<u8>;
+    pub(crate) type BlockCid = Vec<u8>;
+
+    // TODO: clarify the exact type, too many clones
+    pub(crate) type MessageRootCid = Vec<u8>;
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
@@ -50,6 +52,18 @@ pub mod pallet {
     #[pallet::storage]
     pub(crate) type BlockSubmissionProposals<T: Config> =
         StorageMap<_, Blake2_128Concat, BlockCid, BlockSubmissionProposal<T>, OptionQuery>;
+
+    /// Track the message root cid votes for block cid
+    #[pallet::storage]
+    pub(crate) type MessageRootCidCounter<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        BlockCid,
+        Blake2_128Concat,
+        MessageRootCid,
+        u32,
+        OptionQuery,
+    >;
 
     /// Track the blocks that have been verified
     #[pallet::storage]
@@ -101,14 +115,14 @@ pub mod pallet {
     // Errors inform users that something went wrong.
     #[pallet::error]
     pub enum Error<T> {
+        /// Invalid threshold
+        InvalidThreshold,
         /// Relayer already in set
         RelayerAlreadyExists,
         /// Provided accountId is not a relayer
-        RelayerInvalid,
+        NotRelayer,
         /// Not enough relayers
         NotEnoughRelayer,
-        /// Protected operation, must be performed by relayer
-        MustBeRelayer,
         /// Proposal has already executed
         ProposalAlreadyExecuted,
         /// Proposal has already completed
@@ -129,6 +143,37 @@ pub mod pallet {
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+
+    #[pallet::genesis_config]
+    pub struct GenesisConfig<T: Config> {
+        pub vote_threshold: u32,
+        pub vote_period: T::BlockNumber,
+        /// The initial number of relayers
+        pub relayers: Vec<T::AccountId>,
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> Default for GenesisConfig<T> {
+        fn default() -> Self {
+            Self {
+                vote_threshold: DEFAULT_VOTE_THRESHOLD,
+                vote_period: Default::default(),
+                relayers: Default::default(),
+            }
+        }
+    }
+
+    #[pallet::genesis_build]
+    impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+        fn build(&self) {
+            VoteThreshold::<T>::put(self.vote_threshold);
+            VotingPeriod::<T>::put(self.vote_period);
+            for r in self.relayers.clone() {
+                // should not fail in this case
+                Pallet::<T>::register_relayer(r).unwrap();
+            }
+        }
+    }
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
@@ -152,8 +197,8 @@ pub mod pallet {
         pub fn set_vote_threshold(origin: OriginFor<T>, threshold: u32) -> DispatchResult {
             Self::ensure_admin(origin)?;
             ensure!(
-                threshold > 0 && threshold < RelayerCount::<T>::get(),
-                "Invalid threshold"
+                threshold > 0 && threshold <= RelayerCount::<T>::get(),
+                Error::<T>::InvalidThreshold
             );
             VoteThreshold::<T>::set(threshold);
 
@@ -165,11 +210,11 @@ pub mod pallet {
         #[pallet::weight(T::WeightInfo::submit_block_vote())]
         pub fn submit_block_vote(
             origin: OriginFor<T>,
-            block_cid: Vec<u8>,
-            message_root_cid: Vec<u8>,
+            block_cid: BlockCid,
+            message_root_cid: MessageRootCid,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            ensure!(Self::is_relayer(&who), Error::<T>::MustBeRelayer);
+            ensure!(Self::is_relayer(&who), Error::<T>::NotRelayer);
             ensure!(
                 !VerifiedBlocks::<T>::contains_key(block_cid.clone()),
                 Error::<T>::BlockAlreadyVerified
@@ -178,29 +223,56 @@ pub mod pallet {
             BlockSubmissionProposals::<T>::try_mutate(
                 block_cid.clone(),
                 |maybe_proposal| -> Result<(), DispatchError> {
-                    match maybe_proposal {
-                        Some(_) => {}
-                        None => {
-                            let start_block: T::BlockNumber =
-                                <frame_system::Pallet<T>>::block_number();
-                            let end_block = start_block.saturating_add(VotingPeriod::<T>::get());
-                            let r =
-                                BlockSubmissionProposal::new(who.clone(), start_block, end_block);
-                            Self::deposit_event(Event::ProposalCreated(block_cid.clone()));
-                            *maybe_proposal = Some(r)
-                        }
-                    };
+                    let proposal = maybe_proposal.get_or_insert_with(|| {
+                        let start_block: T::BlockNumber = frame_system::Pallet::<T>::block_number();
+                        let end_block = start_block.saturating_add(VotingPeriod::<T>::get());
+                        let r = BlockSubmissionProposal::new(who.clone(), start_block, end_block);
+                        Self::deposit_event(Event::ProposalCreated(block_cid.clone()));
+                        r
+                    });
 
-                    Self::vote_block_proposal(
-                        block_cid,
+                    match Self::vote_block_proposal(
+                        block_cid.clone(),
                         message_root_cid,
-                        maybe_proposal.as_mut().unwrap(),
-                        who,
-                    )?;
-
-                    Ok(())
+                        proposal,
+                        who.clone(),
+                    ) {
+                        Ok(()) => {
+                            Self::deposit_event(Event::VoteCasted(block_cid.clone(), who));
+                            if Self::try_resolve_proposal(block_cid, proposal) {
+                                *maybe_proposal = None;
+                            }
+                            Ok(())
+                        }
+                        Err(e) => match e {
+                            // Resolution is performed lazily, if it happens to be expired,
+                            // we will issue resolution command.
+                            Error::<T>::ProposalExpired => {
+                                if Self::try_resolve_proposal(block_cid, proposal) {
+                                    *maybe_proposal = None;
+                                }
+                                Err(e.into())
+                            }
+                            e => Err(e.into()),
+                        },
+                    }
                 },
             )?;
+
+            Ok(())
+        }
+
+        #[pallet::weight(T::WeightInfo::close_block_proposal())]
+        pub fn close_block_proposal(origin: OriginFor<T>, block_cid: BlockCid) -> DispatchResult {
+            Self::ensure_admin(origin)?;
+            ensure!(
+                !VerifiedBlocks::<T>::contains_key(block_cid.clone()),
+                Error::<T>::BlockAlreadyVerified
+            );
+
+            let p = BlockSubmissionProposals::<T>::get(&block_cid)
+                .ok_or(Error::<T>::ProposalNotExists)?;
+            Self::try_resolve_proposal(block_cid, &p);
 
             Ok(())
         }
@@ -223,7 +295,10 @@ pub mod pallet {
             );
 
             Relayers::<T>::insert(&relayer, true);
-            RelayerCount::<T>::mutate(|i| (*i).saturating_add(1));
+            RelayerCount::<T>::mutate(|i| {
+                *i = i.saturating_add(1);
+                *i
+            });
 
             Self::deposit_event(Event::RelayerAdded(relayer));
             Ok(())
@@ -232,12 +307,12 @@ pub mod pallet {
         /// Removes a relayer from the set
         /// Caller ensure the invoker has appropriate admin roles
         fn unregister_relayer(relayer: T::AccountId) -> DispatchResult {
-            ensure!(Self::is_relayer(&relayer), Error::<T>::RelayerInvalid);
+            ensure!(Self::is_relayer(&relayer), Error::<T>::NotRelayer);
 
             let threshold = VoteThreshold::<T>::get();
             RelayerCount::<T>::try_mutate(|i| -> DispatchResult {
-                let i = i.saturating_sub(1);
-                ensure!(i > threshold, Error::<T>::NotEnoughRelayer);
+                *i = i.saturating_sub(1);
+                ensure!(*i >= threshold, Error::<T>::NotEnoughRelayer);
                 Ok(())
             })?;
             Relayers::<T>::remove(&relayer);
@@ -253,49 +328,49 @@ pub mod pallet {
 
         // ============== Voting Related =============
         fn vote_block_proposal(
-            block_cid: Vec<u8>,
+            block_cid: BlockCid,
             message_root_cid: Vec<u8>,
             proposal: &mut BlockSubmissionProposal<T>,
             who: T::AccountId,
-        ) -> DispatchResult {
-            let now = <frame_system::Pallet<T>>::block_number();
+        ) -> Result<(), Error<T>> {
+            let now = frame_system::Pallet::<T>::block_number();
             let threshold = VoteThreshold::<T>::get();
-
-            proposal.vote_with_resolve(who.clone(), message_root_cid, &now, threshold)?;
-            Self::deposit_event(Event::VoteCasted(block_cid.clone(), who));
-
-            Self::try_resolve_proposal(block_cid, proposal)
+            proposal.vote(block_cid, message_root_cid, who, &now, threshold)
         }
 
-        fn try_resolve_proposal(
-            block_cid: BlockCid,
-            prop: &BlockSubmissionProposal<T>,
-        ) -> DispatchResult {
+        /// Try to resolve the proposal. If the proposal is resolved, return true, else false
+        fn try_resolve_proposal(block_cid: BlockCid, prop: &BlockSubmissionProposal<T>) -> bool {
             match prop.get_status() {
-                ProposalStatus::Approved => Self::finalize_block(block_cid),
-                ProposalStatus::Rejected => Self::reject_block(block_cid),
-                _ => Ok(()),
+                ProposalStatus::Approved => {
+                    Self::finalize_block(block_cid);
+                    true
+                }
+                ProposalStatus::Rejected => {
+                    Self::reject_block(block_cid);
+                    true
+                }
+                _ => false,
             }
         }
 
-        fn finalize_block(block_cid: BlockCid) -> DispatchResult {
-            BlockSubmissionProposals::<T>::remove(&block_cid);
+        fn finalize_block(block_cid: BlockCid) {
+            BlockSubmissionProposals::<T>::remove(block_cid.clone());
+            MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
+
             VerifiedBlocks::<T>::insert(block_cid.clone(), true);
 
-            Self::deposit_event(Event::ProposalApproved(block_cid));
-
-            Ok(())
+            Self::deposit_event(Event::ProposalApproved(block_cid.clone()));
         }
 
-        fn reject_block(block_cid: BlockCid) -> DispatchResult {
+        fn reject_block(block_cid: BlockCid) {
             BlockSubmissionProposals::<T>::remove(&block_cid);
+            MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
-            // TODO: do we need to save false here?
+            // TODO: In case a block is successfully challenged,
+            // then we'd purge it from the storage entirely.
             VerifiedBlocks::<T>::insert(block_cid.clone(), false);
 
             Self::deposit_event(Event::ProposalRejected(block_cid));
-
-            Ok(())
         }
     }
 
@@ -305,7 +380,7 @@ pub mod pallet {
         fn submit_block_vote() -> Weight;
         fn set_vote_threshold() -> Weight;
         fn new_submission() -> Weight;
-        fn close_block_submission() -> Weight;
+        fn close_block_proposal() -> Weight;
     }
 
     /// For backwards compatibility and tests
@@ -330,7 +405,7 @@ pub mod pallet {
             Default::default()
         }
 
-        fn close_block_submission() -> Weight {
+        fn close_block_proposal() -> Weight {
             Default::default()
         }
     }
