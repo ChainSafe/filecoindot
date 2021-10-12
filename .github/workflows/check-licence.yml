@@ -25,4 +25,4 @@ jobs:
       - name: Check license
         run: |
           export PATH=${PATH}:`go env GOPATH`/bin
-          addlicense -check -c "ChainSafe Systems" -f ./scripts/header.txt -y 2021 $(find $PWD -type f -name '*.rs')
+          addlicense -check -c "ChainSafe Systems" -f ./resources/header.txt -y 2021 $(find $PWD -type f -name '*.rs')
