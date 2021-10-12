@@ -1,3 +1,6 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
+
 use crate::types::ProposalStatus;
 use crate::{
     tests::mock::*, BlockSubmissionProposals, Error, MessageRootCidCounter, VerifiedBlocks,

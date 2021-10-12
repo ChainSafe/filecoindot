@@ -1,8 +1,17 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
 
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
+//! # Filecoin Governance Pallet
+//!
+//! This pallet uses a set of AccountIds to identify who
+//! can vote on proposals. Relayers may be added, removed.
+//! There is no bound on how many members may exist in the committee.
+//!
+//! For each block addition proposal, relayers can vote on them.
+//! The pallet will lazily resolve all the proposals.
+//! Admin could also resolve manually.
+//!
+#![cfg_attr(not(feature = "std"), no_std)]
 pub use pallet::*;
 
 mod types;

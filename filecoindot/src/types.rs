@@ -1,3 +1,6 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
+
 use frame_support::pallet_prelude::*;
 use frame_support::sp_std::collections::btree_set::BTreeSet;
 

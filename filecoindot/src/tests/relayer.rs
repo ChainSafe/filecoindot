@@ -1,3 +1,6 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
+
 use crate::{tests::mock::*, Error, RelayerCount, VoteThreshold};
 use frame_support::{assert_err, assert_ok};
 use sp_runtime::DispatchError::BadOrigin;

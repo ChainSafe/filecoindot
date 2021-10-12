@@ -1,3 +1,6 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
+
 use crate as pallet;
 use frame_support::construct_runtime;
 use frame_support::pallet_prelude::{EnsureOrigin, GenesisBuild};
