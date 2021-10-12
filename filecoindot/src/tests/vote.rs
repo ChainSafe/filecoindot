@@ -157,15 +157,16 @@ fn submit_block_vote_resolve_completed() {
             message_cid.clone()
         ));
         System::set_block_number(100);
+        assert_ok!(FileCoinModule::add_relayer(Origin::signed(ALICE), RELAYER4));
         assert_err!(
             FileCoinModule::submit_block_vote(
                 Origin::signed(RELAYER4),
                 block_cid.clone(),
                 message_cid.clone()
             ),
-            Error::<Test>::ProposalCompleted
+            Error::<Test>::BlockAlreadyVerified
         );
-        assert_eq!(VerifiedBlocks::<Test>::get(&block_cid), false);
+        assert_eq!(VerifiedBlocks::<Test>::get(&block_cid), true);
         assert_eq!(
             BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),
             true
