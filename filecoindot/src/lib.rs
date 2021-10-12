@@ -77,7 +77,7 @@ pub mod pallet {
     /// Track the blocks that have been verified
     #[pallet::storage]
     pub(crate) type VerifiedBlocks<T: Config> =
-        StorageMap<_, Blake2_128Concat, BlockCid, bool, ValueQuery>;
+        StorageMap<_, Blake2_128Concat, BlockCid, bool, OptionQuery>;
 
     /// Count the total number of relayers
     #[pallet::storage]
@@ -132,16 +132,10 @@ pub mod pallet {
         NotRelayer,
         /// Not enough relayers
         NotEnoughRelayer,
-        /// Proposal has already executed
-        ProposalAlreadyExecuted,
         /// Proposal has already completed
         ProposalCompleted,
         /// Proposal has already expired
         ProposalExpired,
-        /// Proposal invalid status
-        ProposalInvalidStatus,
-        /// Proposal already exists
-        ProposalAlreadyExists,
         /// Proposal does not exist
         ProposalNotExists,
         /// Relayer has already voted
@@ -201,7 +195,7 @@ pub mod pallet {
             Self::unregister_relayer(v)
         }
 
-        /// Commits a vote in favour of the provided proposal.
+        /// Update the vote threshold
         #[pallet::weight(T::WeightInfo::set_vote_threshold())]
         pub fn set_vote_threshold(origin: OriginFor<T>, threshold: u32) -> DispatchResult {
             Self::ensure_admin(origin)?;
@@ -216,6 +210,7 @@ pub mod pallet {
         }
 
         // ************** Proposal Lifecycle *************
+        /// Commits a vote in favour of the provided block cid and message root.
         #[pallet::weight(T::WeightInfo::submit_block_vote())]
         pub fn submit_block_vote(
             origin: OriginFor<T>,
@@ -271,6 +266,8 @@ pub mod pallet {
             Ok(())
         }
 
+        /// Admin can close the proposal when it has expired. The admin ought to have called this
+        /// when the proposal expired, otherwise it
         #[pallet::weight(T::WeightInfo::close_block_proposal())]
         pub fn close_block_proposal(origin: OriginFor<T>, block_cid: BlockCid) -> DispatchResult {
             Self::ensure_admin(origin)?;
@@ -279,8 +276,13 @@ pub mod pallet {
                 Error::<T>::BlockAlreadyVerified
             );
 
-            let p = BlockSubmissionProposals::<T>::get(&block_cid)
+            let mut p = BlockSubmissionProposals::<T>::get(&block_cid)
                 .ok_or(Error::<T>::ProposalNotExists)?;
+
+            let now = frame_system::Pallet::<T>::block_number();
+            let threshold = VoteThreshold::<T>::get();
+            p.resolve(&block_cid, &now, threshold)?;
+
             Self::try_resolve_proposal(block_cid, &p);
 
             Ok(())
@@ -363,7 +365,7 @@ pub mod pallet {
         }
 
         fn finalize_block(block_cid: BlockCid) {
-            BlockSubmissionProposals::<T>::remove(block_cid.clone());
+            BlockSubmissionProposals::<T>::remove(&block_cid);
             MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
             VerifiedBlocks::<T>::insert(block_cid.clone(), true);

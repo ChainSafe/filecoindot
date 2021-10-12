@@ -75,6 +75,35 @@ impl<T: Config> BlockSubmissionProposal<T> {
         Ok(())
     }
 
+    /// Resolve the proposal status
+    pub fn resolve(
+        &mut self,
+        block_cid: &[u8],
+        when: &T::BlockNumber,
+        threshold: u32,
+    ) -> Result<(), Error<T>> {
+        ensure!(
+            self.status == ProposalStatus::Active,
+            Error::<T>::ProposalCompleted
+        );
+
+        // when expired, we set the status to be rejected
+        if self.is_expired(when) {
+            self.status = ProposalStatus::Rejected;
+        } else {
+            // MessageRootCidCounter leaked into the struct, well not the best way for encapsulation
+            // but works for now, come back later to fix this.
+            for (_, count) in MessageRootCidCounter::<T>::iter_prefix(block_cid) {
+                if count >= threshold {
+                    self.status = ProposalStatus::Approved;
+                    break;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
     /// Checks if the account has already voted
     fn is_voted(&self, who: &T::AccountId) -> bool {
         self.voted.contains(who)
