@@ -59,7 +59,7 @@ impl<T: Config> BlockSubmissionProposal<T> {
         // when expired, we set the status to be rejected
         if self.is_expired(when) {
             self.status = ProposalStatus::Rejected;
-            return Err(Error::<T>::ProposalExpired.into());
+            return Err(Error::<T>::ProposalExpired);
         }
 
         // MessageRootCidCounter leaked into the struct, well not the best way for encapsulation

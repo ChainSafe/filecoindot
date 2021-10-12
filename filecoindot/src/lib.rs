@@ -368,7 +368,7 @@ pub mod pallet {
 
             VerifiedBlocks::<T>::insert(block_cid.clone(), true);
 
-            Self::deposit_event(Event::ProposalApproved(block_cid.clone()));
+            Self::deposit_event(Event::ProposalApproved(block_cid));
         }
 
         fn reject_block(block_cid: BlockCid) {
