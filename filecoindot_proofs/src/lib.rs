@@ -1,3 +1,5 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -8,5 +10,5 @@
 //!   _HAMT_: Hash Array Mapped Trie. Data structure used by
 //! Filecoin to store the key-value map of the chain state.
 
-
-// mod types;
+mod generate;
+mod verify;
