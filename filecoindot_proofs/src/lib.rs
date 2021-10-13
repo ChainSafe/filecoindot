@@ -1,7 +1,7 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
-#![cfg_attr(not(feature = "std"), no_std)]
+// #![cfg_attr(not(feature = "std"), no_std)]
 
 //! Supports proof generation and verification for filecoin's:
 //!
@@ -12,3 +12,13 @@
 
 mod generate;
 mod verify;
+
+/// Trie Errors.
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub enum TrieError {
+    /// The proof is missing trie nodes that are required for verification.
+    IncompleteProof,
+}
+
+/// Trie result type.
+pub type Result<T> = core::result::Result<T, TrieError>;
