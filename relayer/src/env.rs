@@ -14,6 +14,11 @@ pub struct Env;
 impl Env {
     /// Get environment variable `FILECOIN_RPC`
     pub fn rpc() -> Result<String> {
-        var(FILECOIN_RPC_ENV).map_err(|_| Error::NoRPCEndpoint)
+        let r = var(FILECOIN_RPC_ENV).map_err(|_| Error::NoRPCEndpoint)?;
+        if !r.starts_with("http") {
+            Err(Error::NotHttpEndpoint)
+        } else {
+            r
+        }
     }
 }
