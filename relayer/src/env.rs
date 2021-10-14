@@ -18,7 +18,7 @@ impl Env {
         if !r.starts_with("http") {
             Err(Error::NotHttpEndpoint)
         } else {
-            r
+            Ok(r)
         }
     }
 }

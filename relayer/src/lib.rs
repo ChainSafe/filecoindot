@@ -6,6 +6,8 @@ mod client;
 mod db;
 mod env;
 mod result;
+#[cfg(test)]
+mod testing;
 pub mod types;
 
 pub use crate::{

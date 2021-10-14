@@ -33,6 +33,13 @@ impl Client {
     /// "Filecoin.ChainGetBlock"
     ///
     /// Get `Block` by block number
+    ///
+    // /// ```
+    // /// use relayer::Client;
+    // ///
+    // /// let client = Client::new(None).unwrap();
+    // /// println!("{:?}", tokio_test::block_on(client.block(42)));
+    // /// ```
     pub async fn block(&self, number: usize) -> Result<Block> {
         CHAIN_GET_BLOCK.req(self, &[&number.to_string()]).await
     }
