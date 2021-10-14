@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 use frame_support::{assert_err, assert_ok};
+use frame_support::pallet_prelude::EnsureOrigin;
 use sp_runtime::DispatchError::BadOrigin;
 
-use crate::types::ProposalStatus;
+use crate::types::{EnsureRelayerAdmin, ProposalStatus};
 use crate::{
     tests::mock::*, BlockSubmissionProposals, Error, MessageRootCidCounter, VerifiedBlocks,
 };
@@ -322,5 +323,14 @@ fn close_block_proposal_no_effect() {
             MessageRootCidCounter::<Test>::get(&block_cid, &vec![0, 3]).unwrap(),
             1
         );
+    });
+}
+
+#[test]
+fn ensure_admin_works() {
+    let v = ExtBuilder::default();
+    v.build().execute_with(|| {
+        assert_eq!(EnsureRelayerAdmin::<Test>::try_origin(Origin::signed(RELAYER1)).is_err(), true);
+        assert_eq!(EnsureRelayerAdmin::<Test>::try_origin(Origin::signed(ALICE)).is_ok(), true);
     });
 }
