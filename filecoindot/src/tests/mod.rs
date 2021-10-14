@@ -5,3 +5,5 @@
 mod mock;
 mod relayer;
 mod vote;
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
