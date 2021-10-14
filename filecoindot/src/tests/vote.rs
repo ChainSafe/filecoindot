@@ -5,7 +5,7 @@ use frame_support::pallet_prelude::EnsureOrigin;
 use frame_support::{assert_err, assert_ok};
 use sp_runtime::DispatchError::BadOrigin;
 
-use crate::types::{EnsureRelayerAdmin, ProposalStatus};
+use crate::types::{EnsureRelayers, ProposalStatus};
 use crate::{
     tests::mock::*, BlockSubmissionProposals, Error, MessageRootCidCounter, VerifiedBlocks,
 };
@@ -327,15 +327,15 @@ fn close_block_proposal_no_effect() {
 }
 
 #[test]
-fn ensure_admin_works() {
+fn ensure_relayer_works() {
     let v = ExtBuilder::default();
     v.build().execute_with(|| {
         assert_eq!(
-            EnsureRelayerAdmin::<Test>::try_origin(Origin::signed(RELAYER1)).is_err(),
+            EnsureRelayers::<Test>::try_origin(Origin::signed(RELAYER1)).is_ok(),
             true
         );
         assert_eq!(
-            EnsureRelayerAdmin::<Test>::try_origin(Origin::signed(ALICE)).is_ok(),
+            EnsureRelayers::<Test>::try_origin(Origin::signed(ALICE)).is_err(),
             true
         );
     });
