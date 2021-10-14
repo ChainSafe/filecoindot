@@ -6,4 +6,10 @@ mod client;
 mod db;
 mod env;
 mod result;
-mod types;
+pub mod types;
+
+pub use crate::{
+    client::Client,
+    env::Env,
+    result::{Error, Result},
+};

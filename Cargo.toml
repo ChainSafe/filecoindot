@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "api",
+    "relayer",
     "filecoindot"
 ]
