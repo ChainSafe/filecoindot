@@ -1,5 +1,5 @@
 [package]
-name = "api"
+name = "relayer"
 version = "0.1.0"
 edition = "2018"
 
