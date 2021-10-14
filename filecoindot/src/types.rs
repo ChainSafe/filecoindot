@@ -6,7 +6,7 @@ use frame_support::sp_std;
 use frame_support::sp_std::collections::btree_set::BTreeSet;
 use frame_system::{Origin, RawOrigin};
 
-use crate::{Admins, Config, Error, MessageRootCidCounter, pallet};
+use crate::{pallet, Admins, Config, Error, MessageRootCidCounter};
 
 /// The filecoin block submission proposal
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
@@ -135,7 +135,9 @@ pub(crate) enum ProposalStatus {
 /// An implementation of EnsureOrigin that ensures an account is the admin to the pallet.
 pub struct EnsureRelayerAdmin<T: Config>(sp_std::marker::PhantomData<T>);
 
-impl<O: Into<Result<Origin<T>, O>> + From<Origin<T>> + Clone, T: Config> EnsureOrigin<O> for EnsureRelayerAdmin<T> {
+impl<O: Into<Result<Origin<T>, O>> + From<Origin<T>> + Clone, T: Config> EnsureOrigin<O>
+    for EnsureRelayerAdmin<T>
+{
     type Success = T::AccountId;
 
     fn try_origin(o: O) -> Result<Self::Success, O> {

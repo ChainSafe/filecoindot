@@ -1,8 +1,8 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
-use frame_support::{assert_err, assert_ok};
 use frame_support::pallet_prelude::EnsureOrigin;
+use frame_support::{assert_err, assert_ok};
 use sp_runtime::DispatchError::BadOrigin;
 
 use crate::types::{EnsureRelayerAdmin, ProposalStatus};
@@ -330,7 +330,13 @@ fn close_block_proposal_no_effect() {
 fn ensure_admin_works() {
     let v = ExtBuilder::default();
     v.build().execute_with(|| {
-        assert_eq!(EnsureRelayerAdmin::<Test>::try_origin(Origin::signed(RELAYER1)).is_err(), true);
-        assert_eq!(EnsureRelayerAdmin::<Test>::try_origin(Origin::signed(ALICE)).is_ok(), true);
+        assert_eq!(
+            EnsureRelayerAdmin::<Test>::try_origin(Origin::signed(RELAYER1)).is_err(),
+            true
+        );
+        assert_eq!(
+            EnsureRelayerAdmin::<Test>::try_origin(Origin::signed(ALICE)).is_ok(),
+            true
+        );
     });
 }

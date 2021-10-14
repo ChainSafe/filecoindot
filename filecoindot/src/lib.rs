@@ -55,11 +55,13 @@ pub mod pallet {
 
     /// Track the account id of each admin
     #[pallet::storage]
-    pub(crate) type Admins<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+    pub(crate) type Admins<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
 
     /// Track the account id of each relayer
     #[pallet::storage]
-    pub(crate) type Relayers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+    pub(crate) type Relayers<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
 
     /// Count the total number of relayers
     #[pallet::storage]
