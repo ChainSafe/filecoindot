@@ -53,9 +53,17 @@ pub mod pallet {
     #[pallet::generate_store(pub (super) trait Store)]
     pub struct Pallet<T>(_);
 
+    /// Track the account id of each admin
+    #[pallet::storage]
+    pub(crate) type Admins<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+
     /// Track the account id of each relayer
     #[pallet::storage]
-    pub type Relayers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+    pub(crate) type Relayers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+
+    /// Count the total number of relayers
+    #[pallet::storage]
+    pub(super) type RelayerCount<T: Config> = StorageValue<_, u32, ValueQuery>;
 
     /// Track the block submission related proposals stored
     #[pallet::storage]
@@ -78,10 +86,6 @@ pub mod pallet {
     #[pallet::storage]
     pub(crate) type VerifiedBlocks<T: Config> =
         StorageMap<_, Blake2_128Concat, BlockCid, bool, OptionQuery>;
-
-    /// Count the total number of relayers
-    #[pallet::storage]
-    pub(super) type RelayerCount<T: Config> = StorageValue<_, u32, ValueQuery>;
 
     /// The threshold of votes required for a proposal to be qualified for approval resolution
     #[pallet::storage]
@@ -153,6 +157,8 @@ pub mod pallet {
         pub vote_period: T::BlockNumber,
         /// The initial number of relayers
         pub relayers: Vec<T::AccountId>,
+        /// The admin accounts for this pallet
+        pub admin: Vec<T::AccountId>,
     }
 
     #[cfg(feature = "std")]
@@ -162,6 +168,7 @@ pub mod pallet {
                 vote_threshold: DEFAULT_VOTE_THRESHOLD,
                 vote_period: Default::default(),
                 relayers: Default::default(),
+                admin: Default::default(),
             }
         }
     }
@@ -174,6 +181,9 @@ pub mod pallet {
             for r in self.relayers.clone() {
                 // should not fail in this case
                 Pallet::<T>::register_relayer(r).unwrap();
+            }
+            for r in self.admin.clone() {
+                Admins::<T>::insert(r, true);
             }
         }
     }

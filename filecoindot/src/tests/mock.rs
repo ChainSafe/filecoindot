@@ -114,6 +114,7 @@ impl ExtBuilder {
             vote_threshold: self.vote_threshold,
             vote_period: 1,
             relayers: Vec::from(RELAYERS.clone()),
+            admin: vec![ALICE.clone()]
         }
         .assimilate_storage(&mut t)
         .unwrap();
