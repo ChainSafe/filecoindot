@@ -12,15 +12,13 @@
 //! Admin could also resolve manually.
 //!
 #![cfg_attr(not(feature = "std"), no_std)]
+
 pub use pallet::*;
 
 mod types;
 
 #[cfg(test)]
 mod tests;
-
-#[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {
