@@ -3,7 +3,37 @@
 
 //! RPC client for requesting data from filecoin RPC
 
+use crate::{
+    api::{Req, CHAIN_GET_BLOCK},
+    types::Block,
+    Env, Result,
+};
 use reqwest::Client as ReqwestClinet;
 
 /// RPC Client of filecoindot relayers
-pub struct Client(ReqwestClinet);
+pub struct Client {
+    /// base url of rpc endpoint
+    pub base: String,
+    /// inner rpc client
+    pub inner: ReqwestClinet,
+}
+
+impl Client {
+    /// New client with rpc endpoint
+    ///
+    /// If passing None, will try to get rpc endpoint
+    /// from environment variables.
+    pub fn new(rpc: Option<String>) -> Result<Self> {
+        Ok(Self {
+            base: rpc.unwrap_or(Env::rpc()?),
+            inner: ReqwestClinet::new(),
+        })
+    }
+
+    /// "Filecoin.ChainGetBlock"
+    ///
+    /// Get `Block` by block number
+    pub async fn block(&self, number: usize) -> Result<Block> {
+        CHAIN_GET_BLOCK.req(self, &[&number.to_string()]).await
+    }
+}

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 //! Filecoin api types
-
+#![allow(missing_docs)]
 use serde::{Deserialize, Serialize};
 
 /// Response of the [`ChainHead`](https://docs.filecoin.io/reference/lotus-api/#chainhead) RPC call

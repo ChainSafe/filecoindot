@@ -7,6 +7,8 @@ use thiserror::Error as ThisError;
 pub enum Error {
     #[error("could not find FILECOINT_RPC in environment variables")]
     NoRPCEndpoint,
+    #[error("rpc request failed")]
+    RequestFailed(#[from] reqwest::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
