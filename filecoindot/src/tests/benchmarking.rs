@@ -3,18 +3,18 @@
 
 //! Benchmarking setup for filecoindot
 
+use crate::tests::mock::{Origin, Test, ALICE, RELAYER4};
+use crate::*;
 #[allow(unused)]
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, vec, whitelisted_caller};
-use crate::{*};
-use crate::tests::mock::{ALICE, Test, Origin, RELAYER4};
 
 benchmarks! {
     add_relayer {
     }: {
         Pallet::<Test>::add_relayer(Origin::signed(ALICE), RELAYER4)?;
     } verify {
-		assert_eq!(Relayers::<Test>::contains_key(&RELAYER4), true);
-	}
+        assert_eq!(Relayers::<Test>::contains_key(&RELAYER4), true);
+    }
 
     remove_relayer {
         Pallet::<Test>::add_relayer(Origin::signed(ALICE), RELAYER4)?;
@@ -41,4 +41,8 @@ benchmarks! {
     }
 }
 
-impl_benchmark_test_suite!(Pallet, crate::tests::mock::ExtBuilder::default().build(), crate::tests::mock::Test);
+impl_benchmark_test_suite!(
+    Pallet,
+    crate::tests::mock::ExtBuilder::default().build(),
+    crate::tests::mock::Test
+);
