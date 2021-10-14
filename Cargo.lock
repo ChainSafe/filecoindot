@@ -565,10 +565,10 @@ dependencies = [
 name = "filecoindot_proofs"
 version = "0.0.1"
 dependencies = [
- "forest_cid 0.3.0 (git+https://github.com/ChainSafe/forest?branch=main)",
- "forest_db 0.1.0 (git+https://github.com/ChainSafe/forest?branch=main)",
+ "forest_cid 0.3.0 (git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node)",
+ "forest_db 0.1.0 (git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node)",
  "ipld_amt",
- "ipld_blockstore 0.1.1 (git+https://github.com/ChainSafe/forest?branch=main)",
+ "ipld_blockstore 0.1.1 (git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node)",
  "ipld_hamt",
  "parity-scale-codec",
  "serde",
@@ -606,7 +606,7 @@ dependencies = [
 [[package]]
 name = "forest_cid"
 version = "0.3.0"
-source = "git+https://github.com/ChainSafe/forest?branch=main#8543b3fbbea605114bb1fa0e1d7130f1044708dc"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
 dependencies = [
  "cid",
  "cs_serde_bytes",
@@ -632,7 +632,7 @@ dependencies = [
 [[package]]
 name = "forest_db"
 version = "0.1.0"
-source = "git+https://github.com/ChainSafe/forest?branch=main#8543b3fbbea605114bb1fa0e1d7130f1044708dc"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
 dependencies = [
  "forest_encoding",
  "parking_lot 0.11.2",
@@ -1096,7 +1096,7 @@ dependencies = [
 [[package]]
 name = "ipld_amt"
 version = "1.0.0"
-source = "git+https://github.com/ChainSafe/forest?branch=main#8543b3fbbea605114bb1fa0e1d7130f1044708dc"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
 dependencies = [
  "forest_cid 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "forest_db 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1122,7 +1122,7 @@ dependencies = [
 [[package]]
 name = "ipld_blockstore"
 version = "0.1.1"
-source = "git+https://github.com/ChainSafe/forest?branch=main#8543b3fbbea605114bb1fa0e1d7130f1044708dc"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
 dependencies = [
  "byteorder",
  "dashmap",
@@ -1134,7 +1134,7 @@ dependencies = [
 [[package]]
 name = "ipld_hamt"
 version = "2.0.0"
-source = "git+https://github.com/ChainSafe/forest?branch=main#8543b3fbbea605114bb1fa0e1d7130f1044708dc"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
 dependencies = [
  "byteorder",
  "cs_serde_bytes",

@@ -11,14 +11,14 @@ edition = '2018'
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.3.1", features = ['derive'], default-features = false }
 serde = { version = "1.0.130", features = ["derive"] }
-ipld_hamt = { git = "https://github.com/ChainSafe/forest", branch = "main" }
-ipld_amt = { git = "https://github.com/ChainSafe/forest", branch = "main" }
-ipld_blockstore = { git = "https://github.com/ChainSafe/forest", branch = "main" }
+ipld_hamt = { git = "https://github.com/mattsse/forest", branch = "matt/expose-ipld-root-node" }
+ipld_amt = { git = "https://github.com/mattsse/forest", branch = "matt/expose-ipld-root-node" }
+ipld_blockstore = { git = "https://github.com/mattsse/forest", branch = "matt/expose-ipld-root-node" }
+cid = { package = "forest_cid", git = "https://github.com/mattsse/forest", branch = "matt/expose-ipld-root-node", features = ["cbor"], version = "0.3" }
 
 [dev-dependencies]
-cid = { package = "forest_cid", git = "https://github.com/ChainSafe/forest", branch = "main", features = ["cbor"], version = "0.3" }
-db = { package = "forest_db", git = "https://github.com/ChainSafe/forest", branch = "main", version = "0.1" }
-ipld_blockstore = { git = "https://github.com/ChainSafe/forest", branch = "main", features = ["tracking"]  }
+db = { package = "forest_db", git = "https://github.com/mattsse/forest", branch = "matt/expose-ipld-root-node", version = "0.1" }
+ipld_blockstore = { git = "https://github.com/mattsse/forest", branch = "matt/expose-ipld-root-node", features = ["tracking"]  }
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
