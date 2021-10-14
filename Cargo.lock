@@ -606,7 +606,7 @@ dependencies = [
 [[package]]
 name = "forest_cid"
 version = "0.3.0"
-source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#6aded50c60a4927a7f5467bee8d0bcdfe50b9c80"
 dependencies = [
  "cid",
  "cs_serde_bytes",
@@ -632,7 +632,7 @@ dependencies = [
 [[package]]
 name = "forest_db"
 version = "0.1.0"
-source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#6aded50c60a4927a7f5467bee8d0bcdfe50b9c80"
 dependencies = [
  "forest_encoding",
  "parking_lot 0.11.2",
@@ -1096,7 +1096,7 @@ dependencies = [
 [[package]]
 name = "ipld_amt"
 version = "1.0.0"
-source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#6aded50c60a4927a7f5467bee8d0bcdfe50b9c80"
 dependencies = [
  "forest_cid 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "forest_db 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1122,7 +1122,7 @@ dependencies = [
 [[package]]
 name = "ipld_blockstore"
 version = "0.1.1"
-source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#6aded50c60a4927a7f5467bee8d0bcdfe50b9c80"
 dependencies = [
  "byteorder",
  "dashmap",
@@ -1134,7 +1134,7 @@ dependencies = [
 [[package]]
 name = "ipld_hamt"
 version = "2.0.0"
-source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#f565fa36d4ed29d4a9793bc22f30e3b881258342"
+source = "git+https://github.com/mattsse/forest?branch=matt/expose-ipld-root-node#6aded50c60a4927a7f5467bee8d0bcdfe50b9c80"
 dependencies = [
  "byteorder",
  "cs_serde_bytes",
@@ -2791,7 +2791,7 @@ version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f559b464de2e2bdabcac6a210d12e9b5a5973c251e102c44c585c71d51bd78e"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if 0.1.10",
  "rand 0.8.4",
  "static_assertions",
 ]
