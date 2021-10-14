@@ -53,7 +53,12 @@ pub mod pallet {
 
     /// Track the account id of each relayer
     #[pallet::storage]
-    pub type Relayers<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+    pub(crate) type Relayers<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+
+    /// Count the total number of relayers
+    #[pallet::storage]
+    pub(super) type RelayerCount<T: Config> = StorageValue<_, u32, ValueQuery>;
 
     /// Track the block submission related proposals stored
     #[pallet::storage]
@@ -76,10 +81,6 @@ pub mod pallet {
     #[pallet::storage]
     pub(crate) type VerifiedBlocks<T: Config> =
         StorageMap<_, Blake2_128Concat, BlockCid, bool, OptionQuery>;
-
-    /// Count the total number of relayers
-    #[pallet::storage]
-    pub(super) type RelayerCount<T: Config> = StorageValue<_, u32, ValueQuery>;
 
     /// The threshold of votes required for a proposal to be qualified for approval resolution
     #[pallet::storage]

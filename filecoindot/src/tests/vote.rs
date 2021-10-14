@@ -1,10 +1,11 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
+use frame_support::pallet_prelude::EnsureOrigin;
 use frame_support::{assert_err, assert_ok};
 use sp_runtime::DispatchError::BadOrigin;
 
-use crate::types::ProposalStatus;
+use crate::types::{EnsureRelayer, ProposalStatus};
 use crate::{
     tests::mock::*, BlockSubmissionProposals, Error, MessageRootCidCounter, VerifiedBlocks,
 };
@@ -321,6 +322,21 @@ fn close_block_proposal_no_effect() {
         assert_eq!(
             MessageRootCidCounter::<Test>::get(&block_cid, &vec![0, 3]).unwrap(),
             1
+        );
+    });
+}
+
+#[test]
+fn ensure_relayer_works() {
+    let v = ExtBuilder::default();
+    v.build().execute_with(|| {
+        assert_eq!(
+            EnsureRelayer::<Test>::try_origin(Origin::signed(RELAYER1)).is_ok(),
+            true
+        );
+        assert_eq!(
+            EnsureRelayer::<Test>::try_origin(Origin::signed(ALICE)).is_err(),
+            true
         );
     });
 }
