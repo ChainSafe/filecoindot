@@ -133,10 +133,10 @@ pub(crate) enum ProposalStatus {
 }
 
 /// An implementation of EnsureOrigin that ensures an account is the admin to the pallet.
-pub struct EnsureRelayers<T: Config>(sp_std::marker::PhantomData<T>);
+pub struct EnsureRelayer<T: Config>(sp_std::marker::PhantomData<T>);
 
 impl<O: Into<Result<Origin<T>, O>> + From<Origin<T>> + Clone, T: Config> EnsureOrigin<O>
-    for EnsureRelayers<T>
+    for EnsureRelayer<T>
 {
     type Success = T::AccountId;
 

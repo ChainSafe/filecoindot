@@ -5,7 +5,7 @@ use frame_support::pallet_prelude::EnsureOrigin;
 use frame_support::{assert_err, assert_ok};
 use sp_runtime::DispatchError::BadOrigin;
 
-use crate::types::{EnsureRelayers, ProposalStatus};
+use crate::types::{EnsureRelayer, ProposalStatus};
 use crate::{
     tests::mock::*, BlockSubmissionProposals, Error, MessageRootCidCounter, VerifiedBlocks,
 };
@@ -331,11 +331,11 @@ fn ensure_relayer_works() {
     let v = ExtBuilder::default();
     v.build().execute_with(|| {
         assert_eq!(
-            EnsureRelayers::<Test>::try_origin(Origin::signed(RELAYER1)).is_ok(),
+            EnsureRelayer::<Test>::try_origin(Origin::signed(RELAYER1)).is_ok(),
             true
         );
         assert_eq!(
-            EnsureRelayers::<Test>::try_origin(Origin::signed(ALICE)).is_err(),
+            EnsureRelayer::<Test>::try_origin(Origin::signed(ALICE)).is_err(),
             true
         );
     });
