@@ -29,9 +29,9 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
+      - env:
+          FILECOIN_RPC: ${{ secrets.FILECOIN_RPC }}
+        run: cargo t --all-features
 
   fmt:
     name: Rustfmt
