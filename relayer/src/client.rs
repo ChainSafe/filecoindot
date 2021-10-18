@@ -4,8 +4,7 @@
 //! RPC client for requesting data from filecoin RPC
 
 use crate::{
-    api::{Req, CHAIN_GET_BLOCK},
-    types::Block,
+    api::{Api, ChainGetTipSetByHeight, ChainGetTipSetByHeightResult},
     Env, Result,
 };
 use reqwest::Client as ReqwestClinet;
@@ -30,17 +29,30 @@ impl Client {
         })
     }
 
-    /// "Filecoin.ChainGetBlock"
+    /// `Filecoin.ChainGetTipSetByHeight`
     ///
-    /// Get `Block` by block number
+    /// Get tipset by block height
     ///
     /// ```
-    /// use relayer::Client;
+    /// # use relayer::Result;
+    /// use relayer::{Client};
     ///
-    /// let client = Client::new(None).unwrap();
-    /// tokio_test::block_on(client.block(42));
+    /// # fn main() -> Result<()> {
+    ///   assert_eq!(
+    ///       tokio_test::block_on(
+    ///           Client::new(None)?
+    ///               .chain_get_tip_set_by_height(1199840),
+    ///       )?,
+    ///       relayer::testing::get_tip_set_by_height_1199840(),
+    ///   );
+    ///
+    ///   # Ok(())
+    /// }
     /// ```
-    pub async fn block(&self, number: usize) -> Result<Block> {
-        CHAIN_GET_BLOCK.req(self, &[&number.to_string()]).await
+    pub async fn chain_get_tip_set_by_height(
+        &self,
+        number: usize,
+    ) -> Result<ChainGetTipSetByHeightResult> {
+        Api::req(&ChainGetTipSetByHeight, &self, vec![Some(number), None]).await
     }
 }

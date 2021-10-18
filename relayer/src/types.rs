@@ -6,14 +6,14 @@
 use serde::{Deserialize, Serialize};
 
 /// Response of the [`ChainHead`](https://docs.filecoin.io/reference/lotus-api/#chainhead) RPC call
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct GetChainHead {
     pub jsonrpc: String,
     pub result: TipSet,
     pub id: i64,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct TipSet {
     #[serde(rename = "Cids")]
     pub cids: Vec<Cid>,
@@ -23,7 +23,7 @@ pub struct TipSet {
     pub height: i64,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Block {
     #[serde(rename = "Miner")]
     pub miner: String,
@@ -57,7 +57,7 @@ pub struct Block {
     pub fork_signaling: i64,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct BeaconEntry {
     #[serde(rename = "Round")]
     pub round: i64,
@@ -65,7 +65,7 @@ pub struct BeaconEntry {
     pub data: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct BlsAggregate {
     #[serde(rename = "Type")]
     pub bls_aggregate_type: i64,
@@ -73,22 +73,22 @@ pub struct BlsAggregate {
     pub data: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ElectionProof {
     #[serde(rename = "VRFProof")]
     pub vrf_proof: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Cid {
     #[serde(rename = "/")]
     pub empty: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct WinPoStProof {
-    #[serde(rename = "RegisteredProof")]
-    pub registered_proof: i64,
+    #[serde(rename = "PoStProof")]
+    pub po_st_proof: i64,
     #[serde(rename = "ProofBytes")]
     pub proof_bytes: String,
 }
