@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 mod api;
+mod cache;
 mod client;
-mod db;
 mod env;
 mod result;
 pub mod testing;

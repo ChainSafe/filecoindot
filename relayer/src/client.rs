@@ -53,6 +53,6 @@ impl Client {
         &self,
         number: usize,
     ) -> Result<ChainGetTipSetByHeightResult> {
-        Api::req(&ChainGetTipSetByHeight, &self, vec![Some(number), None]).await
+        Api::req(&ChainGetTipSetByHeight, self, vec![Some(number), None]).await
     }
 }
