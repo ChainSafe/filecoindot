@@ -36,26 +36,41 @@ pub struct Req<'r, T> {
 
 /// Abstract filecoin api requests
 #[async_trait]
-pub trait Api {
+pub trait Api: Sized {
     const METHOD: &'static str;
     type Params: Serialize + Send + Sync;
-    type Result: DeserializeOwned;
+    type Result: DeserializeOwned + Serialize;
+
+    /// Storage key in bytes
+    fn storage_key(params: &Self::Params) -> Result<Vec<u8>> {
+        let mut key = bincode::serialize(Self::METHOD)?;
+        key.append(&mut bincode::serialize(params)?);
+        Ok(key)
+    }
 
     /// Request method with params
     async fn req(&self, client: &Client, params: Self::Params) -> Result<Self::Result> {
-        Ok(client
-            .inner
-            .post(&client.base)
-            .json(&Req {
-                id: 0,
-                method: Self::METHOD,
-                jsonrpc: "2.0",
-                params,
-            })
-            .send()
-            .await?
-            .json::<Resp<Self::Result>>()
-            .await?
-            .result)
+        Ok(if let Ok(Some(res)) = client.cache.get::<Self>(&params) {
+            bincode::deserialize(&res)?
+        } else {
+            let res = client
+                .inner
+                .post(&client.base)
+                .json(&Req {
+                    id: 0,
+                    method: Self::METHOD,
+                    jsonrpc: "2.0",
+                    params: &params,
+                })
+                .send()
+                .await?
+                .json::<Resp<Self::Result>>()
+                .await?
+                .result;
+            client
+                .cache
+                .put::<Self>(&params, &bincode::serialize(&res)?)?;
+            res
+        })
     }
 }

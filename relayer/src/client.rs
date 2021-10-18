@@ -5,6 +5,7 @@
 
 use crate::{
     api::{Api, ChainGetTipSetByHeight, ChainGetTipSetByHeightResult},
+    cache::Cache,
     Env, Result,
 };
 use reqwest::Client as ReqwestClinet;
@@ -13,6 +14,8 @@ use reqwest::Client as ReqwestClinet;
 pub struct Client {
     /// base url of rpc endpoint
     pub base: String,
+    /// api cache
+    pub cache: Cache,
     /// inner rpc client
     pub inner: ReqwestClinet,
 }
@@ -25,6 +28,7 @@ impl Client {
     pub fn new(rpc: Option<String>) -> Result<Self> {
         Ok(Self {
             base: rpc.unwrap_or(Env::rpc()?),
+            cache: Cache::new()?,
             inner: ReqwestClinet::new(),
         })
     }
@@ -53,6 +57,6 @@ impl Client {
         &self,
         number: usize,
     ) -> Result<ChainGetTipSetByHeightResult> {
-        Api::req(&ChainGetTipSetByHeight, self, vec![Some(number), None]).await
+        Ok(Api::req(&ChainGetTipSetByHeight, self, vec![Some(number), None]).await?)
     }
 }
