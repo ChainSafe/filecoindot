@@ -9,14 +9,10 @@ pub enum Error {
     NoRPCEndpoint,
     #[error("Only supports http endpoints for now")]
     NotHttpEndpoint,
-    #[error("rpc request failed")]
-    RequestFailed(#[from] reqwest::Error),
     #[error("Serialize storage key failed")]
     BuildStorageKeyFailed(#[from] bincode::Error),
     #[error("Directory not found")]
     DirectoryNotFound,
-    #[error("Rocksdb error")]
-    RocksDB(#[from] rocksdb::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

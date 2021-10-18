@@ -4,6 +4,7 @@
 //! local storage for handling cache
 use crate::{api::Api, Error, Result};
 use rocksdb::DB;
+use sp_runtime;
 
 const FILECOINDOT_CACHE_FILE: &str = "filecoindot_cache";
 
