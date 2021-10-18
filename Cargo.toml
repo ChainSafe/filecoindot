@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "relayer",
-    "filecoindot"
+    "filecoindot",
+    "filecoindot_relayer"
 ]

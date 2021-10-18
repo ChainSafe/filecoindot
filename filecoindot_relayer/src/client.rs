@@ -38,8 +38,8 @@ impl Client {
     /// Get tipset by block height
     ///
     /// ```
-    /// # use relayer::Result;
-    /// use relayer::{Client};
+    /// # use filecoindot_relayer::Result;
+    /// use filecoindot_relayer::{Client};
     ///
     /// # fn main() -> Result<()> {
     ///   assert_eq!(
@@ -47,7 +47,7 @@ impl Client {
     ///           Client::new(None)?
     ///               .chain_get_tip_set_by_height(1199840),
     ///       )?,
-    ///       relayer::testing::get_tip_set_by_height_1199840(),
+    ///       filecoindot_relayer::testing::get_tip_set_by_height_1199840(),
     ///   );
     ///
     ///   # Ok(())
