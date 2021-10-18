@@ -43,20 +43,6 @@ pub trait Api {
 
     /// Request method with params
     async fn req(&self, client: &Client, params: Self::Params) -> Result<Self::Result> {
-        // let context = client
-        //     .inner
-        //     .post(&client.base)
-        //     .json(&Req {
-        //         id: 0,
-        //         method: Self::METHOD,
-        //         jsonrpc: "2.0",
-        //         params,
-        //     })
-        //     .send()
-        //     .await?;
-        //
-        // panic!("{}", context.text().await?);
-        // Err(Error::NoRPCEndpoint)
         Ok(client
             .inner
             .post(&client.base)
