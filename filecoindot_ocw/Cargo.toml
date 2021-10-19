@@ -9,20 +9,19 @@ bincode = "^1"
 dirs = "4.0.0"
 serde = { version = "^1", features = [ "derive" ] }
 thiserror = "^1"
-codec = { package = "parity-scale-codec", version = "^2"}
+codec = { package = "parity-scale-codec", version = "^2" }
+reqwest = { version = "^0", features = [ "blocking" ] }
 
 # filecoindot
 filecoindot = { path = "../filecoindot" }
 
 # substrate dependencies
+sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 sp-runtime = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 sp-keystore = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
-
-[dev-dependencies]
-tokio-test = "0.4.2"
 
 [features]
 default = [ "std" ]

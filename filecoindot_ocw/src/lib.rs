@@ -7,12 +7,12 @@ pub mod testing;
 mod tests;
 
 mod api;
-mod client;
 mod env;
+mod offchain;
 mod result;
 pub mod types;
 pub use crate::{
-    client::Client,
     env::Env,
+    offchain::OffchainExt,
     result::{Error, Result},
 };

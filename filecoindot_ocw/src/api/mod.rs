@@ -57,41 +57,26 @@ pub trait Api: Sized {
         if let Ok(Some(res)) = val.get::<Self::Result>() {
             Ok(res)
         } else {
-            let req = Request::post(
-                "http://httpbin/post",
-                vec![Req {
-                    id: 0,
-                    method: Self::METHOD.to_string(),
-                    jsonrpc: "2.0".to_string(),
-                    params,
-                }
-                .encode()],
+            let req = Request::get(
+                "http://httpbin.org/get",
+                // vec![Req {
+                //     id: 0,
+                //     method: Self::METHOD.to_string(),
+                //     jsonrpc: "2.0".to_string(),
+                //     params,
+                // }
+                // .encode()],
             );
-            let res = req
-                .send()
-                .unwrap()
-                .wait()
-                .unwrap()
-                .body()
-                .collect::<Vec<_>>();
+            let pending = req.send().unwrap();
 
-            // panic!("{}", String::decode(&mut res.as_ref()).unwrap());
-            Self::Result::decode(&mut res.as_ref()).unwrap();
-            // .json(&Req {
-            //     id: 0,
-            //     method: Self::METHOD,
-            //     jsonrpc: "2.0",
-            //     params: &params,
-            // })
-            // .send()
-            // .await?
-            // .json::<Resp<Self::Result>>()
-            // .await?
-            // .result;
-            // client
-            //     .cache
-            //     .put::<Self>(&params, &bincode::serialize(&res)?)?;
-            // res
+            let mut response = pending.wait().unwrap();
+            // .body()
+            // .collect::<Vec<_>>();
+
+            // let decode = String::decode(&mut res.as_ref()).unwrap();
+
+            panic!("{:?}", response);
+            // Self::Result::decode(&mut res.as_ref()).unwrap();
             Err(Error::DirectoryNotFound)
         }
     }
