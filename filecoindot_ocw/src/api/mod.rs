@@ -6,7 +6,7 @@
 mod get_tip_set_by_height;
 
 pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
-use crate::{Client, Error, Result};
+use crate::{Error, Result};
 use async_trait::async_trait;
 use codec::{Decode, Encode};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -75,8 +75,8 @@ pub trait Api: Sized {
                 .body()
                 .collect::<Vec<_>>();
 
-            panic!("{}", String::decode(&mut res.as_ref()).unwrap());
-            Self::Result::decode(&mut res.as_ref());
+            // panic!("{}", String::decode(&mut res.as_ref()).unwrap());
+            Self::Result::decode(&mut res.as_ref()).unwrap();
             // .json(&Req {
             //     id: 0,
             //     method: Self::METHOD,
