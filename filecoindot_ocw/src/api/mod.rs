@@ -7,7 +7,6 @@ mod get_tip_set_by_height;
 
 pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
 use crate::{Error, Result};
-use async_trait::async_trait;
 use codec::{Decode, Encode};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sp_runtime::offchain::{http::Request, storage::StorageValueRef};
@@ -37,7 +36,6 @@ pub struct Req<T: Encode + Decode> {
 }
 
 /// Abstract filecoin api requests
-#[async_trait]
 pub trait Api: Sized {
     const METHOD: &'static str;
     type Params: Encode + Serialize + Send + Sync + Decode;

@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-async-trait = "^0.1"
 bincode = "^1"
 dirs = "4.0.0"
 serde = { version = "^1", features = [ "derive" ] }
 thiserror = "^1"
 codec = { package = "parity-scale-codec", version = "^2" }
 reqwest = { version = "^0", features = [ "blocking" ] }
+rocksdb = "^0"
 
 # filecoindot
 filecoindot = { path = "../filecoindot" }

@@ -6,17 +6,23 @@
 use frame_support::sp_runtime::offchain::{
     Externalities, HttpRequestStatus, OpaqueMultiaddr, OpaqueNetworkState, Timestamp,
 };
-use reqwest::Request;
+use reqwest::{
+    blocking::{Body, Client, RequestBuilder, Response},
+    header::HeaderName,
+    Method, Url,
+};
 use sp_core::{
     offchain::{HttpError, HttpRequestId},
     OpaquePeerId,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 /// Filecoindot offchain Externalities
+#[derive(Default)]
 pub struct OffchainExt {
     counter: u16,
-    requests: HashMap<usize, Request>,
+    client: Client,
+    requests: HashMap<u16, (RequestBuilder, Option<Response>)>,
 }
 
 impl Externalities for OffchainExt {
@@ -52,6 +58,13 @@ impl Externalities for OffchainExt {
         uri: &str,
         meta: &[u8],
     ) -> Result<HttpRequestId, ()> {
+        let req = self.client.request(
+            Method::from_str(&method.to_uppercase()).unwrap(),
+            Url::parse(uri).unwrap(),
+        );
+        let id = self.counter;
+        self.requests.insert(id.into(), (req, None));
+        self.counter += 1;
         Ok(HttpRequestId(self.counter))
     }
 
@@ -61,6 +74,8 @@ impl Externalities for OffchainExt {
         name: &str,
         value: &str,
     ) -> Result<(), ()> {
+        let mut req = self.requests.get_mut(&request_id.0).unwrap();
+        req.0 = req.0.try_clone().unwrap().header(name, value);
         Ok(())
     }
 
@@ -70,6 +85,8 @@ impl Externalities for OffchainExt {
         chunk: &[u8],
         deadline: Option<Timestamp>,
     ) -> Result<(), HttpError> {
+        let mut req = self.requests.get_mut(&request_id.0).unwrap();
+        req.0 = req.0.try_clone().unwrap().body(chunk.to_vec());
         Ok(())
     }
 
@@ -78,7 +95,14 @@ impl Externalities for OffchainExt {
         ids: &[HttpRequestId],
         deadline: Option<Timestamp>,
     ) -> Vec<HttpRequestStatus> {
-        vec![]
+        let mut ret = vec![];
+        for id in ids {
+            let mut req = self.requests.get_mut(&id.0).unwrap();
+            req.1 = Some(req.0.try_clone().unwrap().send().unwrap());
+            ret.push(HttpRequestStatus::Finished(0));
+        }
+
+        ret
     }
 
     fn http_response_headers(&mut self, request_id: HttpRequestId) -> Vec<(Vec<u8>, Vec<u8>)> {
@@ -91,6 +115,8 @@ impl Externalities for OffchainExt {
         buffer: &mut [u8],
         deadline: Option<Timestamp>,
     ) -> Result<usize, HttpError> {
+        let mut req = self.requests.remove(&request_id.0).unwrap();
+        buffer.copy_from_slice(&mut req.1.unwrap().text().unwrap().as_bytes());
         Ok(0)
     }
 

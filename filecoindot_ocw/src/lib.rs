@@ -7,6 +7,7 @@ pub mod testing;
 mod tests;
 
 mod api;
+mod db;
 mod env;
 mod offchain;
 mod result;
