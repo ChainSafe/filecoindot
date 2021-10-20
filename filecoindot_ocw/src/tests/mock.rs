@@ -1,12 +1,14 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
-use frame_support::parameter_types;
-use sp_core::{sr25519::Signature, H256};
-use sp_runtime::{
-    testing::{Header, TestXt},
-    traits::{BlakeTwo256, Extrinsic as ExtrinsicT, IdentifyAccount, IdentityLookup, Verify},
+use frame_support::{
+    parameter_types,
+    sp_runtime::{
+        testing::{Header, TestXt},
+        traits::{BlakeTwo256, Extrinsic as ExtrinsicT, IdentifyAccount, IdentityLookup, Verify},
+    },
 };
+use sp_core::{sr25519::Signature, H256};
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;

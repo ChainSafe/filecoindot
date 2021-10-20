@@ -5,13 +5,13 @@
 
 use crate::state::OffchainState;
 use frame_support::sp_runtime::offchain::{
-    Externalities, HttpRequestStatus, OpaqueMultiaddr, OpaqueNetworkState, Timestamp,
+    Externalities, HttpRequestStatus, OpaqueNetworkState, Timestamp,
 };
 use futures::future::join_all;
 use parking_lot::RwLock;
 use reqwest::{
     header::HeaderName,
-    Method, Url, {Body, Client, Request, Response},
+    Method, Url, {Body, Request},
 };
 use sp_core::{
     offchain::{HttpError, HttpRequestId},
@@ -20,8 +20,14 @@ use sp_core::{
 use std::{collections::BTreeMap, str::FromStr, sync::Arc};
 
 /// Filecoindot offchain Externalities
-#[derive(Default)]
+#[derive(Clone)]
 pub struct OffchainExt(pub Arc<RwLock<OffchainState>>);
+
+impl OffchainExt {
+    pub fn new() -> crate::Result<Self> {
+        Ok(Self(Arc::new(RwLock::new(OffchainState::new()?))))
+    }
+}
 
 impl Externalities for OffchainExt {
     fn is_validator(&self) -> bool {
@@ -44,7 +50,7 @@ impl Externalities for OffchainExt {
         )
     }
 
-    fn sleep_until(&mut self, deadline: Timestamp) {}
+    fn sleep_until(&mut self, _deadline: Timestamp) {}
 
     fn random_seed(&mut self) -> [u8; 32] {
         Default::default()
@@ -54,7 +60,7 @@ impl Externalities for OffchainExt {
         &mut self,
         method: &str,
         uri: &str,
-        meta: &[u8],
+        _meta: &[u8],
     ) -> Result<HttpRequestId, ()> {
         let req = Request::new(
             Method::from_str(&method.to_uppercase()).map_err(|_| ())?,
@@ -64,7 +70,7 @@ impl Externalities for OffchainExt {
         let id = state.counter;
         state.requests.insert(id.into(), (req, None));
         state.counter += 1;
-        Ok(HttpRequestId(state.counter))
+        Ok(HttpRequestId(id))
     }
 
     fn http_request_add_header(
@@ -74,10 +80,10 @@ impl Externalities for OffchainExt {
         value: &str,
     ) -> Result<(), ()> {
         let mut state = self.0.write();
-        let mut req = state.requests.get_mut(&request_id.0).ok_or(())?;
+        let req = state.requests.get_mut(&request_id.0).ok_or(())?;
         req.0.headers_mut().insert(
             HeaderName::from_bytes(name.to_uppercase().as_bytes()).map_err(|_| ())?,
-            value.parse().map_err(|| ())?,
+            value.parse().map_err(|_| ())?,
         );
         Ok(())
     }
@@ -86,10 +92,10 @@ impl Externalities for OffchainExt {
         &mut self,
         request_id: HttpRequestId,
         chunk: &[u8],
-        deadline: Option<Timestamp>,
+        _deadline: Option<Timestamp>,
     ) -> Result<(), HttpError> {
         let mut state = self.0.write();
-        let mut req = state
+        let req = state
             .requests
             .get_mut(&request_id.0)
             .ok_or(HttpError::Invalid)?;
@@ -100,7 +106,7 @@ impl Externalities for OffchainExt {
     fn http_response_wait(
         &mut self,
         ids: &[HttpRequestId],
-        deadline: Option<Timestamp>,
+        _deadline: Option<Timestamp>,
     ) -> Vec<HttpRequestStatus> {
         let mut state = self.0.write();
 
@@ -136,19 +142,47 @@ impl Externalities for OffchainExt {
     }
 
     fn http_response_headers(&mut self, request_id: HttpRequestId) -> Vec<(Vec<u8>, Vec<u8>)> {
-        vec![]
+        let state = self.0.read();
+        if let Some(req) = state.requests.get(&request_id.0) {
+            req.0
+                .headers()
+                .iter()
+                .map(|(key, value)| (key.as_str().as_bytes().to_vec(), value.as_bytes().to_vec()))
+                .collect()
+        } else {
+            Default::default()
+        }
     }
 
     fn http_response_read_body(
         &mut self,
         request_id: HttpRequestId,
         buffer: &mut [u8],
-        deadline: Option<Timestamp>,
+        _deadline: Option<Timestamp>,
     ) -> Result<usize, HttpError> {
-        // let mut req = self.requests.remove(&request_id.0).unwrap();
-        // buffer.copy_from_slice(&mut req.1.unwrap().text().unwrap().as_bytes());
-        Ok(0)
+        if let Ok(rt) = tokio::runtime::Runtime::new() {
+            let mut state = self.0.write();
+            println!("got response");
+
+            let req = state
+                .requests
+                .remove(&request_id.0)
+                .ok_or(HttpError::Invalid)?;
+
+            println!("got response");
+            let body = rt
+                .block_on(req.1.ok_or(HttpError::Invalid)?.text())
+                .map_err(|_| HttpError::Invalid)?;
+
+            println!("body: {:?}", &body);
+            println!("body length: {:?}", body.as_bytes().len());
+            // *buffer.copy_within(body, body.len());
+
+            Ok(0)
+        } else {
+            Err(HttpError::Invalid)
+        }
     }
 
-    fn set_authorized_nodes(&mut self, nodes: Vec<OpaquePeerId>, authorized_only: bool) {}
+    fn set_authorized_nodes(&mut self, _nodes: Vec<OpaquePeerId>, _authorized_only: bool) {}
 }

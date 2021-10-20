@@ -8,8 +8,8 @@ mod get_tip_set_by_height;
 pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
 use crate::{Error, Result};
 use codec::{Decode, Encode};
+use frame_support::sp_runtime::offchain::{http::Request, storage::StorageValueRef};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use sp_runtime::offchain::{http::Request, storage::StorageValueRef};
 
 /// Wrapper for jsonrpc result
 #[derive(Clone, Debug, Serialize, Deserialize, Decode, Encode)]
@@ -52,30 +52,34 @@ pub trait Api: Sized {
     fn req(&self, params: Self::Params) -> Result<Self::Result> {
         let key = <Self>::storage_key(&params)?;
         let val = StorageValueRef::local(&key);
-        if let Ok(Some(res)) = val.get::<Self::Result>() {
-            Ok(res)
-        } else {
-            let req = Request::get(
-                "http://httpbin.org/get",
-                // vec![Req {
-                //     id: 0,
-                //     method: Self::METHOD.to_string(),
-                //     jsonrpc: "2.0".to_string(),
-                //     params,
-                // }
-                // .encode()],
-            );
-            let pending = req.send().unwrap();
+        // if let Ok(Some(res)) = val.get::<Self::Result>() {
+        //     println!("{:?}", res);
+        //     Ok(res)
+        // } else {
+        let req = Request::get(
+            "http://httpbin.org/get",
+            // vec![Req {
+            //     id: 0,
+            //     method: Self::METHOD.to_string(),
+            //     jsonrpc: "2.0".to_string(),
+            //     params,
+            // }
+            // .encode()],
+        );
+        let pending = req.send().unwrap();
 
-            let mut response = pending.wait().unwrap();
-            // .body()
-            // .collect::<Vec<_>>();
+        let mut response = pending.wait().unwrap();
+        // .body()
+        // .collect::<Vec<_>>();
 
-            // let decode = String::decode(&mut res.as_ref()).unwrap();
+        // let decode = String::decode(&mut res.as_ref()).unwrap();
 
-            panic!("{:?}", response);
-            // Self::Result::decode(&mut res.as_ref()).unwrap();
-            Err(Error::DirectoryNotFound)
-        }
+        // panic!(
+        //     "{:?}",
+        //     String::decode(&mut response.body().collect::<Vec<u8>>().as_ref())
+        // );
+        // Self::Result::decode(&mut res.as_ref()).unwrap();
+        Err(Error::DirectoryNotFound)
+        // }
     }
 }
