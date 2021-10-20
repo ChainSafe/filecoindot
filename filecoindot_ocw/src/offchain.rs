@@ -7,6 +7,7 @@ use crate::state::OffchainState;
 use frame_support::sp_runtime::offchain::{
     Externalities, HttpRequestStatus, OpaqueMultiaddr, OpaqueNetworkState, Timestamp,
 };
+use futures::future::join_all;
 use parking_lot::RwLock;
 use reqwest::{
     header::HeaderName,
@@ -16,7 +17,7 @@ use sp_core::{
     offchain::{HttpError, HttpRequestId},
     OpaquePeerId,
 };
-use std::{collections::HashMap, str::FromStr, sync::Arc};
+use std::{collections::BTreeMap, str::FromStr, sync::Arc};
 
 /// Filecoindot offchain Externalities
 #[derive(Default)]
@@ -76,7 +77,7 @@ impl Externalities for OffchainExt {
         let mut req = state.requests.get_mut(&request_id.0).ok_or(())?;
         req.0.headers_mut().insert(
             HeaderName::from_bytes(name.to_uppercase().as_bytes()).map_err(|_| ())?,
-            value.parse().unwrap(),
+            value.parse().map_err(|| ())?,
         );
         Ok(())
     }
@@ -87,8 +88,12 @@ impl Externalities for OffchainExt {
         chunk: &[u8],
         deadline: Option<Timestamp>,
     ) -> Result<(), HttpError> {
-        // let mut req = self.requests.get_mut(&request_id.0).unwrap();
-        // req.0 = req.0.try_clone().unwrap().body(chunk.to_vec());
+        let mut state = self.0.write();
+        let mut req = state
+            .requests
+            .get_mut(&request_id.0)
+            .ok_or(HttpError::Invalid)?;
+        *req.0.body_mut() = Some(Body::from(chunk.to_vec()));
         Ok(())
     }
 
@@ -97,15 +102,37 @@ impl Externalities for OffchainExt {
         ids: &[HttpRequestId],
         deadline: Option<Timestamp>,
     ) -> Vec<HttpRequestStatus> {
-        // let mut ret = vec![];
-        // for id in ids {
-        //     let mut req = self.requests.get_mut(&id.0).unwrap();
-        //     req.1 = Some(req.0.try_clone().unwrap().send().unwrap());
-        //     ret.push(HttpRequestStatus::Finished(0));
-        // }
-        //
-        // ret
-        vec![]
+        let mut state = self.0.write();
+
+        let mut res = BTreeMap::new();
+        let mut queue_ids = vec![];
+        let mut queue = vec![];
+
+        ids.iter().for_each(|HttpRequestId(id)| {
+            res.insert(id, HttpRequestStatus::Invalid);
+            if let Some(req) = state.requests.get(&id) {
+                if let Some(cloned_req) = req.0.try_clone() {
+                    queue_ids.push(id);
+                    queue.push(state.client.execute(cloned_req));
+                }
+            }
+        });
+
+        // construct runtime
+        if let Ok(rt) = tokio::runtime::Runtime::new() {
+            let mut resps = rt.block_on(join_all(queue));
+            for (idx, id) in queue_ids.iter().enumerate() {
+                let resp = resps.remove(idx);
+                if let Some(req) = state.requests.get_mut(id) {
+                    if let Ok(r) = resp {
+                        res.insert(&*id, HttpRequestStatus::Finished(r.status().as_u16()));
+                        req.1 = Some(r);
+                    }
+                }
+            }
+        }
+
+        res.values().cloned().collect::<Vec<_>>()
     }
 
     fn http_response_headers(&mut self, request_id: HttpRequestId) -> Vec<(Vec<u8>, Vec<u8>)> {

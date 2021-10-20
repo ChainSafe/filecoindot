@@ -593,6 +593,7 @@ dependencies = [
  "filecoindot",
  "frame-support",
  "frame-system",
+ "futures",
  "parity-scale-codec",
  "parking_lot 0.11.2",
  "reqwest",
@@ -603,6 +604,7 @@ dependencies = [
  "sp-keystore",
  "sp-runtime",
  "thiserror",
+ "tokio",
 ]
 
 [[package]]
