@@ -11,6 +11,7 @@ mod db;
 mod env;
 mod offchain;
 mod result;
+mod state;
 pub mod types;
 pub use crate::{
     env::Env,
