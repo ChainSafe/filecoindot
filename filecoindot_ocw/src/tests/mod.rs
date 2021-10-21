@@ -9,8 +9,7 @@ use crate::{
     api::{Api, ChainGetTipSetByHeight},
     OffchainExt,
 };
-use sp_core::offchain::{testing, OffchainDbExt, OffchainWorkerExt};
-use std::sync::Arc;
+use sp_core::offchain::{OffchainDbExt, OffchainWorkerExt};
 
 #[test]
 fn test_http_request() {

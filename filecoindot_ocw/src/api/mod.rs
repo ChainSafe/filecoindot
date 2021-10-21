@@ -50,8 +50,8 @@ pub trait Api: Sized {
 
     /// Request method with params
     fn req(&self, params: Self::Params) -> Result<Self::Result> {
-        let key = <Self>::storage_key(&params)?;
-        let val = StorageValueRef::local(&key);
+        // let key = <Self>::storage_key(&params)?;
+        // let val = StorageValueRef::local(&key);
         // if let Ok(Some(res)) = val.get::<Self::Result>() {
         //     println!("{:?}", res);
         //     Ok(res)
@@ -68,17 +68,16 @@ pub trait Api: Sized {
         );
         let pending = req.send().unwrap();
 
-        let mut response = pending.wait().unwrap();
+        let response = pending.wait().unwrap();
         // .body()
         // .collect::<Vec<_>>();
 
         // let decode = String::decode(&mut res.as_ref()).unwrap();
 
-        // panic!(
-        //     "{:?}",
-        //     String::decode(&mut response.body().collect::<Vec<u8>>().as_ref())
-        // );
-        // Self::Result::decode(&mut res.as_ref()).unwrap();
+        panic!(
+            "{:?}",
+            String::from_utf8_lossy(&mut response.body().collect::<Vec<u8>>().as_ref())
+        );
         Err(Error::DirectoryNotFound)
         // }
     }
