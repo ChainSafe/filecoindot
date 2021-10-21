@@ -599,6 +599,7 @@ dependencies = [
  "reqwest",
  "rocksdb",
  "serde",
+ "serde_json",
  "sp-core",
  "sp-io",
  "sp-keystore",

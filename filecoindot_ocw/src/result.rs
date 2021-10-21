@@ -13,6 +13,8 @@ pub enum Error {
     RequestFailed(#[from] reqwest::Error),
     #[error("Serialize storage key failed")]
     BuildStorageKeyFailed(#[from] bincode::Error),
+    #[error("serde_json error")]
+    SerdeJson(#[from] serde_json::Error),
     #[error("Directory not found")]
     DirectoryNotFound,
     #[error("Rocksdb error")]

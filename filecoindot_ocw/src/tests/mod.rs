@@ -20,7 +20,9 @@ fn test_http_request() {
 
     t.execute_with(|| {
         // crate::Offchain::chain_get_tip_set_by_height(1199840).unwrap();
-        ChainGetTipSetByHeight.req(vec![Some(1199840), None]);
+        ChainGetTipSetByHeight
+            .req(vec![Some(1199840), None])
+            .unwrap();
         // .unwrap();
     })
 }

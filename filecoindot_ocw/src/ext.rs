@@ -9,7 +9,7 @@ use frame_support::sp_runtime::offchain::{
 };
 use futures::future::join_all;
 use parking_lot::RwLock;
-use reqwest::{header::HeaderName, Body, Method, Url};
+use reqwest::Method;
 use sp_core::{
     offchain::{HttpError, HttpRequestId},
     OpaquePeerId,
@@ -59,11 +59,12 @@ impl Externalities for OffchainExt {
         uri: &str,
         _meta: &[u8],
     ) -> Result<HttpRequestId, ()> {
-        let req = reqwest::Request::new(
-            Method::from_str(&method.to_uppercase()).map_err(|_| ())?,
-            Url::parse(uri).map_err(|_| ())?,
-        );
         let mut state = self.0.write();
+        let req = state.client.request(
+            Method::from_str(&method.to_uppercase()).map_err(|_| ())?,
+            uri,
+        );
+
         let id = state.counter;
         state.requests.insert(id.into(), req.into());
         state.counter += 1;
@@ -78,10 +79,7 @@ impl Externalities for OffchainExt {
     ) -> Result<(), ()> {
         let mut state = self.0.write();
         let req = state.requests.get_mut(&request_id.0).ok_or(())?;
-        req.req.headers_mut().insert(
-            HeaderName::from_bytes(name.to_uppercase().as_bytes()).map_err(|_| ())?,
-            value.parse().map_err(|_| ())?,
-        );
+        req.req = req.req.try_clone().ok_or(())?.header(name, value);
         Ok(())
     }
 
@@ -91,12 +89,21 @@ impl Externalities for OffchainExt {
         chunk: &[u8],
         _deadline: Option<Timestamp>,
     ) -> Result<(), HttpError> {
+        if chunk.is_empty() {
+            return Ok(());
+        }
+
         let mut state = self.0.write();
         let req = state
             .requests
             .get_mut(&request_id.0)
             .ok_or(HttpError::Invalid)?;
-        *req.req.body_mut() = Some(Body::from(chunk.to_vec()));
+
+        req.req = req
+            .req
+            .try_clone()
+            .ok_or(HttpError::IoError)?
+            .body(chunk.to_vec());
         Ok(())
     }
 
@@ -111,12 +118,25 @@ impl Externalities for OffchainExt {
         let mut queue_ids = vec![];
         let mut queue = vec![];
 
+        // ids.iter().for_each(|HttpRequestId(id)| {
+        //     res.insert(id, HttpRequestStatus::Invalid);
+        //     if let Some(req) = state.requests.get(&id) {
+        //         if let Some(cloned_req) = req.req.try_clone() {
+        //             // queue_ids.push(id);
+        //             // queue.push(cloned_req.send());
+        //             let resp = cloned_req.send().map_err(|_| HttpError::IoError)?;
+        //             res.insert(*id, HttpRequestStatus::Finished(resp.status().as_u16()));
+        //             req.resp = Some(resp);
+        //         }
+        //     }
+        // });
+
         ids.iter().for_each(|HttpRequestId(id)| {
             res.insert(id, HttpRequestStatus::Invalid);
             if let Some(req) = state.requests.get(&id) {
                 if let Some(cloned_req) = req.req.try_clone() {
                     queue_ids.push(id);
-                    queue.push(state.client.execute(cloned_req));
+                    queue.push(cloned_req.send());
                 }
             }
         });
@@ -127,9 +147,7 @@ impl Externalities for OffchainExt {
             for (idx, id) in queue_ids.iter().enumerate() {
                 if let Ok(resp) = resps.remove(idx) {
                     let status = resp.status().as_u16();
-
                     res.insert(*id, HttpRequestStatus::Finished(status));
-
                     if let Some(req) = state.requests.get_mut(id) {
                         req.resp = Some(resp);
                     }
@@ -161,27 +179,32 @@ impl Externalities for OffchainExt {
         buffer: &mut [u8],
         _deadline: Option<Timestamp>,
     ) -> Result<usize, HttpError> {
-        if let Ok(rt) = tokio::runtime::Runtime::new() {
-            let mut state = self.0.write();
+        let mut state = self.0.write();
+        let req = state
+            .requests
+            .get_mut(&request_id.0)
+            .ok_or(HttpError::IoError)?;
 
-            let req = state
-                .requests
-                .get_mut(&request_id.0)
-                .ok_or(HttpError::IoError)?;
-            if let Some(chunk) = rt
-                .block_on(req.resp.as_mut().ok_or(HttpError::IoError)?.chunk())
-                .map_err(|_| HttpError::IoError)?
-            {
-                let read = std::cmp::min(buffer.len(), chunk[req.read..].len());
-                buffer[0..read].copy_from_slice(&chunk[req.read..read]);
-                req.read += read;
-                Ok(read)
-            } else {
-                state.requests.remove(&request_id.0);
-                Ok(0)
+        if let Some(resp) = req.resp.take() {
+            if let Ok(rt) = tokio::runtime::Runtime::new() {
+                req.resp_body = Some(
+                    rt.block_on(resp.bytes())
+                        .map_err(|_| HttpError::IoError)?
+                        .to_vec(),
+                );
             }
+            //req.resp_body = Some(resp.bytes().map_err(|_| HttpError::IoError)).to_vec();
+        }
+
+        let response = req.resp_body.as_ref().ok_or(HttpError::IoError)?;
+        if req.read >= response.len() {
+            state.requests.remove(&request_id.0);
+            Ok(0)
         } else {
-            Err(HttpError::IoError)
+            let read = std::cmp::min(buffer.len(), response[req.read..].len());
+            buffer[0..read].copy_from_slice(&response[req.read..read]);
+            req.read += read;
+            Ok(read)
         }
     }
 
