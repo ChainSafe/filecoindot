@@ -1,7 +1,7 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 use crate::{Error, Result};
-use reqwest::{Client, RequestBuilder, Response};
+use reqwest::{Client, RequestBuilder};
 use rocksdb::DB;
 use std::collections::BTreeMap;
 
@@ -10,8 +10,7 @@ const FILECOINDOT_CACHE_FILE: &str = "filecoindot_cache";
 /// Request with resp body and reading ptr
 pub struct Request {
     pub req: RequestBuilder,
-    pub resp: Option<Response>,
-    pub resp_body: Option<Vec<u8>>,
+    pub resp: Response,
     pub read: usize,
 }
 
@@ -19,11 +18,17 @@ impl From<RequestBuilder> for Request {
     fn from(req: RequestBuilder) -> Self {
         Self {
             req,
-            resp: None,
-            resp_body: None,
+            resp: Default::default(),
             read: 0,
         }
     }
+}
+
+#[derive(Default)]
+pub struct Response {
+    pub status: u16,
+    pub headers: Vec<(Vec<u8>, Vec<u8>)>,
+    pub body: Vec<u8>,
 }
 
 /// filecoindot offchain state

@@ -62,16 +62,14 @@ pub trait Api: Sized {
         )
         .add_header("Content-Type", "application/json");
 
-        let pending = req.send().unwrap();
-        let response = pending.wait().unwrap();
-        let resp_bytes = response.body().collect::<Vec<_>>();
-        println!("resp bytes: {}", resp_bytes.len());
-        println!("resp text: {}", String::from_utf8_lossy(&resp_bytes));
-        panic!(
-            "de: {:?}",
-            serde_json::from_slice::<Resp<Self::Result>>(&resp_bytes)?.result
-        );
-        Err(Error::DirectoryNotFound)
-        // }
+        Ok(serde_json::from_slice::<Resp<Self::Result>>(
+            &req.send()
+                .map_err(|_| Error::SendHttpRequestFailed)?
+                .wait()
+                .map_err(|_| Error::GetHttpResponseFailed)?
+                .body()
+                .collect::<Vec<_>>(),
+        )?
+        .result)
     }
 }

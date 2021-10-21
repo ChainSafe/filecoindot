@@ -3,7 +3,7 @@
 
 //! Filecoindot offchain Externalities
 
-use crate::state::{OffchainState, Request};
+use crate::state::{OffchainState, Response};
 use frame_support::sp_runtime::offchain::{
     Externalities, HttpRequestStatus, OpaqueNetworkState, Timestamp,
 };
@@ -66,7 +66,7 @@ impl Externalities for OffchainExt {
         );
 
         let id = state.counter;
-        state.requests.insert(id.into(), req.into());
+        state.requests.insert(id, req.into());
         state.counter += 1;
         Ok(HttpRequestId(id))
     }
@@ -118,25 +118,30 @@ impl Externalities for OffchainExt {
         let mut queue_ids = vec![];
         let mut queue = vec![];
 
-        // ids.iter().for_each(|HttpRequestId(id)| {
-        //     res.insert(id, HttpRequestStatus::Invalid);
-        //     if let Some(req) = state.requests.get(&id) {
-        //         if let Some(cloned_req) = req.req.try_clone() {
-        //             // queue_ids.push(id);
-        //             // queue.push(cloned_req.send());
-        //             let resp = cloned_req.send().map_err(|_| HttpError::IoError)?;
-        //             res.insert(*id, HttpRequestStatus::Finished(resp.status().as_u16()));
-        //             req.resp = Some(resp);
-        //         }
-        //     }
-        // });
-
         ids.iter().for_each(|HttpRequestId(id)| {
             res.insert(id, HttpRequestStatus::Invalid);
-            if let Some(req) = state.requests.get(&id) {
+            if let Some(req) = state.requests.get(id) {
                 if let Some(cloned_req) = req.req.try_clone() {
                     queue_ids.push(id);
-                    queue.push(cloned_req.send());
+                    queue.push(async {
+                        if let Ok(resp) = cloned_req.send().await {
+                            Ok((
+                                resp.status().as_u16(),
+                                resp.headers()
+                                    .iter()
+                                    .map(|(key, value)| {
+                                        (
+                                            key.as_str().as_bytes().to_vec(),
+                                            value.as_bytes().to_vec(),
+                                        )
+                                    })
+                                    .collect(),
+                                resp.bytes().await,
+                            ))
+                        } else {
+                            Err(())
+                        }
+                    });
                 }
             }
         });
@@ -145,11 +150,14 @@ impl Externalities for OffchainExt {
         if let Ok(rt) = tokio::runtime::Runtime::new() {
             let mut resps = rt.block_on(join_all(queue));
             for (idx, id) in queue_ids.iter().enumerate() {
-                if let Ok(resp) = resps.remove(idx) {
-                    let status = resp.status().as_u16();
+                if let Ok((status, headers, maybe_resp_body)) = resps.remove(idx) {
                     res.insert(*id, HttpRequestStatus::Finished(status));
                     if let Some(req) = state.requests.get_mut(id) {
-                        req.resp = Some(resp);
+                        req.resp = Response {
+                            status,
+                            headers,
+                            body: maybe_resp_body.unwrap_or_default().to_vec(),
+                        };
                     }
                 }
             }
@@ -160,14 +168,8 @@ impl Externalities for OffchainExt {
 
     fn http_response_headers(&mut self, request_id: HttpRequestId) -> Vec<(Vec<u8>, Vec<u8>)> {
         let state = self.0.read();
-        if let Some(Request {
-            resp: Some(resp), ..
-        }) = state.requests.get(&request_id.0)
-        {
-            resp.headers()
-                .iter()
-                .map(|(key, value)| (key.as_str().as_bytes().to_vec(), value.as_bytes().to_vec()))
-                .collect()
+        if let Some(req) = state.requests.get(&request_id.0) {
+            req.resp.headers.clone()
         } else {
             Default::default()
         }
@@ -185,24 +187,13 @@ impl Externalities for OffchainExt {
             .get_mut(&request_id.0)
             .ok_or(HttpError::IoError)?;
 
-        if let Some(resp) = req.resp.take() {
-            if let Ok(rt) = tokio::runtime::Runtime::new() {
-                req.resp_body = Some(
-                    rt.block_on(resp.bytes())
-                        .map_err(|_| HttpError::IoError)?
-                        .to_vec(),
-                );
-            }
-            //req.resp_body = Some(resp.bytes().map_err(|_| HttpError::IoError)).to_vec();
-        }
-
-        let response = req.resp_body.as_ref().ok_or(HttpError::IoError)?;
+        let response = &req.resp.body;
         if req.read >= response.len() {
             state.requests.remove(&request_id.0);
             Ok(0)
         } else {
             let read = std::cmp::min(buffer.len(), response[req.read..].len());
-            buffer[0..read].copy_from_slice(&response[req.read..read]);
+            buffer[0..read].copy_from_slice(&response[req.read..req.read + read]);
             req.read += read;
             Ok(read)
         }

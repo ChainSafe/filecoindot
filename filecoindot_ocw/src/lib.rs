@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 #[cfg(test)]
-pub mod testing;
-#[cfg(test)]
 mod tests;
 
 mod api;

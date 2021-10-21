@@ -1,6 +1,5 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
-
 #[frame_support::pallet]
 pub mod pallet {
     use frame_support::{

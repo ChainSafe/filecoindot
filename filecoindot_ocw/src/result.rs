@@ -21,6 +21,11 @@ pub enum Error {
     RocksDB(#[from] rocksdb::Error),
     #[error("None error")]
     NoneError,
+    // substrate http errors
+    #[error("Send http request failed")]
+    SendHttpRequestFailed,
+    #[error("Get http response failed")]
+    GetHttpResponseFailed,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

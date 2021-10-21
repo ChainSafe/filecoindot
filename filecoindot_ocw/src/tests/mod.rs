@@ -1,5 +1,6 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
+mod data;
 mod mock;
 mod pallet;
 
@@ -19,10 +20,11 @@ fn test_http_request() {
     t.register_extension(OffchainDbExt::new(offchain));
 
     t.execute_with(|| {
-        // crate::Offchain::chain_get_tip_set_by_height(1199840).unwrap();
-        ChainGetTipSetByHeight
-            .req(vec![Some(1199840), None])
-            .unwrap();
-        // .unwrap();
+        assert_eq!(
+            ChainGetTipSetByHeight
+                .req(vec![Some(1199840), None])
+                .unwrap(),
+            data::get_tip_set_by_height_1199840()
+        );
     })
 }
