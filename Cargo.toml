@@ -1,5 +1,5 @@
 [workspace]
 members = [
     "filecoindot",
-    "filecoindot_ocw",
+    "filecoindot-ocw",
 ]
