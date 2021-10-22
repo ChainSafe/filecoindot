@@ -53,7 +53,7 @@ pub fn new_partial(
 > {
     if config.keystore_remote.is_some() {
         return Err(ServiceError::Other(
-            "Remote Keystores are not supported.".to_string()
+            "Remote Keystores are not supported.".to_string(),
         ));
     }
 
