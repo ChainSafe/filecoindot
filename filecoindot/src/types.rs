@@ -153,4 +153,9 @@ impl<O: Into<Result<Origin<T>, O>> + From<Origin<T>> + Clone, T: Config> EnsureO
             _ => Err(o),
         }
     }
+
+    #[cfg(feature = "runtime-benchmarks")]
+    fn successful_origin() -> O {
+        RawOrigin::Signed(Default::default()).into()
+    }
 }

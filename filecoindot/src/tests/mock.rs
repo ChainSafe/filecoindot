@@ -54,6 +54,11 @@ impl EnsureOrigin<<Test as frame_system::Config>::Origin> for MockedRelayerAdmin
             Err(o)
         }
     }
+
+    #[cfg(feature = "runtime-benchmarks")]
+    fn successful_origin() -> <Test as frame_system::Config>::Origin {
+        Origin::signed(Default::default())
+    }
 }
 
 impl frame_system::Config for Test {
