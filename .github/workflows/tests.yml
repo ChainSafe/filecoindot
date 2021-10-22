@@ -13,6 +13,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
+          target: wasm32-unknown-unknown
           toolchain: nightly
           override: true
       - uses: actions-rs/cargo@v1
@@ -42,6 +43,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
+          target: wasm32-unknown-unknown
           toolchain: nightly
           override: true
       - run: rustup component add rustfmt
@@ -58,6 +60,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
+          target: wasm32-unknown-unknown
           toolchain: nightly
           override: true
       - run: rustup component add clippy
