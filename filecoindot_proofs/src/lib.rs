@@ -1,5 +1,4 @@
 mod blockstore;
-mod cid;
 mod errors;
 mod generate;
 mod hamt;
@@ -17,24 +16,6 @@ const MAX_ARRAY_WIDTH: usize = 3;
 const DEFAULT_BIT_WIDTH: u32 = 8;
 
 type HashedKey = [u8; 32];
-
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct KeyValuePair<K, V>(K, V);
-
-impl<K, V> KeyValuePair<K, V> {
-    pub fn key(&self) -> &K {
-        &self.0
-    }
-    pub fn value(&self) -> &V {
-        &self.1
-    }
-}
-
-impl<K, V> KeyValuePair<K, V> {
-    pub fn new(key: K, value: V) -> Self {
-        KeyValuePair(key, value)
-    }
-}
 
 #[cfg(test)]
 mod tests {

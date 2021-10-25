@@ -14,7 +14,6 @@ use crate::hash::Hash;
 use crate::hash_algorithm::{HashAlgorithm, Sha256};
 use crate::hash_bits::HashBits;
 use crate::node::Node;
-use crate::KeyValuePair;
 
 /// This is a simplified implementation of HAMT based on:
 /// http://lampwww.epfl.ch/papers/idealhashtrees.pdf
@@ -34,7 +33,7 @@ pub struct Hamt<'a, BS, K, V, N: Node<K, V>, H = Sha256> {
 impl<'a, BS, K, V, N, H> Hamt<'a, BS, K, V, N, H>
 where
     K: Hash + Eq + PartialOrd + Serialize + DeserializeOwned,
-    BS: BlockStore,
+    BS: BlockStore<K, V, N>,
     H: HashAlgorithm,
     N: Node<K, V>
 {
@@ -44,7 +43,7 @@ where
         store: &'a BS,
         bit_width: u32,
     ) -> Result<Self, Error> {
-        match store.get(root_cid)? {
+        match store.get::<N>(root_cid)? {
             Some(root) => Ok(Self {
                 root,
                 store,
