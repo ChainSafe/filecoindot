@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "filecoindot",
-    "filecoindot_relayer"
+    "filecoindot_relayer",
+    "filecoindot_proofs"
 ]
