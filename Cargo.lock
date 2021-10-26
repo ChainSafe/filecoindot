@@ -700,6 +700,8 @@ dependencies = [
  "forest_hash_utils",
  "forest_ipld",
  "ipld_blockstore",
+ "ipld_hamt",
+ "num-traits",
  "once_cell",
  "parking_lot 0.11.2",
  "serde",
@@ -1355,6 +1357,25 @@ dependencies = [
  "forest_cid",
  "forest_db",
  "forest_encoding",
+]
+
+[[package]]
+name = "ipld_hamt"
+version = "2.0.0"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#6e5167ec9eacf4c3ca741785cd90065db8242f8c"
+dependencies = [
+ "byteorder",
+ "cs_serde_bytes",
+ "forest_cid",
+ "forest_db",
+ "forest_encoding",
+ "forest_hash_utils",
+ "forest_ipld",
+ "ipld_blockstore",
+ "once_cell",
+ "serde",
+ "sha2 0.9.8",
+ "thiserror",
 ]
 
 [[package]]
