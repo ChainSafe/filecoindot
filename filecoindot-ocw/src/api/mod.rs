@@ -6,15 +6,15 @@
 mod get_tip_set_by_height;
 
 pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
-use crate::{Client, Result};
-use async_trait::async_trait;
+use crate::{Env, Error, Result};
+use frame_support::sp_runtime::offchain::http::Request;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 /// Wrapper for jsonrpc result
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Resp<T> {
     /// reponse id
-    pub id: usize,
+    pub id: u8,
     /// JsonRPC version
     pub jsonrpc: String,
     /// JsonRPC result
@@ -23,23 +23,22 @@ pub struct Resp<T> {
 
 /// Request JSON body
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Req<'r, T> {
+pub struct Req<T> {
     /// reponse id
-    pub id: usize,
+    pub id: u8,
     /// JsonRPC method
-    pub method: &'r str,
+    pub method: String,
     /// JsonRPC version
-    pub jsonrpc: &'r str,
+    pub jsonrpc: String,
     /// JsonRPC result
     pub params: T,
 }
 
 /// Abstract filecoin api requests
-#[async_trait]
 pub trait Api: Sized {
     const METHOD: &'static str;
     type Params: Serialize + Send + Sync;
-    type Result: DeserializeOwned + Serialize;
+    type Result: Serialize + DeserializeOwned + core::fmt::Debug;
 
     /// Storage key in bytes
     fn storage_key(params: &Self::Params) -> Result<Vec<u8>> {
@@ -49,28 +48,27 @@ pub trait Api: Sized {
     }
 
     /// Request method with params
-    async fn req(&self, client: &Client, params: Self::Params) -> Result<Self::Result> {
-        Ok(if let Ok(Some(res)) = client.cache.get::<Self>(&params) {
-            bincode::deserialize(&res)?
-        } else {
-            let res = client
-                .inner
-                .post(&client.base)
-                .json(&Req {
-                    id: 0,
-                    method: Self::METHOD,
-                    jsonrpc: "2.0",
-                    params: &params,
-                })
-                .send()
-                .await?
-                .json::<Resp<Self::Result>>()
-                .await?
-                .result;
-            client
-                .cache
-                .put::<Self>(&params, &bincode::serialize(&res)?)?;
-            res
-        })
+    fn req(&self, params: Self::Params) -> Result<Self::Result> {
+        let base = Env::rpc()?;
+        let req = Request::post(
+            &base,
+            vec![serde_json::to_vec(&Req {
+                id: 0,
+                method: Self::METHOD.to_string(),
+                jsonrpc: "2.0".to_string(),
+                params,
+            })?],
+        )
+        .add_header("Content-Type", "application/json");
+
+        Ok(serde_json::from_slice::<Resp<Self::Result>>(
+            &req.send()
+                .map_err(|_| Error::SendHttpRequestFailed)?
+                .wait()
+                .map_err(|_| Error::GetHttpResponseFailed)?
+                .body()
+                .collect::<Vec<_>>(),
+        )?
+        .result)
     }
 }

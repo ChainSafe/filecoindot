@@ -1,0 +1,36 @@
+[package]
+name = "filecoindot_ocw"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+bincode = "^1"
+dirs = "4.0.0"
+serde = { version = "^1", features = [ "derive" ] }
+serde_json = "^1"
+thiserror = "^1"
+codec = { package = "parity-scale-codec", version = "^2" }
+reqwest = { version = "^0", features = [ "blocking", "json" ] }
+rocksdb = "^0.17"
+parking_lot = "^0.11"
+futures = "^0.3"
+tokio = { version = "^1.12", features = [ "rt" ]}
+
+# filecoindot
+filecoindot = { path = "../filecoindot" }
+
+# substrate dependencies
+sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+sp-keystore = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+
+[features]
+default = [ "std" ]
+std = [
+  "codec/std",
+  "frame-support/std",
+  "frame-system/std"
+]
+

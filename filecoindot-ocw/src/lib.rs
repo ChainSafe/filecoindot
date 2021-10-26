@@ -1,16 +1,18 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
-mod api;
-mod cache;
-mod client;
-mod env;
-mod result;
-pub mod testing;
-pub mod types;
+#[cfg(test)]
+mod tests;
 
+mod api;
+mod db;
+mod env;
+mod ext;
+mod result;
+mod state;
+pub mod types;
 pub use crate::{
-    client::Client,
     env::Env,
+    ext::OffchainExt,
     result::{Error, Result},
 };
