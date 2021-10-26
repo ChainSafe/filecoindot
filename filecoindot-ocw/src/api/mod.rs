@@ -57,8 +57,7 @@ pub trait Api: Sized {
                 method: Self::METHOD.to_string(),
                 jsonrpc: "2.0".to_string(),
                 params,
-            })
-            .unwrap()],
+            })?],
         )
         .add_header("Content-Type", "application/json");
 

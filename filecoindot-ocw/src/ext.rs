@@ -42,7 +42,7 @@ impl Externalities for OffchainExt {
         Timestamp::from_unix_millis(
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
+                .unwrap_or_default()
                 .as_millis() as u64,
         )
     }
@@ -163,7 +163,7 @@ impl Externalities for OffchainExt {
             }
         }
 
-        res.values().cloned().collect::<Vec<_>>()
+        res.into_values().collect::<Vec<_>>()
     }
 
     fn http_response_headers(&mut self, request_id: HttpRequestId) -> Vec<(Vec<u8>, Vec<u8>)> {
