@@ -4,5 +4,6 @@ members = [
     "filecoindot_relayer",
     # node-example
     "substrate-node-example/node",
-    "substrate-node-example/runtime"
+    "substrate-node-example/runtime",
+    "substrate-node-example/pallets/template"
 ]
