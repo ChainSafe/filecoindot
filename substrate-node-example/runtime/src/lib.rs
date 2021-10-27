@@ -332,7 +332,7 @@ where
             call,
             (
                 sp_runtime::MultiAddress::Id(address),
-                signature.into(),
+                signature,
                 extra,
             ),
         ))
