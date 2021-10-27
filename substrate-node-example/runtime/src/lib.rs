@@ -269,6 +269,15 @@ impl pallet_sudo::Config for Runtime {
     type Call = Call;
 }
 
+// ManagerOrigin as root
+type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
+
+impl filecoindot::Config for Runtime {
+    type ManagerOrigin = ManagerOrigin;
+    type Event = Event;
+    type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
     pub enum Runtime where
@@ -284,6 +293,9 @@ construct_runtime!(
         Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
         TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
         Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
+
+        // filecoindot
+        Filecoindot: filecoindot::{Pallet, Call, Config<T>, Storage, Event<T>},
     }
 );
 
