@@ -2,8 +2,8 @@
 members = [
     "filecoindot",
     "filecoindot-ocw",
+
     # node-example
     "substrate-node-example/node",
-    "substrate-node-example/runtime",
-    "substrate-node-example/pallets/example-offchain-worker"
+    "substrate-node-example/runtime"
 ]

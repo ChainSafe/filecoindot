@@ -4,6 +4,7 @@
 //! Filecoin api types
 #![allow(missing_docs)]
 use codec::{Decode, Encode};
+use frame_support::sp_std::vec::Vec;
 use serde::{Deserialize, Serialize};
 
 /// Response of the [`ChainHead`](https://docs.filecoin.io/reference/lotus-api/#chainhead) RPC call

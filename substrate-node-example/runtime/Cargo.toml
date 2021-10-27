@@ -47,9 +47,7 @@ hex-literal = { version = "0.3.3", optional = true }
 
 # filecoindot dependencies
 filecoindot = { path = "../../filecoindot",  default-features = false }
-
-# test dependencies
-pallet-example-offchain-worker = { path = "../pallets/example-offchain-worker", default-features = false }
+filecoindot-ocw = { path = "../../filecoindot-ocw",  default-features = false }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
@@ -85,7 +83,7 @@ std = [
 	"sp-version/std",
 
 	"filecoindot/std",
-    "pallet-example-offchain-worker/std"
+    "filecoindot-ocw/std",
 ]
 runtime-benchmarks = [
 	'frame-benchmarking',

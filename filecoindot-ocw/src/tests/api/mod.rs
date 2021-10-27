@@ -6,7 +6,10 @@
 mod get_tip_set_by_height;
 
 pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
-use frame_support::sp_runtime::offchain::http::{Error, Request};
+use frame_support::{
+    sp_runtime::offchain::http::{Error, Request},
+    sp_std::{vec, vec::Vec},
+};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 /// Wrapper for jsonrpc result
@@ -15,7 +18,7 @@ pub struct Resp<T> {
     /// reponse id
     pub id: u8,
     /// JsonRPC version
-    pub jsonrpc: String,
+    pub jsonrpc: Vec<u8>,
     /// JsonRPC result
     pub result: T,
 }
@@ -26,9 +29,9 @@ pub struct Req<T> {
     /// reponse id
     pub id: u8,
     /// JsonRPC method
-    pub method: String,
+    pub method: Vec<u8>,
     /// JsonRPC version
-    pub jsonrpc: String,
+    pub jsonrpc: Vec<u8>,
     /// JsonRPC result
     pub params: T,
 }
@@ -53,8 +56,8 @@ pub trait Api: Sized {
             &base,
             vec![serde_json::to_vec(&Req {
                 id: 0,
-                method: Self::METHOD.to_string(),
-                jsonrpc: "2.0".to_string(),
+                method: Self::METHOD.as_bytes().to_vec(),
+                jsonrpc: "2.0".as_bytes().to_vec(),
                 params,
             })
             .map_err(|_| Error::IoError)?],

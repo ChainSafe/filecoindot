@@ -1,12 +1,10 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 #![cfg_attr(not(feature = "std"), no_std)]
+pub use pallet::*;
 
 #[cfg(test)]
 mod tests;
-
-mod api;
-pub mod types;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -33,7 +31,7 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn offchain_worker(_block_number: T::BlockNumber) {
-            log::info!("hello,world from filecoindot offchain worker!");
+            log::info!("'hello, world' from filecoindot offchain worker!");
 
             // TODO
             //
