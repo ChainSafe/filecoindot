@@ -3,7 +3,7 @@
 
 //! Filecoindot offchain Externalities
 
-use crate::state::{OffchainState, Response};
+use super::state::{OffchainState, Response};
 use frame_support::sp_runtime::offchain::{
     Externalities, HttpRequestStatus, OpaqueNetworkState, Timestamp,
 };
@@ -21,7 +21,7 @@ use std::{collections::BTreeMap, str::FromStr, sync::Arc};
 pub struct OffchainExt(pub Arc<RwLock<OffchainState>>);
 
 impl OffchainExt {
-    pub fn new() -> crate::Result<Self> {
+    pub fn new() -> super::Result<Self> {
         Ok(Self(Arc::new(RwLock::new(OffchainState::new()?))))
     }
 }

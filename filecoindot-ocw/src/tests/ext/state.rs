@@ -1,6 +1,6 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
-use crate::{Error, Result};
+use super::{Error, Result};
 use reqwest::{Client, RequestBuilder};
 use rocksdb::DB;
 use std::collections::BTreeMap;

@@ -6,8 +6,7 @@
 mod get_tip_set_by_height;
 
 pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
-use crate::{Env, Error, Result};
-use frame_support::sp_runtime::offchain::http::Request;
+use frame_support::sp_runtime::offchain::http::{Error, Request};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 /// Wrapper for jsonrpc result
@@ -41,15 +40,15 @@ pub trait Api: Sized {
     type Result: Serialize + DeserializeOwned + core::fmt::Debug;
 
     /// Storage key in bytes
-    fn storage_key(params: &Self::Params) -> Result<Vec<u8>> {
-        let mut key = bincode::serialize(Self::METHOD)?;
-        key.append(&mut bincode::serialize(params)?);
+    fn storage_key(params: &Self::Params) -> Result<Vec<u8>, Error> {
+        let mut key = bincode::serialize(Self::METHOD).map_err(|_| Error::IoError)?;
+        key.append(&mut bincode::serialize(params).map_err(|_| Error::IoError)?);
         Ok(key)
     }
 
     /// Request method with params
-    fn req(&self, params: Self::Params) -> Result<Self::Result> {
-        let base = Env::rpc()?;
+    fn req(&self, base: &str, params: Self::Params) -> Result<Self::Result, Error> {
+        // set env via storage
         let req = Request::post(
             &base,
             vec![serde_json::to_vec(&Req {
@@ -57,18 +56,20 @@ pub trait Api: Sized {
                 method: Self::METHOD.to_string(),
                 jsonrpc: "2.0".to_string(),
                 params,
-            })?],
+            })
+            .map_err(|_| Error::IoError)?],
         )
         .add_header("Content-Type", "application/json");
 
         Ok(serde_json::from_slice::<Resp<Self::Result>>(
             &req.send()
-                .map_err(|_| Error::SendHttpRequestFailed)?
+                .map_err(|_| Error::IoError)?
                 .wait()
-                .map_err(|_| Error::GetHttpResponseFailed)?
+                .map_err(|_| Error::IoError)?
                 .body()
                 .collect::<Vec<_>>(),
-        )?
+        )
+        .map_err(|_| Error::IoError)?
         .result)
     }
 }

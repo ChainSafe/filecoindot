@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 //! Offchain db implementation
-use crate::OffchainExt;
+use super::OffchainExt;
 use sp_core::offchain::{DbExternalities, StorageKind};
 
 impl DbExternalities for OffchainExt {
