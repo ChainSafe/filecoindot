@@ -24,8 +24,8 @@ mod tests;
 pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_support::sp_runtime::traits::Saturating;
-    use frame_system::pallet_prelude::*;
     use frame_support::sp_std::prelude::*;
+    use frame_system::pallet_prelude::*;
 
     use crate::types::{BlockSubmissionProposal, ProposalStatus};
 
