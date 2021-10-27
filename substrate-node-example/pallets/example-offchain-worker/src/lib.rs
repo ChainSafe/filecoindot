@@ -85,11 +85,19 @@ pub mod crypto {
 	use sp_core::sr25519::Signature as Sr25519Signature;
 	use sp_runtime::{
 		app_crypto::{app_crypto, sr25519},
-		traits::Verify,
+		traits::Verify, MultiSignature, MultiSigner
 	};
 	app_crypto!(sr25519, KEY_TYPE);
 
 	pub struct TestAuthId;
+
+	// implemented for runtime
+	impl frame_system::offchain::AppCrypto<MultiSigner, MultiSignature> for TestAuthId {
+		type RuntimeAppPublic = Public;
+		type GenericSignature = sp_core::sr25519::Signature;
+		type GenericPublic = sp_core::sr25519::Public;
+	}
+
 	impl frame_system::offchain::AppCrypto<<Sr25519Signature as Verify>::Signer, Sr25519Signature>
 		for TestAuthId
 	{
@@ -164,7 +172,7 @@ pub mod pallet {
 			// significantly. You can use `RuntimeDebug` custom derive to hide details of the types
 			// in WASM. The `sp-api` crate also provides a feature `disable-logging` to disable
 			// all logging and thus, remove any logging from the WASM.
-			log::info!("Hello World from offchain workers!");
+			log::info!("Hello from pallet-example-offchain-worker.");
 
 			// Since off-chain workers are just part of the runtime code, they have direct access
 			// to the storage and other included pallets.
@@ -305,7 +313,7 @@ pub mod pallet {
 					return InvalidTransaction::BadProof.into()
 				}
 				Self::validate_transaction_parameters(&payload.block_number, &payload.price)
-			} else if let Call::submit_price_unsigned(block_number, new_price) = call {
+			} else if let Call::submit_price_unsigned (block_number, new_price) = call {
 				Self::validate_transaction_parameters(block_number, new_price)
 			} else {
 				InvalidTransaction::Call.into()
@@ -567,6 +575,7 @@ impl<T: Config> Pallet<T> {
 		// import the library here.
 		let request =
 			http::Request::get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD");
+
 		// We set the deadline for sending of the request, note that awaiting response can
 		// have a separate deadline. Next we send the request, before that it's also possible
 		// to alter request headers or stream body content in case of non-GET requests.
@@ -596,6 +605,8 @@ impl<T: Config> Pallet<T> {
 			http::Error::Unknown
 		})?;
 
+		log::info!("fetch_price: {}", body_str);
+
 		let price = match Self::parse_price(body_str) {
 			Some(price) => Ok(price),
 			None => {
@@ -604,7 +615,7 @@ impl<T: Config> Pallet<T> {
 			},
 		}?;
 
-		log::warn!("Got price: {} cents", price);
+		log::info!("Got price: {} cents", price);
 
 		Ok(price)
 	}
