@@ -10,7 +10,8 @@ use serde::{de::DeserializeOwned, Serialize, Serializer};
 
 use crate::errors::Error;
 use crate::hash::Hash;
-use crate::traits::{BlockStore, HashAlgorithm, HashedBits, Node};
+use crate::node::Pointer;
+use crate::traits::{BitMap, BlockStore, HashAlgorithm, HashedBits, Node};
 
 /// This is a simplified implementation of HAMT based on:
 /// http://lampwww.epfl.ch/papers/idealhashtrees.pdf
@@ -18,29 +19,27 @@ use crate::traits::{BlockStore, HashAlgorithm, HashedBits, Node};
 /// This implementation has only implemented the read related functions
 /// as we only care about generating the path to the node
 #[derive(Debug)]
-pub struct Hamt<'a, BS, K: Eq, V, N: Node<K, V>, HashAlgo> {
+pub struct Hamt<'a, BS, K: Eq, V, B: BitMap, N: Node<K, V, B>, HashAlgo> {
     root: N,
     store: &'a BS,
     bit_width: u8,
     hash: PhantomData<HashAlgo>,
     _k: PhantomData<K>,
     _v: PhantomData<V>,
+    _b: PhantomData<B>,
 }
 
-impl<'a, BS, K, V, HashOutput, N, HashAlgo> Hamt<'a, BS, K, V, N, HashAlgo>
+impl<'a, BS, K, B, V, HashOutput, N, HashAlgo> Hamt<'a, BS, K, V, B, N, HashAlgo>
 where
     K: Eq,
+    B: BitMap<Index = HashOutput::Value>,
     HashOutput: HashedBits,
-    BS: BlockStore<K, V, N>,
+    BS: BlockStore<K, V, B, N>,
     HashAlgo: HashAlgorithm<Output = HashOutput>,
-    N: Node<K, V, GetHashBits = HashOutput>,
+    N: Node<K, V, B>,
 {
     /// Lazily instantiate a hamt from this root Cid with a specified bit width.
-    pub fn new(
-        root_cid: &Cid,
-        store: &'a BS,
-        bit_width: u8,
-    ) -> Result<Self, Error> {
+    pub fn new(root_cid: &Cid, store: &'a BS, bit_width: u8) -> Result<Self, Error> {
         match store.get::<N>(root_cid)? {
             Some(root) => Ok(Self {
                 root,
@@ -49,6 +48,7 @@ where
                 hash: Default::default(),
                 _k: Default::default(),
                 _v: Default::default(),
+                _b: Default::default(),
             }),
             None => Err(Error::CidNotFound(root_cid.to_string())),
         }
@@ -56,14 +56,14 @@ where
 
     pub fn generate_proof(&self, k: &K) -> Result<Option<Vec<Vec<u8>>>, Error> {
         let mut path = Vec::new();
-
-        if !self.path_to_key(&self.root, &mut HashAlgo::hash(k), k, &mut path)? {
-            Ok(None)
-        } else {
+        if self.path_to_key(&self.root, &mut HashAlgo::hash(k), k, &mut path)? {
             Ok(Some(path))
+        } else {
+            Ok(None)
         }
     }
 
+    /// This is an implementation of the search outlined in the paper: see section 3.1
     fn path_to_key(
         &self,
         node: &N,
@@ -71,25 +71,25 @@ where
         k: &K,
         path: &mut Vec<Vec<u8>>,
     ) -> Result<bool, Error> {
-        if !node.contains_key(k, hash_bits) {
+        let idx = hash_bits.next(self.bit_width)?;
+        let mut bitmap = node.bitmap();
+
+        if !bitmap.is_bit_set(idx) {
             return Ok(false);
         }
 
-        // we have reached a KeyValue node
-        if !node.is_index() {
-            path.push(node.cid().to_bytes());
-            Ok(true)
-        } else {
-            let idx = hash_bits.next()?;
-            // unwrap should be safe as node has passed contains_key
-            let cid = node.get_link_cid(idx).unwrap();
-            match self.store.get::<N>(&cid)? {
-                Some(node) => {
+        match node.get_pointer(bitmap.pop_count(idx)).unwrap() {
+            Pointer::KeyValue(key_values) => match key_values.iter().find(|kv| kv.key() == k) {
+                Some(_) => {
                     path.push(node.cid().to_bytes());
-                    self.path_to_key(&node, hash_bits, k, path)
+                    Ok(true)
                 }
-                None => Err(Error::CidNotFound(cid.to_string())),
-            }
+                None => Ok(false),
+            },
+            Pointer::Link(cid) => match self.store.get::<N>(&cid)? {
+                Some(n) => self.path_to_key(&n, hash_bits, k, path),
+                None => Ok(false),
+            },
         }
     }
 }

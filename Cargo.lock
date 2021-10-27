@@ -696,6 +696,7 @@ dependencies = [
  "byteorder",
  "cs_serde_bytes",
  "forest_cid",
+ "forest_db 0.1.0 (git+https://github.com/willeslau/forest?branch=willes/filecoindot)",
  "forest_encoding",
  "forest_hash_utils",
  "forest_ipld",
@@ -778,6 +779,16 @@ name = "forest_db"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "637464246b3f5554e6d7678cf05d8d76a5cbefe3324cd8c5c5a24c62c379af46"
+dependencies = [
+ "forest_encoding",
+ "parking_lot 0.11.2",
+ "thiserror",
+]
+
+[[package]]
+name = "forest_db"
+version = "0.1.0"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#31afb4abfa37a11b7081f072fce8f638e6688124"
 dependencies = [
  "forest_encoding",
  "parking_lot 0.11.2",
@@ -1355,25 +1366,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b00297ec82ec490ef38b5f703413d7fb8b3bdf0e64690a459662a1898afcc11b"
 dependencies = [
  "forest_cid",
- "forest_db",
+ "forest_db 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "forest_encoding",
 ]
 
 [[package]]
 name = "ipld_hamt"
 version = "2.0.0"
-source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#6e5167ec9eacf4c3ca741785cd90065db8242f8c"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#31afb4abfa37a11b7081f072fce8f638e6688124"
 dependencies = [
  "byteorder",
  "cs_serde_bytes",
  "forest_cid",
- "forest_db",
+ "forest_db 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "forest_encoding",
  "forest_hash_utils",
  "forest_ipld",
  "ipld_blockstore",
  "once_cell",
  "serde",
+ "serde_json",
  "sha2 0.9.8",
  "thiserror",
 ]

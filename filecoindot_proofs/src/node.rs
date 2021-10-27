@@ -1,79 +1,53 @@
 use crate::traits::{BitMap, HashedBits, Node};
 use cid::Cid;
+use std::cell::{RefCell, RefMut};
 use std::marker::PhantomData;
+
+#[derive(Debug)]
+pub struct KeyValuePair<K: Eq, V>(K, V);
+
+impl<K: Eq, V> KeyValuePair<K, V> {
+    pub fn key(&self) -> &K {
+        &self.0
+    }
+    pub fn value(&self) -> &V {
+        &self.1
+    }
+}
+
+impl<K: Eq, V> KeyValuePair<K, V> {
+    pub fn new(key: K, value: V) -> Self {
+        KeyValuePair(key, value)
+    }
+}
 
 /// Node in Hamt tree which contains bitfield of set indexes and pointers to nodes
 #[derive(Debug)]
-enum NodeType<'a, K, V, B, N>
-where
-    K: Eq,
-    N: Node<K, V>,
-    B: BitMap<Index = <<N as Node<K, V>>::GetHashBits as HashedBits>::Value>,
-{
-    KeyValue {
-        key: K,
-        val: V,
-    },
-    Index {
-        bitmap: B,
-        /// Link nodes pointing to other nodes
-        links: Vec<Option<Box<&'a N>>>,
-    },
+pub enum Pointer<K: Eq, V> {
+    KeyValue(Vec<KeyValuePair<K, V>>),
+    Link(Cid),
 }
 
-pub(crate) struct NodeInner<
-    'a,
-    K: Eq,
-    V,
-    B: BitMap<Index = <<N as Node<K, V>>::GetHashBits as HashedBits>::Value>,
-    H: HashedBits,
-    N: Node<K, V, GetHashBits = H>,
-> {
+pub(crate) struct NodeInner<K: Eq, V, B: BitMap> {
     cid: Cid,
-    bit_width: u8,
-    node_type: NodeType<'a, K, V, B, N>
+    bitmap: RefCell<B>,
+    pointers: Vec<Pointer<K, V>>,
 }
 
-impl<'a, K, V, B, H, N> Node<K, V> for NodeInner<'a, K, V, B, H, N>
+impl<K, V, B> Node<K, V, B> for NodeInner<K, V, B>
 where
     K: Eq,
-    B: BitMap<Index = <<N as Node<K, V>>::GetHashBits as HashedBits>::Value>,
-    H: HashedBits,
-    N: Node<K, V, GetHashBits = H>,
+    B: BitMap,
 {
-    type GetHashBits = H;
-
-    fn contains_key(&self, k: &K, hash_bits: &Self::GetHashBits) -> bool {
-        match &self.node_type {
-            NodeType::KeyValue { key, .. } => key == k,
-            NodeType::Index { bitmap, .. } => {
-                let idx = hash_bits.get();
-                bitmap.is_bit_set(idx)
-            }
-        }
+    fn bitmap(&self) -> RefMut<B> {
+        self.bitmap.borrow_mut()
     }
 
-    fn is_index(&self) -> bool {
-        match &self.node_type {
-            NodeType::Index { .. } => true,
-            _ => false
-        }
+    fn get_pointer(&self, idx: usize) -> Option<&Pointer<K, V>> {
+        self.pointers.get(idx)
     }
 
     fn cid(&self) -> Cid {
         self.cid.clone()
-    }
-
-    fn get_link_cid(
-        &self,
-        idx: <<Self as Node<K, V>>::GetHashBits as HashedBits>::Value,
-    ) -> Option<Cid> {
-        match &self.node_type {
-            NodeType::Index { bitmap, links} => {
-                let i = bitmap.count_ones(idx);
-                links.get(i).unwrap().as_ref().map(|n| n.cid())
-            },
-            _ => None,
-        }
     }
 }
