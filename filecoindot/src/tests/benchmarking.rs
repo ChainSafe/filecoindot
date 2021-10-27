@@ -13,7 +13,7 @@ benchmarks! {
     }: {
         Pallet::<Test>::add_relayer(Origin::signed(ALICE), RELAYER4)?;
     } verify {
-        assert_eq!(Relayers::<Test>::contains_key(&RELAYER4), true);
+        assert!(Relayers::<Test>::contains_key(&RELAYER4));
     }
 
     remove_relayer {
@@ -21,7 +21,7 @@ benchmarks! {
     }: {
         Pallet::<Test>::remove_relayer(Origin::signed(ALICE), RELAYER4)?;
     } verify {
-        assert_eq!(Relayers::<Test>::contains_key(&RELAYER4), false);
+        assert!(!Relayers::<Test>::contains_key(&RELAYER4));
     }
 
     set_vote_threshold {
@@ -37,7 +37,7 @@ benchmarks! {
     }: {
         Pallet::<Test>::submit_block_vote(Origin::signed(ALICE), vec![0], vec![0])?;
     } verify {
-        assert_eq!(BlockSubmissionProposals::<Test>::contains_key(&vec![0]), false);
+        assert!(!BlockSubmissionProposals::<Test>::contains_key(&vec![0]));
     }
 }
 
