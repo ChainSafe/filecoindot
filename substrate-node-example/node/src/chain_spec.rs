@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 use node_template_runtime::{
-    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
-    SystemConfig, WASM_BINARY,
+    AccountId, AuraConfig, BalancesConfig, FilecoindotConfig, GenesisConfig, GrandpaConfig,
+    Signature, SudoConfig, SystemConfig, WASM_BINARY,
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -162,6 +162,11 @@ fn testnet_genesis(
         sudo: SudoConfig {
             // Assign network admin rights.
             key: root_key,
+        },
+        filecoindot: FilecoindotConfig {
+            vote_threshold: 1,
+            vote_period: 5,
+            relayers: endowed_accounts,
         },
     }
 }
