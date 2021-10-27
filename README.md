@@ -12,7 +12,7 @@ framework, including Polkadot parachains.
 
 _TODO_
 
-See [the example runtime](./node-example/runtime/src/lib.rs) for a full example showing how to integrate the pallet into
+See [the example runtime](./substrate-node-example/runtime/src/lib.rs) for a full example showing how to integrate the pallet into
 a substrate runtime.
 
 # ChainSafe Security Policy
