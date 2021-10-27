@@ -9,7 +9,7 @@ use frame_system::{Origin, RawOrigin};
 use crate::{pallet, Config, Error, MessageRootCidCounter, Relayers};
 
 /// The filecoin block submission proposal
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub(crate) struct BlockSubmissionProposal<T: Config> {
     proposer: T::AccountId,
     /// The accounts with voted
@@ -122,7 +122,7 @@ impl<T: Config> BlockSubmissionProposal<T> {
 ///     Active -> Approved -> Executed
 ///               Rejected    Canceled
 ///                           Expired
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub(crate) enum ProposalStatus {
     /// The proposal is active and relayers can start voting
     Active,

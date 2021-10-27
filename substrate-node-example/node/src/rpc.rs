@@ -55,7 +55,7 @@ where
     )));
 
     io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
-        client,
+        client.clone(),
     )));
 
     // Extend this RPC with a custom API by using the following syntax.

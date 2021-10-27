@@ -20,11 +20,11 @@ tokio = { version = "1.12", features = [ "rt" ] }
 filecoindot = { path = "../filecoindot", default-features = false }
 
 # substrate dependencies
-sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
-frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
-frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
-sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
-sp-keystore = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.12', default-features = false }
+frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.12', default-features = false }
+frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.12', default-features = false }
+sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.12', default-features = false }
+sp-keystore = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.12', default-features = false }
 
 [features]
 default = [ "std" ]
