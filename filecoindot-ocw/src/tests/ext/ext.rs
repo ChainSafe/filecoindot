@@ -21,8 +21,8 @@ use std::{collections::BTreeMap, str::FromStr, sync::Arc};
 pub struct OffchainExt(pub Arc<RwLock<OffchainState>>);
 
 impl OffchainExt {
-    pub fn new() -> super::Result<Self> {
-        Ok(Self(Arc::new(RwLock::new(OffchainState::new()?))))
+    pub fn new() -> Self {
+        Self(Arc::new(RwLock::new(OffchainState::default())))
     }
 }
 

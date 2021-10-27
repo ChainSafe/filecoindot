@@ -1517,7 +1517,6 @@ dependencies = [
  "parity-scale-codec",
  "parking_lot 0.11.2",
  "reqwest",
- "rocksdb",
  "serde",
  "serde_json",
  "sp-core",
@@ -7728,7 +7727,11 @@ dependencies = [
  "memchr",
  "mio 0.7.14",
  "num_cpus",
+ "once_cell",
+ "parking_lot 0.11.2",
  "pin-project-lite 0.2.7",
+ "signal-hook-registry",
+ "tokio-macros",
  "winapi 0.3.9",
 ]
 
@@ -7794,6 +7797,17 @@ dependencies = [
  "bytes 0.4.12",
  "futures 0.1.31",
  "log",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2dd85aeaba7b68df939bd357c6afb36c87951be9e80bf9c859f2fc3e9fca0fd"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

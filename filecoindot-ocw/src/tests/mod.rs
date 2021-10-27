@@ -11,7 +11,7 @@ use sp_core::offchain::{OffchainDbExt, OffchainWorkerExt};
 
 #[test]
 fn test_http_request() {
-    let offchain = OffchainExt::new().unwrap();
+    let offchain = OffchainExt::new();
     let mut t = sp_io::TestExternalities::default();
     t.register_extension(OffchainWorkerExt::new(offchain.clone()));
     t.register_extension(OffchainDbExt::new(offchain));

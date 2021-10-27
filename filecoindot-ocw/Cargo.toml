@@ -5,16 +5,9 @@ edition = "2018"
 
 [dependencies]
 bincode = "1.3.3"
-dirs = "4.0.0"
 serde = { version = "1.0.130", features = [ "derive" ] }
 serde_json = "1.0"
-thiserror = "1.0.30"
 codec = { package = "parity-scale-codec", version = "2.3.1" }
-reqwest = { version = "0.11.6", features = [ "blocking", "json" ] }
-rocksdb = "0.17"
-parking_lot = "0.11"
-futures = "0.3"
-tokio = { version = "1.12", features = [ "rt" ] }
 
 # filecoindot
 filecoindot = { path = "../filecoindot", default-features = false }
@@ -25,6 +18,15 @@ frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'pol
 frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 sp-keystore = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+
+[dev-dependencies]
+reqwest = { version = "0.11.6", features = [ "json" ] }
+parking_lot = "0.11"
+futures = "0.3"
+tokio = { version = "1.12", features = [ "full" ] }
+thiserror = "1.0.30"
+dirs = "4.0.0"
+
 
 [features]
 default = [ "std" ]
