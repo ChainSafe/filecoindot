@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "filecoindot",
-    "filecoindot_relayer",
+    "filecoindot-ocw",
     # node-example
     "substrate-node-example/node",
     "substrate-node-example/runtime",

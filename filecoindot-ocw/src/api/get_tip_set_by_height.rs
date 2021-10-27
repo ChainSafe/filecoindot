@@ -4,13 +4,14 @@ use crate::{
     api::Api,
     types::{Block, Cid},
 };
+use codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
 /// Method `Filecoin.ChainGetTipSetByHeight`
 pub const CHAIN_GET_TIP_SET_BY_HEIGHT: &str = "Filecoin.ChainGetTipSetByHeight";
 
 /// Response of `Filecoin.ChainGetTipSetByHeight`
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Decode, Encode, PartialEq, Eq)]
 pub struct ChainGetTipSetByHeightResult {
     /// TipSet Cids
     #[serde(rename = "Cids")]
@@ -20,7 +21,7 @@ pub struct ChainGetTipSetByHeightResult {
     pub blocks: Vec<Block>,
     /// TipSet Height
     #[serde(rename = "Height")]
-    pub height: usize,
+    pub height: u64,
 }
 
 /// `Filecoin.ChainGetTipSetByHeight`
@@ -28,6 +29,6 @@ pub struct ChainGetTipSetByHeight;
 
 impl Api for ChainGetTipSetByHeight {
     const METHOD: &'static str = CHAIN_GET_TIP_SET_BY_HEIGHT;
-    type Params = Vec<Option<usize>>;
+    type Params = Vec<Option<u64>>;
     type Result = ChainGetTipSetByHeightResult;
 }
