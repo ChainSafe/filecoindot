@@ -5,10 +5,7 @@ use crate::errors::Error;
 use crate::node::Pointer;
 use cid::Cid;
 use num_traits::Num;
-use std::borrow::Borrow;
 use std::cell::RefMut;
-use std::fmt::Debug;
-use std::marker::PhantomData;
 
 pub trait HashAlgorithm {
     type Output: HashedBits;

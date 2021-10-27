@@ -1,7 +1,6 @@
-use crate::traits::{BitMap, HashedBits, Node};
+use crate::traits::{BitMap, Node};
 use cid::Cid;
 use std::cell::{RefCell, RefMut};
-use std::marker::PhantomData;
 
 #[derive(Debug)]
 pub struct KeyValuePair<K: Eq, V>(K, V);
@@ -9,9 +8,6 @@ pub struct KeyValuePair<K: Eq, V>(K, V);
 impl<K: Eq, V> KeyValuePair<K, V> {
     pub fn key(&self) -> &K {
         &self.0
-    }
-    pub fn value(&self) -> &V {
-        &self.1
     }
 }
 

@@ -1,14 +1,9 @@
 use crate::errors::Error;
-use crate::node::{KeyValuePair, NodeInner};
 use crate::traits::{BitMap, BlockStore, HashedBits, Node};
 use cid::Cid;
 use forest_db::{MemoryDB, Store};
 use forest_encoding::from_slice;
 use ipld_hamt::{Bitfield, HashBits, Pointer, Sha256};
-use serde::de::DeserializeOwned;
-use serde::{Deserialize, Deserializer};
-use std::cmp::Ordering;
-use std::marker::PhantomData;
 
 pub struct ForestAdaptedHashedBits<'a> {
     inner: HashBits<'a>,

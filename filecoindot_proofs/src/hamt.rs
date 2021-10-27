@@ -1,15 +1,10 @@
 // Copyright 2019-2022 ChainSafe Systems
 // SPDX-License-Identifier: Apache-2.0, MIT
 
-use std::borrow::Borrow;
 use std::marker::PhantomData;
-
-use cid::{Cid, Code::Blake2b256};
-use forest_hash_utils::BytesKey;
-use serde::{de::DeserializeOwned, Serialize, Serializer};
+use cid::Cid;
 
 use crate::errors::Error;
-use crate::hash::Hash;
 use crate::node::Pointer;
 use crate::traits::{BitMap, BlockStore, HashAlgorithm, HashedBits, Node};
 
@@ -72,7 +67,7 @@ where
         path: &mut Vec<Vec<u8>>,
     ) -> Result<bool, Error> {
         let idx = hash_bits.next(self.bit_width)?;
-        let mut bitmap = node.bitmap();
+        let bitmap = node.bitmap();
 
         if !bitmap.is_bit_set(idx) {
             return Ok(false);
