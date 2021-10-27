@@ -330,11 +330,7 @@ where
         let (call, extra, _) = raw_payload.deconstruct();
         Some((
             call,
-            (
-                sp_runtime::MultiAddress::Id(address),
-                signature,
-                extra,
-            ),
+            (sp_runtime::MultiAddress::Id(address), signature, extra),
         ))
     }
 }
