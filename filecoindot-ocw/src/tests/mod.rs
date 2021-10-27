@@ -3,10 +3,12 @@
 mod data;
 mod ext;
 mod mock;
-mod pallet;
-use crate::api::{Api, ChainGetTipSetByHeight};
+
+use crate::{
+    api::{Api, ChainGetTipSetByHeight},
+    pallet::*,
+};
 use ext::{Env, OffchainExt};
-use pallet::pallet::*;
 use sp_core::offchain::{OffchainDbExt, OffchainWorkerExt};
 
 #[test]
