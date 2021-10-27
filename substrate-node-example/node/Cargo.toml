@@ -17,7 +17,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 name = "node-template"
 
 [dependencies]
-structopt = "0.3.8"
+structopt = "0.3.25"
 
 sc-cli = { features = ["wasmtime"], git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
 sp-core = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
@@ -39,7 +39,7 @@ sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "po
 sp-timestamp = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
 
 # These dependencies are used for the node template's RPCs
-jsonrpc-core = "15.1.0"
+jsonrpc-core = "18.0.0"
 sc-rpc = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
 sp-api = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
 sc-rpc-api = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
