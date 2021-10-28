@@ -3,7 +3,7 @@
 
 //! Module for handling environments
 
-use crate::{Error, Result};
+use super::{Error, Result};
 use std::env::var;
 
 pub const FILECOIN_RPC_ENV: &str = "FILECOIN_RPC";

@@ -1,10 +1,11 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
-use crate::{
+use crate::tests::{
     api::Api,
     types::{Block, Cid},
 };
 use codec::{Decode, Encode};
+use frame_support::sp_std::vec::Vec;
 use serde::{Deserialize, Serialize};
 
 /// Method `Filecoin.ChainGetTipSetByHeight`
