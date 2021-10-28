@@ -1,6 +1,7 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(dead_code)]
 pub use pallet::*;
 
 #[cfg(test)]
