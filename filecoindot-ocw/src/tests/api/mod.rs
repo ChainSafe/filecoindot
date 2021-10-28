@@ -18,6 +18,7 @@ pub struct Resp<T> {
     /// reponse id
     pub id: u8,
     /// JsonRPC version
+    #[serde(skip_deserializing)]
     pub jsonrpc: Vec<u8>,
     /// JsonRPC result
     pub result: T,
@@ -29,9 +30,9 @@ pub struct Req<T> {
     /// reponse id
     pub id: u8,
     /// JsonRPC method
-    pub method: Vec<u8>,
+    pub method: &'static str,
     /// JsonRPC version
-    pub jsonrpc: Vec<u8>,
+    pub jsonrpc: &'static str,
     /// JsonRPC result
     pub params: T,
 }
@@ -56,8 +57,8 @@ pub trait Api: Sized {
             &base,
             vec![serde_json::to_vec(&Req {
                 id: 0,
-                method: Self::METHOD.as_bytes().to_vec(),
-                jsonrpc: "2.0".as_bytes().to_vec(),
+                method: Self::METHOD,
+                jsonrpc: "2.0",
                 params,
             })
             .map_err(|_| Error::IoError)?],
