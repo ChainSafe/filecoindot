@@ -4,8 +4,6 @@
 /// Database error
 #[derive(Debug)]
 pub enum Error {
-    InvalidBulkLen,
-    Unopened,
     InvalidHashBitLen,
     MaxDepth,
     CidNotFound(String),

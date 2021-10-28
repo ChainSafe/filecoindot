@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0, MIT
 
 use crate::errors::Error;
-use crate::node::Pointer;
 use cid::Cid;
+use ipld_hamt::Hash;
 use num_traits::Num;
-use std::cell::RefMut;
 
 pub trait HashAlgorithm {
     type Output: HashedBits;
-    fn hash<X: ?Sized>(key: &X) -> Self::Output;
+    fn hash<X: ?Sized + Hash>(key: &X) -> Self::Output;
 }
 
 pub trait HashedBits {
@@ -17,30 +16,32 @@ pub trait HashedBits {
     fn next(&mut self, n: u8) -> Result<Self::Value, Error>;
 }
 
-pub trait Node<K, V, B>
+pub trait Node<K, V, H>
 where
     K: Eq,
-    B: BitMap,
+    H: HashedBits,
 {
-    fn bitmap(&self) -> RefMut<B>;
+    fn path_to_key<S: BlockStore<K, V, H, Self>>(
+        &self,
+        hash_bits: &mut H,
+        k: &K,
+        path: &mut Vec<Vec<u8>>,
+        bit_width: u8,
+        store: &S,
+    ) -> Result<bool, Error>
+    where
+        Self: Sized;
 
-    fn get_pointer(&self, idx: usize) -> Option<&Pointer<K, V>>;
-
-    /// Returns a clone of the cid.
-    /// TODO: consider returning Option<&Cid> in the future
-    fn cid(&self) -> Cid;
+    fn cid(&self) -> Result<Cid, Error>;
 }
 
 /// Wrapper for database to handle inserting and retrieving ipld data with Cids
-pub trait BlockStore<K: Eq, V, B: BitMap, N: Node<K, V, B>> {
+pub trait BlockStore<K, V, H, N>
+where
+    K: Eq,
+    H: HashedBits,
+    N: Node<K, V, H>,
+{
     /// Get typed object from block store by Cid.
-    fn get<T>(&self, cid: &Cid) -> Result<Option<N>, Error>;
-}
-
-pub trait BitMap {
-    type Index: Num + Copy;
-    /// Checks if the bit at index is set
-    fn is_bit_set(&self, index: Self::Index) -> bool;
-    /// Get the count of 1 bit in the start of n indexes
-    fn pop_count(&self, n: Self::Index) -> usize;
+    fn get(&self, cid: &Cid) -> Result<Option<N>, Error>;
 }

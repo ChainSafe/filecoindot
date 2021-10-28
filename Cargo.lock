@@ -507,6 +507,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashmap"
+version = "4.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e77a43b28d0668df09411cb0bc9a8c2adc40f9a048afe863e05fd43251e8e39c"
+dependencies = [
+ "cfg-if 1.0.0",
+ "num_cpus",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -700,7 +710,7 @@ dependencies = [
  "forest_encoding",
  "forest_hash_utils",
  "forest_ipld",
- "ipld_blockstore",
+ "ipld_blockstore 0.1.1 (git+https://github.com/willeslau/forest?branch=willes/filecoindot)",
  "ipld_hamt",
  "num-traits",
  "once_cell",
@@ -788,7 +798,7 @@ dependencies = [
 [[package]]
 name = "forest_db"
 version = "0.1.0"
-source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#31afb4abfa37a11b7081f072fce8f638e6688124"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#ddc3e6c1d2505b7b018aef5885dff22a40ad043e"
 dependencies = [
  "forest_encoding",
  "parking_lot 0.11.2",
@@ -1371,9 +1381,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ipld_blockstore"
+version = "0.1.1"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#ddc3e6c1d2505b7b018aef5885dff22a40ad043e"
+dependencies = [
+ "byteorder",
+ "dashmap",
+ "forest_cid",
+ "forest_db 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "forest_encoding",
+]
+
+[[package]]
 name = "ipld_hamt"
 version = "2.0.0"
-source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#31afb4abfa37a11b7081f072fce8f638e6688124"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#ddc3e6c1d2505b7b018aef5885dff22a40ad043e"
 dependencies = [
  "byteorder",
  "cs_serde_bytes",
@@ -1382,10 +1404,9 @@ dependencies = [
  "forest_encoding",
  "forest_hash_utils",
  "forest_ipld",
- "ipld_blockstore",
+ "ipld_blockstore 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "once_cell",
  "serde",
- "serde_json",
  "sha2 0.9.8",
  "thiserror",
 ]
