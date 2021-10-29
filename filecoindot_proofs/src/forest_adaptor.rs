@@ -5,7 +5,7 @@ use cid::Code::Blake2b256;
 use forest_encoding::{from_slice, to_vec};
 use ipld_blockstore::BlockStore as ForestBlockStore;
 use ipld_hamt::{
-    Bitfield, Hash, HashAlgorithm as ForestHashAlgo, HashBits, Node as ForestNode,
+    Bitfield, Hash, HashAlgorithm as ForestHashAlgo, Node as ForestNode,
     Pointer as ForestPointer, Sha256,
 };
 use serde::{Serialize, Serializer};
@@ -279,7 +279,7 @@ mod tests {
     use super::*;
     use crate::hamt::Hamt;
     use ipld_blockstore::MemoryDB;
-    use ipld_hamt::{Hamt as ForestHamt, Pointer, Sha256};
+    use ipld_hamt::{Hamt as ForestHamt};
 
     #[test]
     #[allow(clippy::many_single_char_names)]
@@ -302,6 +302,7 @@ mod tests {
             ForestAdaptedHashAlgo,
         > = Hamt::new(&cid, &store, 8).unwrap();
         let p = hamt.generate_proof(&1).unwrap();
-        assert_eq!(p.is_some(), true)
+        assert_eq!(p.is_some(), true);
+        assert_eq!(p.unwrap()[0], cid.to_bytes());
     }
 }
