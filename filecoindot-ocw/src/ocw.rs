@@ -6,7 +6,7 @@ use crate::{
     result::{Error, Result},
     Config,
 };
-use frame_support::{log, sp_runtime::offchain::storage::StorageValueRef};
+use frame_support::{log, sp_runtime::offchain::storage::StorageValueRef, sp_std::vec::Vec};
 use frame_system::offchain::Signer;
 
 /// the storage key of filecoin rpc endpoint

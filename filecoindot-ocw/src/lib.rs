@@ -2,8 +2,14 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(dead_code)]
-pub use pallet::*;
+pub use self::{
+    crypto::{FilecoindotId, KEY_TYPE},
+    ocw::offchain_worker,
+    pallet::*,
+    result::{Error, Result},
+};
 
+mod crypto;
 mod ocw;
 mod result;
 
