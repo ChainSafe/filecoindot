@@ -1509,6 +1509,7 @@ name = "filecoindot-ocw"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "derive_more",
  "dirs",
  "filecoindot",
  "frame-support",

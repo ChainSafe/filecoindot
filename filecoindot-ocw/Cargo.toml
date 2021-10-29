@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.3.1", default-features = false }
+derive_more = "^0.99"
 
 # substrate dependencies
 sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
