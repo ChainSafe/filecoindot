@@ -283,7 +283,7 @@ mod tests {
 
     #[test]
     #[allow(clippy::many_single_char_names)]
-    fn dag_tracking_generation() {
+    fn test_basic_proof_generation() {
         let bs = MemoryDB::default();
         let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
 
