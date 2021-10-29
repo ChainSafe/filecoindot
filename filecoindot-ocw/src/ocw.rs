@@ -14,24 +14,25 @@ pub const FILECOIN_RPC: &'static [u8] = b"FILECOIN_RPC";
 
 /// offchain worker entry
 pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
-    if let Some(url) = StorageValueRef::local(FILECOIN_RPC)
+    let url = StorageValueRef::persistent(FILECOIN_RPC)
         .get::<Vec<u8>>()
-        .map_err(|_| Error::FilecoinRpcNotSet)?
-    {
-        log::info!("\"hello, world\" from filecoindot ocw!");
-        log::info!("bootstrap relayer with filecoin rpc {}", unsafe {
-            core::str::from_utf8_unchecked(&url)
-        });
+        .map_err(|_| Error::GetStorageFailed)?
+        .ok_or(Error::FilecoinRpcNotSet)?;
 
-        // log errors from ocw
-        bootstrap::<T>(block_number)?;
-    }
+    // log out filecoin rpc endpoint
+    log::info!(
+        "bootstrap filecoindot ocw with filecoin rpc endpoint {}",
+        core::str::from_utf8(&url).map_err(|_| Error::FormatBytesFailed)?
+    );
+
+    // log errors from ocw
+    bootstrap::<T>(block_number, &url)?;
 
     Ok(())
 }
 
 /// bootstrap filcoindot ocw
-fn bootstrap<T: Config>(_: T::BlockNumber) -> Result<()> {
+fn bootstrap<T: Config>(_: T::BlockNumber, _: &[u8]) -> Result<()> {
     let _signer = Signer::<T, T::AuthorityId>::all_accounts();
 
     Ok(())
