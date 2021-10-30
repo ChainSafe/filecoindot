@@ -40,6 +40,7 @@ where
 {
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
     use substrate_frame_rpc_system::{FullSystem, SystemApi};
+    use filecoindot_rpc::{Filecoindot, FilecoindotApi};
 
     let mut io = jsonrpc_core::IoHandler::default();
     let FullDeps {
@@ -55,13 +56,16 @@ where
     )));
 
     io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
-        client,
+        client.clone(),
     )));
 
     // Extend this RPC with a custom API by using the following syntax.
     // `YourRpcStruct` should have a reference to a client, which is needed
     // to call into the runtime.
     // `io.extend_with(YourRpcTrait::to_delegate(YourRpcStruct::new(ReferenceToClient, ...)));`
+
+    // filecoindot rpc
+    io.extend_with(FilecoindotApi::to_delegate(Filecoindot));
 
     io
 }

@@ -2,6 +2,7 @@
 members = [
     "filecoindot",
     "filecoindot-ocw",
+    "filecoindot-rpc",
 
     # node-example
     "substrate-node-example/node",
