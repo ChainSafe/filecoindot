@@ -11,13 +11,13 @@
 use std::sync::Arc;
 
 use node_template_runtime::{opaque::Block, AccountId, Balance, Index};
+use parking_lot::RwLock;
 pub use sc_rpc_api::DenyUnsafe;
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_core::offchain::OffchainStorage;
-use parking_lot::RwLock;
 
 /// Full client dependencies.
 pub struct FullDeps<C, P, S> {
@@ -43,9 +43,9 @@ where
     P: TransactionPool + 'static,
     S: OffchainStorage + 'static,
 {
+    use filecoindot_rpc::{Filecoindot, FilecoindotApi};
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
     use substrate_frame_rpc_system::{FullSystem, SystemApi};
-    use filecoindot_rpc::{Filecoindot, FilecoindotApi};
 
     let mut io = jsonrpc_core::IoHandler::default();
     let FullDeps {

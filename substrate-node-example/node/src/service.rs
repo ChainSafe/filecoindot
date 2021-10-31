@@ -4,7 +4,8 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use node_template_runtime::{self, opaque::Block, RuntimeApi};
-use sc_client_api::{ExecutorProvider, RemoteBackend, Backend};
+use parking_lot::RwLock;
+use sc_client_api::{Backend, ExecutorProvider, RemoteBackend};
 use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
@@ -15,7 +16,6 @@ use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_consensus::SlotData;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::{sync::Arc, time::Duration};
-use parking_lot::RwLock;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -205,7 +205,10 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
     let name = config.network.node_name.clone();
     let enable_grandpa = !config.disable_grandpa;
     let prometheus_registry = config.prometheus_registry().cloned();
-    let storage = backend.clone().offchain_storage().map(|s| Arc::new(RwLock::new(s)));
+    let storage = backend
+        .clone()
+        .offchain_storage()
+        .map(|s| Arc::new(RwLock::new(s)));
 
     let rpc_extensions_builder = {
         let client = client.clone();

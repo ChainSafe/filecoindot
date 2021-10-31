@@ -1,3 +1,6 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
+
 //! crypto identifier for filecoindot
 use sp_core::crypto::KeyTypeId;
 
