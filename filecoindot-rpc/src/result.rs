@@ -11,12 +11,12 @@ pub enum Error {
     InvalidEndpoint,
 }
 
-impl Into<RpcError> for Error {
-    fn into(self) -> RpcError {
-        match self {
+impl From<Error> for RpcError {
+    fn from(e: Error) -> RpcError {
+        match e {
             Error::InvalidEndpoint => RpcError {
                 code: ErrorCode::InvalidRequest,
-                message: self.to_string(),
+                message: e.to_string(),
                 data: None,
             },
         }

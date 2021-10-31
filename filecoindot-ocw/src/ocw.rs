@@ -10,13 +10,13 @@ use frame_support::{log, sp_runtime::offchain::storage::StorageValueRef, sp_std:
 use frame_system::offchain::Signer;
 
 /// the storage key of filecoin rpc endpoint
-pub const FILECOIN_RPC: &'static [u8] = b"FILECOIN_RPC";
+pub const FILECOIN_RPC: &[u8] = b"FILECOIN_RPC";
 
 /// offchain worker entry
 pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
     let url = StorageValueRef::persistent(FILECOIN_RPC)
         .get::<Vec<u8>>()
-        .map_err(|e| Error::GetStorageFailed)?
+        .map_err(|_| Error::GetStorageFailed)?
         .ok_or(Error::FilecoinRpcNotSet)?;
 
     // log out filecoin rpc endpoint

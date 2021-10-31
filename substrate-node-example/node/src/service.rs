@@ -206,7 +206,6 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
     let enable_grandpa = !config.disable_grandpa;
     let prometheus_registry = config.prometheus_registry().cloned();
     let storage = backend
-        .clone()
         .offchain_storage()
         .map(|s| Arc::new(RwLock::new(s)));
 
@@ -235,7 +234,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         rpc_extensions_builder,
         on_demand: None,
         remote_blockchain: None,
-        backend: backend.clone(),
+        backend,
         system_rpc_tx,
         config,
         telemetry: telemetry.as_mut(),
