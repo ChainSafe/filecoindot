@@ -18,6 +18,7 @@ name = "node-template"
 
 [dependencies]
 structopt = "0.3.25"
+parking_lot = "^0.10"
 
 sc-cli = { features = ["wasmtime"], git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
 sp-core = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
@@ -57,6 +58,7 @@ node-template-runtime = { path = "../runtime" }
 
 # filecoindot deps
 filecoindot-rpc = { path = "../../filecoindot-rpc" }
+
 
 [build-dependencies]
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }

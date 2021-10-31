@@ -16,9 +16,13 @@ use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
+use sp_core::offchain::OffchainStorage;
+use parking_lot::RwLock;
 
 /// Full client dependencies.
-pub struct FullDeps<C, P> {
+pub struct FullDeps<C, P, S> {
+    /// The offchain storage instance to use.
+    pub storage: Option<Arc<RwLock<S>>>,
     /// The client instance to use.
     pub client: Arc<C>,
     /// Transaction pool instance.
@@ -28,7 +32,7 @@ pub struct FullDeps<C, P> {
 }
 
 /// Instantiate all full RPC extensions.
-pub fn create_full<C, P>(deps: FullDeps<C, P>) -> jsonrpc_core::IoHandler<sc_rpc::Metadata>
+pub fn create_full<C, P, S>(deps: FullDeps<C, P, S>) -> jsonrpc_core::IoHandler<sc_rpc::Metadata>
 where
     C: ProvideRuntimeApi<Block>,
     C: HeaderBackend<Block> + HeaderMetadata<Block, Error = BlockChainError> + 'static,
@@ -37,6 +41,7 @@ where
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BlockBuilder<Block>,
     P: TransactionPool + 'static,
+    S: OffchainStorage + 'static,
 {
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
     use substrate_frame_rpc_system::{FullSystem, SystemApi};
@@ -45,8 +50,9 @@ where
     let mut io = jsonrpc_core::IoHandler::default();
     let FullDeps {
         client,
-        pool,
         deny_unsafe,
+        pool,
+        storage,
     } = deps;
 
     io.extend_with(SystemApi::to_delegate(FullSystem::new(
@@ -65,7 +71,9 @@ where
     // `io.extend_with(YourRpcTrait::to_delegate(YourRpcStruct::new(ReferenceToClient, ...)));`
 
     // filecoindot rpc
-    io.extend_with(FilecoindotApi::to_delegate(Filecoindot));
+    if let Some(storage) = storage {
+        io.extend_with(FilecoindotApi::to_delegate(Filecoindot::new(storage)));
+    }
 
     io
 }

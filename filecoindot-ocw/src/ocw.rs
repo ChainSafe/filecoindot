@@ -16,7 +16,7 @@ pub const FILECOIN_RPC: &'static [u8] = b"FILECOIN_RPC";
 pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
     let url = StorageValueRef::persistent(FILECOIN_RPC)
         .get::<Vec<u8>>()
-        .map_err(|_| Error::GetStorageFailed)?
+        .map_err(|e| Error::GetStorageFailed)?
         .ok_or(Error::FilecoinRpcNotSet)?;
 
     // log out filecoin rpc endpoint

@@ -14,7 +14,8 @@ jsonrpc-core-client = "15.1"
 jsonrpc-derive = "15.1"
 derive_more = "^0.99"
 thiserror = "^1"
+parking_lot = "^0.10"
 
 # substrate dependencies
 sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10' }
-sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10' }
+sp-offchain = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10' }
