@@ -87,13 +87,15 @@ impl HashedBits for ForestAdaptedHashedBits {
 
 impl From<ipld_blockstore::Error> for Error {
     fn from(_: ipld_blockstore::Error) -> Self {
-        Error::Other("TODO: ipld_blockstore error".into())
+        let error_str = format!("ipld_blockstore error: {:?}", error);
+        Error::Other(error_str)
     }
 }
 
 impl From<ipld_hamt::Error> for Error {
     fn from(_: ipld_hamt::Error) -> Self {
-        Error::Other("TODO: ipld_hamt error".into())
+        let error_str = format!("ipld_hamt error: {:?}", error);
+        Error::Other(error_str)
     }
 }
 
