@@ -4,7 +4,8 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use node_template_runtime::{self, opaque::Block, RuntimeApi};
-use sc_client_api::{ExecutorProvider, RemoteBackend};
+use parking_lot::RwLock;
+use sc_client_api::{Backend, ExecutorProvider, RemoteBackend};
 use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
@@ -204,6 +205,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
     let name = config.network.node_name.clone();
     let enable_grandpa = !config.disable_grandpa;
     let prometheus_registry = config.prometheus_registry().cloned();
+    let storage = backend.offchain_storage().map(|s| Arc::new(RwLock::new(s)));
 
     let rpc_extensions_builder = {
         let client = client.clone();
@@ -213,6 +215,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             let deps = crate::rpc::FullDeps {
                 client: client.clone(),
                 pool: pool.clone(),
+                storage: storage.clone(),
                 deny_unsafe,
             };
 

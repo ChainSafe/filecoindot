@@ -3,10 +3,8 @@
 mod api;
 mod data;
 mod ext;
-mod mock;
 mod types;
 
-use crate::pallet::*;
 use api::{Api, ChainGetTipSetByHeight};
 use ext::{Env, OffchainExt};
 use sp_core::offchain::{OffchainDbExt, OffchainWorkerExt};

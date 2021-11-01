@@ -1506,9 +1506,10 @@ dependencies = [
 
 [[package]]
 name = "filecoindot-ocw"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "bincode",
+ "derive_more",
  "dirs",
  "filecoindot",
  "frame-support",
@@ -1523,6 +1524,20 @@ dependencies = [
  "sp-io",
  "thiserror",
  "tokio 1.13.0",
+]
+
+[[package]]
+name = "filecoindot-rpc"
+version = "0.0.1"
+dependencies = [
+ "derive_more",
+ "jsonrpc-core",
+ "jsonrpc-core-client",
+ "jsonrpc-derive",
+ "parking_lot 0.10.2",
+ "sp-core",
+ "sp-offchain",
+ "thiserror",
 ]
 
 [[package]]
@@ -3873,11 +3888,13 @@ dependencies = [
 name = "node-template"
 version = "3.0.0"
 dependencies = [
+ "filecoindot-rpc",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "jsonrpc-core",
  "node-template-runtime",
  "pallet-transaction-payment-rpc",
+ "parking_lot 0.10.2",
  "sc-basic-authorship",
  "sc-cli",
  "sc-client-api",

@@ -283,6 +283,7 @@ impl filecoindot::Config for Runtime {
 impl filecoindot_ocw::Config for Runtime {
     type Call = Call;
     type Event = Event;
+    type AuthorityId = filecoindot_ocw::FilecoindotId;
 }
 
 // For pallet-example-offchain-worker

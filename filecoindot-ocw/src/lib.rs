@@ -2,7 +2,16 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(dead_code)]
-pub use pallet::*;
+pub use self::{
+    crypto::{FilecoindotId, KEY_TYPE},
+    ocw::offchain_worker,
+    pallet::*,
+    result::{Error, Result},
+};
+
+mod crypto;
+mod ocw;
+mod result;
 
 #[cfg(test)]
 mod tests;
@@ -14,13 +23,19 @@ pub mod pallet {
         pallet_prelude::{Hooks, IsType, TransactionSource, TransactionValidity},
         sp_runtime::{traits::ValidateUnsigned, transaction_validity::InvalidTransaction},
     };
-    use frame_system::{offchain::CreateSignedTransaction, pallet_prelude::BlockNumberFor};
+    use frame_system::{
+        offchain::{AppCrypto, CreateSignedTransaction},
+        pallet_prelude::BlockNumberFor,
+    };
 
     /// Filecoindot offchain worker config
     #[pallet::config]
-    pub trait Config: CreateSignedTransaction<Call<Self>> + frame_system::Config {
+    pub trait Config:
+        CreateSignedTransaction<Call<Self>> + frame_system::Config + filecoindot::Config
+    {
         type Call: From<Call<Self>>;
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
     }
 
     /// Filecoindot offchain worker pallet
@@ -31,13 +46,10 @@ pub mod pallet {
     /// Filecoindot offchain worker hooks
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-        fn offchain_worker(_block_number: T::BlockNumber) {
-            log::info!("'hello, world' from filecoindot offchain worker!");
-
-            // TODO
-            //
-            // 0. make condition about relaying which filecoin blocks
-            // 1. relay blocks
+        fn offchain_worker(block_number: T::BlockNumber) {
+            if let Err(e) = crate::ocw::offchain_worker::<T>(block_number) {
+                log::error!("{}", e);
+            }
         }
     }
 
