@@ -5,8 +5,8 @@ use cid::Code::Blake2b256;
 use forest_encoding::{from_slice, to_vec};
 use ipld_blockstore::BlockStore as ForestBlockStore;
 use ipld_hamt::{
-    Bitfield, Hash, HashAlgorithm as ForestHashAlgo, Node as ForestNode,
-    Pointer as ForestPointer, Sha256,
+    Bitfield, Hash, HashAlgorithm as ForestHashAlgo, Node as ForestNode, Pointer as ForestPointer,
+    Sha256,
 };
 use serde::{Serialize, Serializer};
 use std::cmp::Ordering;
@@ -26,7 +26,7 @@ impl HashAlgorithm for ForestAdaptedHashAlgo {
 }
 
 #[inline]
-fn mkmask(n: u32) -> u32 {
+const fn mkmask(n: u32) -> u32 {
     ((1u64 << n) - 1) as u32
 }
 
@@ -85,6 +85,12 @@ impl HashedBits for ForestAdaptedHashedBits {
     }
 }
 
+impl From<ipld_blockstore::Error> for Error {
+    fn from(_: ipld_blockstore::Error) -> Self {
+        Error::Other("TODO: ipld_blockstore error".into())
+    }
+}
+
 impl From<ipld_hamt::Error> for Error {
     fn from(_: ipld_hamt::Error) -> Self {
         Error::Other("TODO: ipld_hamt error".into())
@@ -92,8 +98,16 @@ impl From<ipld_hamt::Error> for Error {
 }
 
 impl From<forest_db::Error> for Error {
-    fn from(_: forest_db::Error) -> Self {
-        Error::Other("TODO: ipld_hamt error".into())
+    fn from(error: forest_db::Error) -> Self {
+        let error_str = format!("forest_db error: {:?}", error);
+        Error::Other(error_str)
+    }
+}
+
+impl From<forest_encoding::error::Error> for Error {
+    fn from(error: forest_encoding::error::Error) -> Self {
+        let error_str = format!("forest_encoding error: {:?}", error);
+        Error::Other(error_str)
     }
 }
 
@@ -178,15 +192,13 @@ where
                 if let Some(cached_node) = cache.get() {
                     path.push(cid.to_bytes());
                     let n = serialize_to_node(
-                        Some(cid.clone()),
+                        Some(*cid),
                         &deserialize_node_slice(cached_node)?,
                     )?;
                     n.path_to_key(hash_bits, k, path, bit_width, s)
                 } else {
-                    match s.get(&cid)? {
-                        Some(n) => n.path_to_key(hash_bits, k, path, bit_width, s),
-                        None => Ok(false),
-                    }
+                    let n = s.get(cid)?;
+                    n.path_to_key(hash_bits, k, path, bit_width, s)
                 }
             }
             ForestPointer::Dirty(n) => {
@@ -205,7 +217,7 @@ where
 
     fn cid(&self) -> Result<Cid, Error> {
         match self.cid {
-            Some(cid) => Ok(cid.clone()),
+            Some(cid) => Ok(cid),
             None => self.derive_cid(),
         }
     }
@@ -229,24 +241,9 @@ where
     V: Serialize + for<'de> serde::Deserialize<'de>,
     FBS: ForestBlockStore,
 {
-    fn get(
-        &self,
-        cid: &Cid,
-    ) -> Result<Option<ForestAdaptedNode<K, V, H, ForestAdaptedHashedBits>>, Error> {
-        let r = self.store.read(cid.to_bytes());
-        // need to do this as the Error is not exposed in the Forest lib
-        if r.is_err() {
-            return Ok(None);
-        }
-        let maybe_bytes = r.unwrap();
-        if maybe_bytes.is_none() {
-            Ok(None)
-        } else {
-            Ok(Some(serialize_to_node(
-                Some(cid.clone()),
-                &maybe_bytes.unwrap(),
-            )?))
-        }
+    fn get(&self, cid: &Cid) -> Result<ForestAdaptedNode<K, V, H, ForestAdaptedHashedBits>, Error> {
+        let n = self.store.read(cid.to_bytes())?.ok_or(Error::NotFound)?;
+        serialize_to_node(Some(*cid), &n)
     }
 }
 
@@ -257,7 +254,7 @@ fn serialize_to_node<
     H,
 >(
     cid: Option<Cid>,
-    bytes: &Vec<u8>,
+    bytes: &[u8],
 ) -> Result<ForestAdaptedNode<K, V, H, ForestAdaptedHashedBits>, Error> {
     let (bitfield, pointers): (Bitfield, Vec<ForestPointer<K, V, H>>) = from_slice(bytes)?;
     Ok(ForestAdaptedNode::new(cid, bitfield, pointers))
@@ -274,20 +271,21 @@ fn deserialize_node_slice<
     Ok(to_vec(node)?)
 }
 
+// #[cfg(feature="forest")]
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::hamt::Hamt;
     use ipld_blockstore::MemoryDB;
-    use ipld_hamt::{Hamt as ForestHamt};
+    use ipld_hamt::Hamt as ForestHamt;
 
     #[test]
-    #[allow(clippy::many_single_char_names)]
     fn test_basic_proof_generation() {
         let bs = MemoryDB::default();
         let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
 
-        for i in 1..1000 {
+        let max = 1000;
+        for i in 1..max {
             fhamt.set(i, i.to_string()).unwrap();
         }
 
@@ -301,8 +299,58 @@ mod tests {
             ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, _>,
             ForestAdaptedHashAlgo,
         > = Hamt::new(&cid, &store, 8).unwrap();
-        let p = hamt.generate_proof(&1).unwrap();
-        assert_eq!(p.is_some(), true);
-        assert_eq!(p.unwrap()[0], cid.to_bytes());
+        for i in 1..max {
+            let p = hamt.generate_proof(&i);
+            assert_eq!(p.is_ok(), true);
+        }
+    }
+
+    #[test]
+    fn test_deeper_tree() {
+        let bs = MemoryDB::default();
+        let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
+
+        let max = 10000;
+        for i in 1..max {
+            fhamt.set(i, i.to_string()).unwrap();
+        }
+
+        let cid = fhamt.flush().unwrap();
+        let store = ForestAdaptedBlockStorage::new(bs);
+        let hamt: Hamt<
+            ForestAdaptedBlockStorage<MemoryDB>,
+            usize,
+            String,
+            ForestAdaptedHashedBits,
+            ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, _>,
+            ForestAdaptedHashAlgo,
+        > = Hamt::new(&cid, &store, 8).unwrap();
+        let p = hamt.generate_proof(&100);
+        assert_eq!(p.is_ok(), true);
+    }
+
+    #[test]
+    fn test_not_found() {
+        let bs = MemoryDB::default();
+        let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
+
+        let max = 1000;
+        for i in 1..max {
+            fhamt.set(i, i.to_string()).unwrap();
+        }
+
+        let cid = fhamt.flush().unwrap();
+        let store = ForestAdaptedBlockStorage::new(bs);
+        let hamt: Hamt<
+            ForestAdaptedBlockStorage<MemoryDB>,
+            usize,
+            String,
+            ForestAdaptedHashedBits,
+            ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, _>,
+            ForestAdaptedHashAlgo,
+        > = Hamt::new(&cid, &store, 8).unwrap();
+
+        let p = hamt.generate_proof(&(max + 1));
+        assert_eq!(p.is_err(), true);
     }
 }

@@ -34,21 +34,21 @@ where
 {
     /// Lazily instantiate a hamt from this root Cid with a specified bit width.
     pub fn new(root_cid: &Cid, store: &'a BS, bit_width: u8) -> Result<Self, Error> {
-        match store.get(root_cid)? {
-            Some(root) => Ok(Self {
-                root,
-                store,
-                bit_width,
-                hash: Default::default(),
-                _k: Default::default(),
-                _v: Default::default(),
-                _h: Default::default(),
-            }),
-            None => Err(Error::CidNotFound(root_cid.to_string())),
-        }
+        let root = store.get(root_cid)?;
+        Ok(Self {
+            root,
+            store,
+            bit_width,
+            hash: Default::default(),
+            _k: Default::default(),
+            _v: Default::default(),
+            _h: Default::default(),
+        })
     }
 
-    pub fn generate_proof(&self, k: &K) -> Result<Option<Vec<Vec<u8>>>, Error> {
+    /// Generates a full path from the root to the node that contains the
+    /// key. Returns Error::KeyNotFound if the key is not present in the tree.
+    pub fn generate_proof(&self, k: &K) -> Result<Vec<Vec<u8>>, Error> {
         let mut path = Vec::new();
         if self.root.path_to_key(
             &mut HashAlgo::hash(k),
@@ -57,9 +57,9 @@ where
             self.bit_width,
             self.store,
         )? {
-            Ok(Some(path))
+            Ok(path)
         } else {
-            Ok(None)
+            Err(Error::NotFound)
         }
     }
 }

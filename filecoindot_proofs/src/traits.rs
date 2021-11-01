@@ -43,5 +43,5 @@ where
     N: Node<K, V, H>,
 {
     /// Get typed object from block store by Cid.
-    fn get(&self, cid: &Cid) -> Result<Option<N>, Error>;
+    fn get(&self, cid: &Cid) -> Result<N, Error>;
 }

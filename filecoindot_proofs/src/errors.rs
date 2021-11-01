@@ -6,12 +6,6 @@
 pub enum Error {
     InvalidHashBitLen,
     MaxDepth,
-    CidNotFound(String),
+    NotFound,
     Other(String),
-}
-
-impl From<forest_encoding::error::Error> for Error {
-    fn from(_: forest_encoding::error::Error) -> Self {
-        todo!()
-    }
 }
