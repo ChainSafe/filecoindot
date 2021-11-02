@@ -7,5 +7,6 @@ pub enum Error {
     InvalidHashBitLen,
     MaxDepth,
     NotFound,
+    VerificationFailed,
     Other(String),
 }

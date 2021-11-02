@@ -7,5 +7,6 @@ mod forest_adaptor;
 mod generate;
 mod hamt;
 mod traits;
+mod verify;
 
 pub use forest_adaptor::*;
