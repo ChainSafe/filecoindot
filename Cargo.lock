@@ -1533,7 +1533,7 @@ dependencies = [
  "derive_more",
  "jsonrpc-core",
  "jsonrpc-core-client",
- "jsonrpc-derive",
+ "jsonrpc-derive 18.0.0",
  "parking_lot 0.10.2",
  "sp-core",
  "sp-offchain",
@@ -2699,6 +2699,18 @@ name = "jsonrpc-derive"
 version = "15.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99a847f9ec7bb52149b2786a17c9cb260d6effc6b8eeb8c16b343a487a7563a3"
+dependencies = [
+ "proc-macro-crate 0.1.5",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "jsonrpc-derive"
+version = "18.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b939a78fa820cdfcb7ee7484466746a7377760970f6f9c6fe19f9edcc8a38d2"
 dependencies = [
  "proc-macro-crate 0.1.5",
  "proc-macro2",
@@ -4298,7 +4310,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.10#ac
 dependencies = [
  "jsonrpc-core",
  "jsonrpc-core-client",
- "jsonrpc-derive",
+ "jsonrpc-derive 15.1.0",
  "pallet-transaction-payment-rpc-runtime-api",
  "parity-scale-codec",
  "sp-api",
@@ -6046,7 +6058,7 @@ dependencies = [
  "futures 0.3.17",
  "jsonrpc-core",
  "jsonrpc-core-client",
- "jsonrpc-derive",
+ "jsonrpc-derive 15.1.0",
  "jsonrpc-pubsub",
  "log",
  "parity-scale-codec",
@@ -7416,7 +7428,7 @@ dependencies = [
  "futures 0.3.17",
  "jsonrpc-core",
  "jsonrpc-core-client",
- "jsonrpc-derive",
+ "jsonrpc-derive 15.1.0",
  "log",
  "parity-scale-codec",
  "sc-client-api",
