@@ -10,7 +10,7 @@ edition = '2018'
 
 [dependencies]
 jsonrpc-core = "15.1"
-jsonrpc-core-client = "15.1"
+jsonrpc-core-client = "18.0"
 jsonrpc-derive = "15.1"
 derive_more = "^0.99"
 thiserror = "^1"
