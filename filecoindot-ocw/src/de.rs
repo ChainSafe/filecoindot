@@ -1,6 +1,7 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
+use frame_support::sp_std::vec::Vec;
 use serde;
 use serde::de::{Deserialize, Deserializer, Error as _};
 use serde_json::Value;

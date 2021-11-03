@@ -10,9 +10,7 @@ use serde::{Deserialize, Serialize};
 /// Response of the [`ChainHead`](https://docs.filecoin.io/reference/lotus-api/#chainhead) RPC call
 #[derive(Clone, Debug, Serialize, Deserialize, Decode, Encode, Eq, PartialEq)]
 pub struct GetChainHead {
-    pub jsonrpc: String,
     pub result: TipSet,
-    pub id: i64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Decode, Encode, Eq, PartialEq)]
