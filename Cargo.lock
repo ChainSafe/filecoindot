@@ -1515,6 +1515,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "futures 0.3.17",
+ "hex",
  "parity-scale-codec",
  "parking_lot 0.11.2",
  "reqwest",

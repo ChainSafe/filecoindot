@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(dead_code)]
+extern crate alloc;
+
 pub use self::{
     crypto::{FilecoindotId, KEY_TYPE},
     ocw::offchain_worker,

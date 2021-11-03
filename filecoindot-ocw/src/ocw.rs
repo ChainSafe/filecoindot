@@ -33,7 +33,10 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
 
 /// bootstrap filcoindot ocw
 fn bootstrap<T: Config>(_: T::BlockNumber, _: &[u8]) -> Result<()> {
-    let _signer = Signer::<T, T::AuthorityId>::all_accounts();
+    let signer = Signer::<T, T::AuthorityId>::all_accounts();
+    frame_support::sp_std::if_std! {
+        println!("ability to sign {:?}", signer.can_sign());
+    }
 
     Ok(())
 }

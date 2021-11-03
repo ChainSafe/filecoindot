@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 mod api;
 mod data;
+mod de;
 mod ext;
 mod types;
 
