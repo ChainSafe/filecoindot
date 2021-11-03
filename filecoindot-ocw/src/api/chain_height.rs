@@ -7,12 +7,12 @@ use crate::{
 use frame_support::sp_std::vec::Vec;
 use serde::{Deserialize, Serialize};
 
-/// Method `Filecoin.ChainGetTipSetByHeight`
-pub const CHAIN_GET_TIP_SET_BY_HEIGHT: &str = "Filecoin.ChainGetTipSetByHeight";
+/// Method `Filecoin.ChainHeight`
+pub const CHAIN_HEIGHT: &str = "Filecoin.ChainHeight";
 
-/// Response of `Filecoin.ChainGetTipSetByHeight`
+/// Response of `Filecoin.ChainHeight`
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub struct ChainGetTipSetByHeightResult {
+pub struct ChainHeightResult {
     /// TipSet Cids
     #[serde(rename = "Cids")]
     pub cids: Vec<Cid>,
@@ -24,11 +24,11 @@ pub struct ChainGetTipSetByHeightResult {
     pub height: u64,
 }
 
-/// `Filecoin.ChainGetTipSetByHeight`
+/// `Filecoin.ChainHeight`
 pub struct ChainGetTipSetByHeight;
 
 impl Api for ChainGetTipSetByHeight {
-    const METHOD: &'static str = CHAIN_GET_TIP_SET_BY_HEIGHT;
-    type Params = Vec<Option<u64>>;
-    type Result = ChainGetTipSetByHeightResult;
+    const METHOD: &'static str = CHAIN_HEIGHT;
+    type Params = Vec<()>;
+    type Result = ChainHeightResult;
 }

@@ -10,6 +10,8 @@ pub enum Error {
     GetStorageFailed,
     #[display(fmt = "haven't set filecoin rpc yet")]
     FilecoinRpcNotSet,
+    #[display(fmt = "blocks and cids not matched in tipset")]
+    InvalidTipSet,
 }
 
 pub type Result<T> = core::result::Result<T, Error>;

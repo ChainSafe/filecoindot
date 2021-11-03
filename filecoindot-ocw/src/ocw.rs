@@ -6,6 +6,7 @@ use crate::{
     result::{Error, Result},
     Config,
 };
+use filecoindot::Call;
 use frame_support::{log, sp_runtime::offchain::storage::StorageValueRef, sp_std::vec::Vec};
 use frame_system::offchain::Signer;
 

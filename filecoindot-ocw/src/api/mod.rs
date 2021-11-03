@@ -10,6 +10,7 @@ use frame_support::{
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
+mod chain_height;
 mod get_tip_set_by_height;
 
 /// Wrapper for jsonrpc result
@@ -47,7 +48,7 @@ pub trait Api: Sized {
     fn req(&self, base: &str, params: Self::Params) -> Result<Self::Result, Error> {
         // set env via storage
         let req = Request::post(
-            &base,
+            base,
             vec![serde_json::to_vec(&Req {
                 id: 0,
                 method: Self::METHOD,
