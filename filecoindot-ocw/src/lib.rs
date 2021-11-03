@@ -1,8 +1,6 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 #![cfg_attr(not(feature = "std"), no_std)]
-#![allow(dead_code)]
-extern crate alloc;
 
 pub use self::{
     crypto::{FilecoindotId, KEY_TYPE},
@@ -11,9 +9,12 @@ pub use self::{
     result::{Error, Result},
 };
 
+mod api;
 mod crypto;
+mod de;
 mod ocw;
 mod result;
+mod types;
 
 #[cfg(test)]
 mod tests;

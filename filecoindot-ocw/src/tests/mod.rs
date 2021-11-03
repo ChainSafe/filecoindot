@@ -1,12 +1,9 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
-mod api;
 mod data;
-mod de;
 mod ext;
-mod types;
 
-use api::{Api, ChainGetTipSetByHeight};
+use crate::api::{Api, ChainGetTipSetByHeight};
 use ext::{Env, OffchainExt};
 use sp_core::offchain::{OffchainDbExt, OffchainWorkerExt};
 

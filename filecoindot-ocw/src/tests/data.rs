@@ -1,6 +1,6 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
-use crate::tests::{
+use crate::{
     api::ChainGetTipSetByHeightResult,
     types::{Block, Cid},
 };
