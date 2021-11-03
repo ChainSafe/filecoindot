@@ -193,10 +193,7 @@ where
             ForestPointer::Link { cid, cache, .. } => {
                 if let Some(cached_node) = cache.get() {
                     path.push(cid.to_bytes());
-                    let n = serialize_to_node(
-                        Some(*cid),
-                        &deserialize_node_slice(cached_node)?,
-                    )?;
+                    let n = serialize_to_node(Some(*cid), &deserialize_node_slice(cached_node)?)?;
                     n.path_to_key(hash_bits, k, path, bit_width, s)
                 } else {
                     let n = s.get(cid)?;

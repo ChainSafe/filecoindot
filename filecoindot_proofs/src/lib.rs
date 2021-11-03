@@ -9,4 +9,6 @@ mod hamt;
 mod traits;
 mod verify;
 
-pub use forest_adaptor::*;
+pub use crate::forest_adaptor::*;
+pub use crate::verify::*;
+pub use crate::hamt::Hamt;
