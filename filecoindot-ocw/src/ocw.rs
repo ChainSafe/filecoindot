@@ -29,7 +29,7 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
     );
 
     // log errors from ocw
-    bootstrap::<T>(block_number, &url_str)?;
+    bootstrap::<T>(block_number, url_str)?;
 
     Ok(())
 }
@@ -42,11 +42,11 @@ fn bootstrap<T: Config>(_: T::BlockNumber, url: &str) -> Result<()> {
 
 fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -> Result<()> {
     let pairs = ChainHeight
-        .req(url, vec![])
+        .req(url, Default::default())
         .map_err(|_| Error::HttpError)?
         .pairs()?;
 
-    if pairs
+    pairs
         .into_iter()
         .map(|(cid, msg_root)| {
             // FIXME:
@@ -61,11 +61,9 @@ fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -
             let _ = res.map_err(|_| Error::OffchainSignedTxError)?;
             Ok(())
         })
-        .collect::<Vec<Result<()>>>()
-        .contains(&Err(Error::OffchainSignedTxError))
-    {
-        Err(Error::OffchainSignedTxError)
-    } else {
-        Ok(())
-    }
+        .any(|x| x == Err(Error::OffchainSignedTxError))
+        .then(|| Some(()))
+        .ok_or(Error::OffchainSignedTxError)?;
+
+    Ok(())
 }
