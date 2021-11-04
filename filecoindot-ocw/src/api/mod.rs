@@ -3,7 +3,10 @@
 
 //! Filecoin APIs
 
-pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
+pub use self::{
+    chain_height::ChainHeight,
+    get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult},
+};
 use frame_support::{
     sp_runtime::offchain::http::{Error, Request},
     sp_std::{vec, vec::Vec},

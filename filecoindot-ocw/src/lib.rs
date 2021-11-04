@@ -34,9 +34,11 @@ pub mod pallet {
     /// Filecoindot offchain worker config
     #[pallet::config]
     pub trait Config:
-        CreateSignedTransaction<Call<Self>> + frame_system::Config + filecoindot::Config
+        CreateSignedTransaction<filecoindot::Call<Self>>
+        + frame_system::Config
+        + filecoindot::Config
     {
-        type Call: From<Call<Self>>;
+        type Call: From<filecoindot::Call<Self>>;
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
     }
@@ -69,7 +71,7 @@ pub mod pallet {
 
     #[pallet::validate_unsigned]
     impl<T: Config> ValidateUnsigned for Pallet<T> {
-        type Call = Call<T>;
+        type Call = filecoindot::Call<T>;
 
         /// Validate unsigned call to this module.
         ///
