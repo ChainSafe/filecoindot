@@ -280,7 +280,6 @@ impl filecoindot::Config for Runtime {
     type AuthorityId = filecoindot::FilecoindotId;
 }
 
-
 // For pallet-example-offchain-worker
 parameter_types! {
     pub const GracePeriod: BlockNumber = 3;
