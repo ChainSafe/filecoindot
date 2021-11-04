@@ -3,10 +3,7 @@
 
 //! Filecoin APIs
 
-pub use self::{
-    chain_height::ChainHeight,
-    get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult},
-};
+pub use self::chain_height::ChainHeight;
 use frame_support::{
     sp_runtime::offchain::http::{Error, Request},
     sp_std::{vec, vec::Vec},
@@ -14,7 +11,6 @@ use frame_support::{
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 mod chain_height;
-mod get_tip_set_by_height;
 
 /// Wrapper for jsonrpc result
 #[derive(Clone, Debug, Serialize, Deserialize)]
