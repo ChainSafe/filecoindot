@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 mod data;
 mod ext;
+mod get_tip_set_by_height;
 
-use crate::api::{Api, ChainGetTipSetByHeight};
+use crate::ocw::api::Api;
 use ext::{Env, OffchainExt};
+use get_tip_set_by_height::ChainGetTipSetByHeight;
 use sp_core::offchain::{OffchainDbExt, OffchainWorkerExt};
 
 #[test]
