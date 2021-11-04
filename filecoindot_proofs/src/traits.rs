@@ -32,6 +32,14 @@ where
     where
         Self: Sized;
 
+    fn get_by_cid<S: BlockStore<K, V, H, Self>>(
+        &self,
+        cid: &Cid,
+        store: &S,
+    ) -> Result<Option<Self>, Error>
+        where
+            Self: Sized;
+
     fn cid(&self) -> Result<Cid, Error>;
 }
 

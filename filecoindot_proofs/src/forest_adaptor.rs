@@ -4,10 +4,7 @@ use cid::Cid;
 use cid::Code::Blake2b256;
 use forest_encoding::{from_slice, to_vec};
 use ipld_blockstore::BlockStore as ForestBlockStore;
-use ipld_hamt::{
-    Bitfield, Hash, HashAlgorithm as ForestHashAlgo, Node as ForestNode, Pointer as ForestPointer,
-    Sha256,
-};
+use ipld_hamt::{Bitfield, Hash, HashAlgorithm as ForestHashAlgo, Node as ForestNode, Pointer as ForestPointer, Pointer, Sha256};
 use serde::{Serialize, Serializer};
 use std::cmp::Ordering;
 use std::marker::PhantomData;
@@ -191,6 +188,7 @@ where
         let child = self.get_child(cindex);
         match child {
             ForestPointer::Link { cid, cache, .. } => {
+                path.push(self.cid()?.to_bytes());
                 if let Some(cached_node) = cache.get() {
                     path.push(cid.to_bytes());
                     let n = serialize_to_node(Some(*cid), &deserialize_node_slice(cached_node)?)?;
@@ -201,6 +199,7 @@ where
                 }
             }
             ForestPointer::Dirty(n) => {
+                path.push(self.cid()?.to_bytes());
                 let n = serialize_to_node(None, &deserialize_node_slice(n)?)?;
                 n.path_to_key(hash_bits, k, path, bit_width, s)
             }
@@ -212,6 +211,29 @@ where
                 None => Ok(false),
             },
         }
+    }
+
+    fn get_by_cid<S: BlockStore<K, V, ForestAdaptedHashedBits, Self>>(&self, cid: &Cid, store: &S) -> Result<Option<Self>, Error> where Self: Sized {
+        for pointer in &self.raw_pointers {
+            match pointer {
+                Pointer::Values(_) => { continue; }
+                Pointer::Link { cid: link_cid, cache, .. } => {
+                    if cid != link_cid {
+                        continue;
+                    }
+                    return if let Some(cached_node) = cache.get() {
+                        let node = serialize_to_node(Some(*cid), &deserialize_node_slice(cached_node)?)?;
+                        Ok(Some(node))
+                    } else {
+                        let n = store.get(link_cid)?;
+                        Ok(Some(n))
+                    }
+                }
+                // TODO: check again if dirty needs to be checked
+                Pointer::Dirty(_) => { continue; }
+            }
+        }
+        Ok(None)
     }
 
     fn cid(&self) -> Result<Cid, Error> {
@@ -324,8 +346,12 @@ mod tests {
             ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, _>,
             ForestAdaptedHashAlgo,
         > = Hamt::new(&cid, &store, 8).unwrap();
-        let p = hamt.generate_proof(&100);
+        let p = hamt.generate_proof(&(max-1));
         assert_eq!(p.is_ok(), true);
+        let v = p.unwrap();
+        assert_eq!(v.len(), 2);
+        assert_eq!(v[0], cid.to_bytes());
+
     }
 
     #[test]
@@ -351,5 +377,65 @@ mod tests {
 
         let p = hamt.generate_proof(&(max + 1));
         assert_eq!(p.is_err(), true);
+    }
+
+    #[test]
+    fn test_verify_works() {
+        let bs = MemoryDB::default();
+        let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
+
+        let max = 10000;
+        for i in 1..max {
+            fhamt.set(i, i.to_string()).unwrap();
+        }
+
+        let cid = fhamt.flush().unwrap();
+        let store = ForestAdaptedBlockStorage::new(bs);
+        let hamt: Hamt<
+            ForestAdaptedBlockStorage<MemoryDB>,
+            usize,
+            String,
+            ForestAdaptedHashedBits,
+            ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, _>,
+            ForestAdaptedHashAlgo,
+        > = Hamt::new(&cid, &store, 8).unwrap();
+
+        let mut p = hamt.generate_proof(&(max/2)).unwrap();
+        let reverse_root = Cid::read_bytes(&*p[0]).unwrap();
+        assert_eq!(cid, reverse_root);
+        p.reverse();
+        let target_cid = Cid::read_bytes(&*p[0]).unwrap();
+        let r = hamt.verify_proof(p, &target_cid);
+        assert_eq!(r.is_ok(), true);
+    }
+
+    #[test]
+    fn test_verify_not_ok() {
+        let bs = MemoryDB::default();
+        let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
+
+        let max = 10000;
+        for i in 1..max {
+            fhamt.set(i, i.to_string()).unwrap();
+        }
+
+        let cid = fhamt.flush().unwrap();
+        let store = ForestAdaptedBlockStorage::new(bs);
+        let hamt: Hamt<
+            ForestAdaptedBlockStorage<MemoryDB>,
+            usize,
+            String,
+            ForestAdaptedHashedBits,
+            ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, _>,
+            ForestAdaptedHashAlgo,
+        > = Hamt::new(&cid, &store, 8).unwrap();
+
+        let mut p = hamt.generate_proof(&(max/2)).unwrap();
+        let reverse_root = Cid::read_bytes(&*p[0]).unwrap();
+        assert_eq!(cid, reverse_root);
+        p.reverse();
+        let target_cid = cid::new_from_cbor(&p[0], Blake2b256);
+        let r = hamt.verify_proof(p, &target_cid);
+        assert_eq!(r.is_ok(), false);
     }
 }
