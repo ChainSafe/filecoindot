@@ -7,6 +7,7 @@ use frame_support::pallet_prelude::{EnsureOrigin, GenesisBuild};
 use frame_support::sp_runtime::{
     testing::TestXt,
     traits::{Extrinsic as ExtrinsicT, Verify},
+    Duration,
 };
 use frame_support::{parameter_types, sp_std};
 use frame_system::ensure_signed;
@@ -41,6 +42,7 @@ construct_runtime!(
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
+    pub const OffchainWorkerTimtout: Duration = Duration::from_millis(1_000_000);
 }
 
 /// An implementation of EnsureOrigin
@@ -127,6 +129,7 @@ impl pallet::Config for Test {
     type Event = Event;
     type WeightInfo = ();
     type AuthorityId = pallet::FilecoindotId;
+    type OffchainWorkerTimeout = OffchainWorkerTimeout;
 }
 
 pub struct ExtBuilder {

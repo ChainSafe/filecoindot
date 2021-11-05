@@ -19,7 +19,7 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify},
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature,
+    ApplyExtrinsicResult, MultiSignature, offchain::Duration,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -270,6 +270,10 @@ impl pallet_sudo::Config for Runtime {
     type Call = Call;
 }
 
+parameter_types! {
+    pub const OffchainWorkerTimeout: Duration = Duration::from_millis(1_000_000);
+}
+
 // ManagerOrigin as root
 type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
 
@@ -278,6 +282,7 @@ impl filecoindot::Config for Runtime {
     type Event = Event;
     type WeightInfo = ();
     type AuthorityId = filecoindot::FilecoindotId;
+    type OffchainWorkerTimeout = OffchainWorkerTimeout;
 }
 
 // For pallet-example-offchain-worker
