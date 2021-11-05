@@ -3,7 +3,7 @@
 
 //! offchain worker logics
 use crate::{
-    api::{Api, ChainHeight},
+    api::{Api, ChainHead},
     result::{Error, Result},
     Config,
 };
@@ -41,7 +41,7 @@ fn bootstrap<T: Config>(_: T::BlockNumber, url: &str) -> Result<()> {
 }
 
 fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -> Result<()> {
-    let pairs = ChainHeight
+    let pairs = ChainHead
         .req(url, Default::default())
         .map_err(|_| Error::HttpError)?
         .pairs()?;

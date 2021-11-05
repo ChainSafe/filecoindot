@@ -4,7 +4,7 @@
 //! Filecoin APIs
 
 pub use self::{
-    chain_height::ChainHeight,
+    chain_head::ChainHead,
     get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult},
 };
 use frame_support::{
@@ -13,7 +13,7 @@ use frame_support::{
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-mod chain_height;
+mod chain_head;
 mod get_tip_set_by_height;
 
 /// Wrapper for jsonrpc result
