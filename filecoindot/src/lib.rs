@@ -31,7 +31,6 @@ pub mod pallet {
         log,
         pallet_prelude::*,
         sp_runtime::{
-            offchain::Duration,
             traits::{Saturating, ValidateUnsigned},
             transaction_validity::InvalidTransaction,
         },
@@ -63,8 +62,8 @@ pub mod pallet {
         type ManagerOrigin: EnsureOrigin<Self::Origin>;
         /// The weight for this pallet's extrinsics.
         type WeightInfo: WeightInfo;
-        /// The timeout of the http requests of ocw
-        type OffchainWorkerTimeout: Get<Duration>;
+        /// The timeout of the http requests of ocw in milliseconds
+        type OffchainWorkerTimeout: Get<u64>;
     }
 
     #[pallet::pallet]

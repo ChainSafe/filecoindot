@@ -5,12 +5,17 @@
 
 use crate::{
     ocw::{
-        api::{Api, ChainHeight},
+        api::{Api, ChainHead},
         result::{Error, Result},
     },
     Call, Config,
 };
-use frame_support::{log, sp_runtime::offchain::storage::StorageValueRef, sp_std::vec::Vec};
+use frame_support::{
+    log,
+    sp_runtime::offchain::{storage::StorageValueRef, Timestamp},
+    sp_std::vec::Vec,
+    traits::Get,
+};
 use frame_system::offchain::{SendSignedTransaction, Signer};
 
 mod api;
@@ -51,8 +56,12 @@ fn bootstrap<T: Config>(_: T::BlockNumber, url: &str) -> Result<()> {
 }
 
 fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -> Result<()> {
-    let pairs = ChainHeight
-        .req(url, Default::default())
+    let pairs = ChainHead
+        .req(
+            url,
+            Default::default(),
+            Timestamp::from_unix_millis(T::OffchainWorkerTimeout::get()),
+        )
         .map_err(|_| Error::HttpError)?
         .pairs()?;
 

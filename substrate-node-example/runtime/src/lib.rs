@@ -19,7 +19,7 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify},
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature, offchain::Duration,
+    ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -271,7 +271,7 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
-    pub const OffchainWorkerTimeout: Duration = Duration::from_millis(1_000_000);
+    pub const OffchainWorkerTimeout: u64 = 1_000_000;
 }
 
 // ManagerOrigin as root

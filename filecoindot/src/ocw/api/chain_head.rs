@@ -4,13 +4,13 @@ use crate::ocw::{api::Api, types::TipSet};
 use frame_support::sp_std::vec::Vec;
 
 /// Method `Filecoin.ChainHeight`
-pub const CHAIN_HEIGHT: &str = "Filecoin.ChainHeight";
+pub const CHAIN_HEAD: &str = "Filecoin.ChainHead";
 
 /// `Filecoin.ChainHeight`
-pub struct ChainHeight;
+pub struct ChainHead;
 
-impl Api for ChainHeight {
-    const METHOD: &'static str = CHAIN_HEIGHT;
+impl Api for ChainHead {
+    const METHOD: &'static str = CHAIN_HEAD;
     type Params = Vec<()>;
     type Result = TipSet;
 }
