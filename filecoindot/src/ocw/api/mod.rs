@@ -3,14 +3,14 @@
 
 //! Filecoin APIs
 
-pub use self::chain_height::ChainHeight;
+pub use self::chain_head::ChainHead;
 use frame_support::{
     sp_runtime::offchain::http::{Error, Request},
     sp_std::{vec, vec::Vec},
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-mod chain_height;
+mod chain_head;
 
 /// Wrapper for jsonrpc result
 #[derive(Clone, Debug, Serialize, Deserialize)]
