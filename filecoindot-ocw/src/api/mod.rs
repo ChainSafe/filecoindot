@@ -3,14 +3,18 @@
 
 //! Filecoin APIs
 
-mod get_tip_set_by_height;
-
-pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
+pub use self::{
+    chain_head::ChainHead,
+    get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult},
+};
 use frame_support::{
     sp_runtime::offchain::http::{Error, Request},
     sp_std::{vec, vec::Vec},
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+
+mod chain_head;
+mod get_tip_set_by_height;
 
 /// Wrapper for jsonrpc result
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -43,18 +47,11 @@ pub trait Api: Sized {
     type Params: Serialize + Send + Sync;
     type Result: Serialize + DeserializeOwned + core::fmt::Debug;
 
-    /// Storage key in bytes
-    fn storage_key(params: &Self::Params) -> Result<Vec<u8>, Error> {
-        let mut key = bincode::serialize(Self::METHOD).map_err(|_| Error::IoError)?;
-        key.append(&mut bincode::serialize(params).map_err(|_| Error::IoError)?);
-        Ok(key)
-    }
-
     /// Request method with params
     fn req(&self, base: &str, params: Self::Params) -> Result<Self::Result, Error> {
         // set env via storage
         let req = Request::post(
-            &base,
+            base,
             vec![serde_json::to_vec(&Req {
                 id: 0,
                 method: Self::METHOD,

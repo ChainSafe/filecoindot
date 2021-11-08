@@ -9,7 +9,10 @@ repository = 'https://github.com/ChainSafe/filecoindot'
 edition = '2018'
 
 [dependencies]
+hex = { version = "^0.4", features = [ "alloc" ], default-features = false }
 codec = { package = "parity-scale-codec", version = "2.3.1", default-features = false }
+serde = { version = "1.0.130", features = [ "derive" ], default-features = false }
+serde_json = { version = "1.0", features = [ "alloc" ], default-features = false }
 derive_more = "^0.99"
 
 # substrate dependencies
@@ -35,6 +38,7 @@ dirs = "4.0.0"
 [features]
 default = [ "std" ]
 std = [
+  "hex/std",
   "codec/std",
   "serde/std",
   "serde_json/std",

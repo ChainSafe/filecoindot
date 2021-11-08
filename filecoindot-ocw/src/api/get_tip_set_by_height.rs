@@ -1,10 +1,9 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
-use crate::tests::{
+use crate::{
     api::Api,
     types::{Block, Cid},
 };
-use codec::{Decode, Encode};
 use frame_support::sp_std::vec::Vec;
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +11,7 @@ use serde::{Deserialize, Serialize};
 pub const CHAIN_GET_TIP_SET_BY_HEIGHT: &str = "Filecoin.ChainGetTipSetByHeight";
 
 /// Response of `Filecoin.ChainGetTipSetByHeight`
-#[derive(Clone, Debug, Serialize, Deserialize, Decode, Encode, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChainGetTipSetByHeightResult {
     /// TipSet Cids
     #[serde(rename = "Cids")]
