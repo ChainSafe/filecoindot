@@ -5,7 +5,10 @@
 
 pub use self::chain_head::ChainHead;
 use frame_support::{
-    sp_runtime::offchain::http::{Error, Request},
+    sp_runtime::offchain::{
+        http::{Error, Request},
+        Timestamp,
+    },
     sp_std::{vec, vec::Vec},
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -44,7 +47,12 @@ pub trait Api: Sized {
     type Result: Serialize + DeserializeOwned + core::fmt::Debug;
 
     /// Request method with params
-    fn req(&self, base: &str, params: Self::Params) -> Result<Self::Result, Error> {
+    fn req(
+        &self,
+        base: &str,
+        params: Self::Params,
+        deadline: Timestamp,
+    ) -> Result<Self::Result, Error> {
         // set env via storage
         let req = Request::post(
             base,
@@ -56,7 +64,8 @@ pub trait Api: Sized {
             })
             .map_err(|_| Error::IoError)?],
         )
-        .add_header("Content-Type", "application/json");
+        .add_header("Content-Type", "application/json")
+        .deadline(deadline);
 
         Ok(serde_json::from_slice::<Resp<Self::Result>>(
             &req.send()

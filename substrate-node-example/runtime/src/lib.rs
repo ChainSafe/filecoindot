@@ -270,6 +270,10 @@ impl pallet_sudo::Config for Runtime {
     type Call = Call;
 }
 
+parameter_types! {
+    pub const OffchainWorkerTimeout: u64 = 1_000_000;
+}
+
 // ManagerOrigin as root
 type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
 
@@ -278,6 +282,7 @@ impl filecoindot::Config for Runtime {
     type Event = Event;
     type WeightInfo = ();
     type AuthorityId = filecoindot::FilecoindotId;
+    type OffchainWorkerTimeout = OffchainWorkerTimeout;
 }
 
 // For pallet-example-offchain-worker

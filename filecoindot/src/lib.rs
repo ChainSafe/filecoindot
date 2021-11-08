@@ -62,6 +62,8 @@ pub mod pallet {
         type ManagerOrigin: EnsureOrigin<Self::Origin>;
         /// The weight for this pallet's extrinsics.
         type WeightInfo: WeightInfo;
+        /// The timeout of the http requests of ocw in milliseconds
+        type OffchainWorkerTimeout: Get<u64>;
     }
 
     #[pallet::pallet]
