@@ -3,7 +3,7 @@
 
 //! Filecoin api types
 #![allow(missing_docs)]
-use crate::{Error, Result};
+use crate::ocw::{Error, Result};
 use frame_support::sp_std::vec::Vec;
 use serde::{Deserialize, Serialize};
 
@@ -47,7 +47,7 @@ pub struct Block {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Cid {
-    #[serde(deserialize_with = "crate::de::bytes")]
+    #[serde(deserialize_with = "crate::ocw::de::bytes")]
     #[serde(rename = "/")]
     pub inner: Vec<u8>,
 }

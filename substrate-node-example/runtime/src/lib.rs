@@ -277,13 +277,7 @@ impl filecoindot::Config for Runtime {
     type ManagerOrigin = ManagerOrigin;
     type Event = Event;
     type WeightInfo = ();
-}
-
-// For pallet-ocw
-impl filecoindot_ocw::Config for Runtime {
-    type Call = Call;
-    type Event = Event;
-    type AuthorityId = filecoindot_ocw::FilecoindotId;
+    type AuthorityId = filecoindot::FilecoindotId;
 }
 
 // For pallet-example-offchain-worker
@@ -367,7 +361,6 @@ construct_runtime!(
 
         // filecoindot
         Filecoindot: filecoindot::{Pallet, Call, Config<T>, Storage, Event<T>},
-        FilecoindotOcw: filecoindot_ocw::{Pallet, Call, Storage, Event<T>},
     }
 );
 

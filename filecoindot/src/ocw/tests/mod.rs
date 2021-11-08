@@ -3,8 +3,11 @@
 mod data;
 mod ext;
 
-use crate::api::{Api, ChainGetTipSetByHeight};
+mod get_tip_set_by_height;
+
+use crate::ocw::api::Api;
 use ext::{Env, OffchainExt};
+use get_tip_set_by_height::ChainGetTipSetByHeight;
 use sp_core::offchain::{OffchainDbExt, OffchainWorkerExt};
 
 #[test]

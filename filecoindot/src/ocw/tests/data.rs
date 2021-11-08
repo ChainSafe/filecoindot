@@ -1,12 +1,9 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
-use crate::{
-    api::ChainGetTipSetByHeightResult,
-    types::{Block, Cid},
-};
+use crate::ocw::types::{Block, Cid, TipSet};
 
-pub fn get_tip_set_by_height_1199840() -> ChainGetTipSetByHeightResult {
-    ChainGetTipSetByHeightResult {
+pub fn get_tip_set_by_height_1199840() -> TipSet {
+    TipSet {
         cids: vec![
             Cid {
                 inner: "bafy2bzacedbaliyx3k64d4rxy5q2og3wf5r5e2ra6bvf52ogldc6oad3jukbe"

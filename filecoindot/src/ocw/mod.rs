@@ -1,15 +1,25 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
+#![cfg_attr(not(feature = "std"), no_std)]
+#![allow(dead_code)]
 
-//! offchain worker logics
 use crate::{
-    api::{Api, ChainHead},
-    result::{Error, Result},
-    Config,
+    ocw::{
+        api::{Api, ChainHead},
+        result::{Error, Result},
+    },
+    Call, Config,
 };
-use filecoindot::Call;
 use frame_support::{log, sp_runtime::offchain::storage::StorageValueRef, sp_std::vec::Vec};
 use frame_system::offchain::{SendSignedTransaction, Signer};
+
+mod api;
+mod de;
+mod result;
+mod types;
+
+#[cfg(test)]
+mod tests;
 
 /// the storage key of filecoin rpc endpoint
 pub const FILECOIN_RPC: &[u8] = b"FILECOIN_RPC";
@@ -46,7 +56,7 @@ fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -
         .map_err(|_| Error::HttpError)?
         .pairs()?;
 
-    if pairs
+    pairs
         .into_iter()
         .map(|(cid, msg_root)| {
             // FIXME:
@@ -62,9 +72,8 @@ fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -
             Ok(())
         })
         .any(|x| x == Err(Error::OffchainSignedTxError))
-    {
-        return Err(Error::OffchainSignedTxError);
-    }
+        .then(|| Some(()))
+        .ok_or(Error::OffchainSignedTxError)?;
 
     Ok(())
 }

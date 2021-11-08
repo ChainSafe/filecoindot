@@ -13,8 +13,13 @@
 //!
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub use pallet::*;
+pub use self::{
+    crypto::{FilecoindotId, KEY_TYPE},
+    pallet::*,
+};
 
+mod crypto;
+mod ocw;
 mod types;
 
 #[cfg(test)]
@@ -22,10 +27,19 @@ mod tests;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::pallet_prelude::*;
-    use frame_support::sp_runtime::traits::Saturating;
-    use frame_support::sp_std::prelude::*;
-    use frame_system::pallet_prelude::*;
+    use frame_support::{
+        log,
+        pallet_prelude::*,
+        sp_runtime::{
+            traits::{Saturating, ValidateUnsigned},
+            transaction_validity::InvalidTransaction,
+        },
+        sp_std::prelude::*,
+    };
+    use frame_system::{
+        offchain::{AppCrypto, CreateSignedTransaction},
+        pallet_prelude::*,
+    };
 
     use crate::types::{BlockSubmissionProposal, ProposalStatus};
 
@@ -39,7 +53,9 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: CreateSignedTransaction<Call<Self>> + frame_system::Config {
+        /// The identifier type for the offchain worker.
+        type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         /// Origin used to administer the pallet
@@ -145,7 +161,13 @@ pub mod pallet {
     }
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        fn offchain_worker(block_number: T::BlockNumber) {
+            if let Err(e) = crate::ocw::offchain_worker::<T>(block_number) {
+                log::error!("{}", e);
+            }
+        }
+    }
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
@@ -163,6 +185,23 @@ pub mod pallet {
                 vote_period: Default::default(),
                 relayers: Default::default(),
             }
+        }
+    }
+
+    #[pallet::validate_unsigned]
+    impl<T: Config> ValidateUnsigned for Pallet<T> {
+        type Call = Call<T>;
+
+        /// Validate unsigned call to this module.
+        ///
+        /// By default unsigned transactions are disallowed, but implementing the validator
+        /// here we make sure that some particular calls (the ones produced by offchain worker)
+        /// are being whitelisted and marked as valid.
+        fn validate_unsigned(
+            _source: TransactionSource,
+            _call: &Self::Call,
+        ) -> TransactionValidity {
+            InvalidTransaction::Call.into()
         }
     }
 
