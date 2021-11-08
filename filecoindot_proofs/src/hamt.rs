@@ -6,7 +6,7 @@ use ipld_hamt::Hash;
 use std::marker::PhantomData;
 
 use crate::errors::Error;
-use crate::traits::{BlockStore, HashAlgorithm, HashedBits, Node};
+use crate::traits::{BlockStore, HAMTNode, HashAlgorithm, HashedBits};
 
 /// This is a simplified implementation of HAMT based on:
 /// http://lampwww.epfl.ch/papers/idealhashtrees.pdf
@@ -14,7 +14,7 @@ use crate::traits::{BlockStore, HashAlgorithm, HashedBits, Node};
 /// This implementation has only implemented the read related functions
 /// as we only care about generating the path to the node
 #[derive(Debug)]
-pub struct Hamt<'a, BS, K: Eq, V, H: HashedBits, N: Node<K, V, H>, HashAlgo> {
+pub struct Hamt<'a, BS, K: Eq, V, H: HashedBits, N: HAMTNode<K, V, H>, HashAlgo> {
     root: N,
     store: &'a BS,
     bit_width: u8,
@@ -29,12 +29,12 @@ where
     K: Eq + Hash,
     H: HashedBits,
     HashAlgo: HashAlgorithm<Output = H>,
-    N: Node<K, V, H>,
-    BS: BlockStore<K, V, H, N>,
+    N: HAMTNode<K, V, H> + for<'de> serde::Deserialize<'de>,
+    BS: BlockStore,
 {
     /// Lazily instantiate a hamt from this root Cid with a specified bit width.
     pub fn new(root_cid: &Cid, store: &'a BS, bit_width: u8) -> Result<Self, Error> {
-        let root = store.get(root_cid)?;
+        let root: N = store.get(root_cid)?;
         Ok(Self {
             root,
             store,
@@ -73,16 +73,23 @@ where
             return Err(Error::VerificationFailed);
         }
 
-        let root_cid = Cid::read_bytes(&*proof[proof.len()-1]).map_err(|_| Error::VerificationFailed)?;
+        let root_cid =
+            Cid::read_bytes(&*proof[proof.len() - 1]).map_err(|_| Error::VerificationFailed)?;
         if root_cid != self.root.cid()? {
             return Err(Error::VerificationFailed);
         }
 
-        self.traverse_and_match(&proof, proof.len()-1, &self.root,node_cid)?;
+        self.traverse_and_match(&proof, proof.len() - 1, &self.root, node_cid)?;
         Ok(())
     }
 
-    fn traverse_and_match(&self, proof: &[Vec<u8>], index: usize, current_node: &N, target_cid: &Cid) -> Result<(), Error> {
+    fn traverse_and_match(
+        &self,
+        proof: &[Vec<u8>],
+        index: usize,
+        current_node: &N,
+        target_cid: &Cid,
+    ) -> Result<(), Error> {
         let current_node_cid = current_node.cid()?;
         if current_node_cid == *target_cid {
             return Ok(());
@@ -97,12 +104,13 @@ where
         }
 
         // now we search the previous index as we traverse deeper in to the trie
-        let next_cid = Cid::read_bytes(&*proof[index-1]).map_err(|_| Error::VerificationFailed)?;
+        let next_cid =
+            Cid::read_bytes(&*proof[index - 1]).map_err(|_| Error::VerificationFailed)?;
         let next_node = current_node
             .get_by_cid(&next_cid, self.store)
             .map_err(|_| Error::VerificationFailed)?
             // node with next_cid not found in the current node, fail directly
             .ok_or(Error::VerificationFailed)?;
-        self.traverse_and_match(proof, index-1, &next_node, target_cid)
+        self.traverse_and_match(proof, index - 1, &next_node, target_cid)
     }
 }

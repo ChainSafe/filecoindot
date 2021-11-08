@@ -8,5 +8,7 @@ pub enum Error {
     MaxDepth,
     NotFound,
     VerificationFailed,
+    MaxHeightExceeded,
+    CidNotFound(String),
     Other(String),
 }

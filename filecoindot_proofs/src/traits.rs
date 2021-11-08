@@ -5,6 +5,7 @@ use crate::errors::Error;
 use cid::Cid;
 use ipld_hamt::Hash;
 use num_traits::Num;
+use serde::de::DeserializeOwned;
 
 pub trait HashAlgorithm {
     type Output: HashedBits;
@@ -16,27 +17,38 @@ pub trait HashedBits {
     fn next(&mut self, n: u8) -> Result<Self::Value, Error>;
 }
 
-pub trait Node<K, V, H>
+pub trait HAMTNode<K, V, H>
 where
     K: Eq,
     H: HashedBits,
 {
-    fn path_to_key<S: BlockStore<K, V, H, Self>>(
+    fn path_to_key<S: BlockStore>(
         &self,
         hash_bits: &mut H,
         k: &K,
         path: &mut Vec<Vec<u8>>,
         bit_width: u8,
         store: &S,
-    ) -> Result<bool, Error>
+    ) -> Result<bool, Error>;
+
+    fn get_by_cid<S: BlockStore>(&self, cid: &Cid, store: &S) -> Result<Option<Self>, Error>
     where
         Self: Sized;
 
-    fn get_by_cid<S: BlockStore<K, V, H, Self>>(
+    fn cid(&self) -> Result<Cid, Error>;
+}
+
+pub trait AMTNode {
+    fn path_to_key<S: BlockStore>(
         &self,
-        cid: &Cid,
         store: &S,
-    ) -> Result<Option<Self>, Error>
+        bit_width: usize,
+        height: usize,
+        i: usize,
+        path: &mut Vec<Vec<u8>>,
+    ) -> Result<bool, Error>;
+
+    fn get_by_cid<S: BlockStore>(&self, cid: &Cid, store: &S) -> Result<Option<Self>, Error>
         where
             Self: Sized;
 
@@ -44,12 +56,7 @@ where
 }
 
 /// Wrapper for database to handle inserting and retrieving ipld data with Cids
-pub trait BlockStore<K, V, H, N>
-where
-    K: Eq,
-    H: HashedBits,
-    N: Node<K, V, H>,
-{
+pub trait BlockStore {
     /// Get typed object from block store by Cid.
-    fn get(&self, cid: &Cid) -> Result<N, Error>;
+    fn get<T: DeserializeOwned>(&self, cid: &Cid) -> Result<T, Error>;
 }

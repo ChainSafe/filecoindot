@@ -2,13 +2,15 @@
 
 mod errors;
 // #[cfg(feature="forest")]
-mod forest_adaptor;
+mod forest_hamt_adaptor;
 
+mod amt;
 mod generate;
 mod hamt;
 mod traits;
 mod verify;
+mod forest_amt_adaptor;
 
-pub use crate::forest_adaptor::*;
-pub use crate::verify::*;
+pub use crate::forest_hamt_adaptor::*;
 pub use crate::hamt::Hamt;
+pub use crate::verify::*;
