@@ -34,7 +34,7 @@ impl TipSet {
             .cids
             .into_iter()
             .zip(self.blocks.into_iter())
-            .map(|(cid, block)| (cid.empty, block.messages.empty))
+            .map(|(cid, block)| (cid.inner, block.messages.inner))
             .collect())
     }
 }
@@ -49,5 +49,5 @@ pub struct Block {
 pub struct Cid {
     #[serde(deserialize_with = "crate::ocw::de::bytes")]
     #[serde(rename = "/")]
-    pub empty: Vec<u8>,
+    pub inner: Vec<u8>,
 }

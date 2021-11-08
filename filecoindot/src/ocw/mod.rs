@@ -65,7 +65,7 @@ fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -
         .map_err(|_| Error::HttpError)?
         .pairs()?;
 
-    pairs
+    if pairs
         .into_iter()
         .map(|(cid, msg_root)| {
             // FIXME:
@@ -81,8 +81,9 @@ fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -
             Ok(())
         })
         .any(|x| x == Err(Error::OffchainSignedTxError))
-        .then(|| Some(()))
-        .ok_or(Error::OffchainSignedTxError)?;
+    {
+        return Err(Error::OffchainSignedTxError);
+    }
 
     Ok(())
 }
