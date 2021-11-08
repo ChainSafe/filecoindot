@@ -9,22 +9,22 @@ pub fn get_tip_set_by_height_1199840() -> ChainGetTipSetByHeightResult {
     ChainGetTipSetByHeightResult {
         cids: vec![
             Cid {
-                empty: "bafy2bzacedbaliyx3k64d4rxy5q2og3wf5r5e2ra6bvf52ogldc6oad3jukbe"
+                inner: "bafy2bzacedbaliyx3k64d4rxy5q2og3wf5r5e2ra6bvf52ogldc6oad3jukbe"
                     .as_bytes()
                     .to_vec(),
             },
             Cid {
-                empty: "bafy2bzaceblrey44c6ekyu7iu6dni4inrjgnyp7sgjrrgg3xnd3poxjrt2v2i"
+                inner: "bafy2bzaceblrey44c6ekyu7iu6dni4inrjgnyp7sgjrrgg3xnd3poxjrt2v2i"
                     .as_bytes()
                     .to_vec(),
             },
             Cid {
-                empty: "bafy2bzacedd2wb4ijvvowm2gq3izffhl2oqlogigfubizozgbgo5l7rk73ick"
+                inner: "bafy2bzacedd2wb4ijvvowm2gq3izffhl2oqlogigfubizozgbgo5l7rk73ick"
                     .as_bytes()
                     .to_vec(),
             },
             Cid {
-                empty: "bafy2bzacecav4sjwonnjryjb5kmrint45yenyhorzn2it5noxdqhnudsquyoo"
+                inner: "bafy2bzacecav4sjwonnjryjb5kmrint45yenyhorzn2it5noxdqhnudsquyoo"
                     .as_bytes()
                     .to_vec(),
             },
@@ -32,28 +32,28 @@ pub fn get_tip_set_by_height_1199840() -> ChainGetTipSetByHeightResult {
         blocks: vec![
             Block {
                 messages: Cid {
-                    empty: "bafy2bzacea4v4uwhlffeznk5sn2naw7zsl6tahsstc37ygongb3tppnqjosey"
+                    inner: "bafy2bzacea4v4uwhlffeznk5sn2naw7zsl6tahsstc37ygongb3tppnqjosey"
                         .as_bytes()
                         .to_vec(),
                 },
             },
             Block {
                 messages: Cid {
-                    empty: "bafy2bzacebyoxanjivzgsj3aisd5e5wrdai3oeqodxnkw2gbo2yctt33mbeeo"
+                    inner: "bafy2bzacebyoxanjivzgsj3aisd5e5wrdai3oeqodxnkw2gbo2yctt33mbeeo"
                         .as_bytes()
                         .to_vec(),
                 },
             },
             Block {
                 messages: Cid {
-                    empty: "bafy2bzacebizldd4vzjmjqp6gmmtixshxo7xlc4fl77drjmvhjg6zm5z6ojoc"
+                    inner: "bafy2bzacebizldd4vzjmjqp6gmmtixshxo7xlc4fl77drjmvhjg6zm5z6ojoc"
                         .as_bytes()
                         .to_vec(),
                 },
             },
             Block {
                 messages: Cid {
-                    empty: "bafy2bzaceducpch7kljxpbsybi5uc3wljabh3zfbk2jvhpk56c2a4gnjbveoc"
+                    inner: "bafy2bzaceducpch7kljxpbsybi5uc3wljabh3zfbk2jvhpk56c2a4gnjbveoc"
                         .as_bytes()
                         .to_vec(),
                 },
