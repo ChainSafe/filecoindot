@@ -5,8 +5,8 @@ This is an example for configuring filecointdot to your substrate node
 
 ### 0. add `filecoindot` to your runtime
 
-```
-//! /runtime/Cargo.toml
+```toml
+# /runtime/Cargo.toml
 
 filecoindot = { git = "https://github.com/chainSafe/filecoindot",  default-features = false }
 ```
@@ -15,6 +15,8 @@ filecoindot = { git = "https://github.com/chainSafe/filecoindot",  default-featu
 ### 1. configure `filecoindot` into your runtime
 
 ```rust
+//! runtime/src/lib.rs
+
 /// ManagerOrigin which manages the approved relayer set, in this case root
 type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
 
@@ -34,6 +36,8 @@ impl filecoindot::Config for Runtime {
 ### 2. implement `CreateSignedTransaction` for your runtime
 
 ```rust
+//! runtime/src/lib.rs
+
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 where
 	Call: From<LocalCall>,
@@ -99,7 +103,7 @@ filecoindot = { git = "https://github.com/chainSafe/filecoindot" }
 
 ### 4. extend filecoindot rpc for the rpc handler
 
-```
+```rust
 //! node/src/rpc.rs
 
 /// Full client dependencies.
