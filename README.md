@@ -10,101 +10,15 @@ framework, including Polkadot parachains.
 
 ## How to integrate the Filecoin bridge pallet into a runtime?
 
-### 0. add `filecoindot` to your runtime config
+### 0. configure `filecoindot` into your node
 
-```
-// Cargo.toml
+Here we need to configure filecoindot to our runtime first, see [substrate-node-example](./substrate-node-example/README.md) 
+for detail.
 
-filecoindot = { git = "https://github.com/chainSafe/filecoindot",  default-features = false }
-```
-
-Here you need to register filecoindot and the offchain worker's logic to your `runtime.rs`:
-
-```rust
-// runtime.rs
-
-parameter_types! {
-    pub const OffchainWorkerTimeout: u64 = 1_000_000;
-}
-
-// ManagerOrigin as root
-type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
-
-impl filecoindot::Config for Runtime {
-    type ManagerOrigin = ManagerOrigin;
-    type Event = Event;
-    type WeightInfo = ();
-    type AuthorityId = filecoindot::FilecoindotId;
-    type OffchainWorkerTimeout = OffchainWorkerTimeout;
-}
-
-// For pallet-example-offchain-worker
-parameter_types! {
-    pub const GracePeriod: BlockNumber = 3;
-    pub const UnsignedInterval: BlockNumber = 3;
-    pub const UnsignedPriority: BlockNumber = 3;
-}
-
-impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
-where
-    Call: From<LocalCall>,
-{
-    fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
-        call: Call,
-        public: <Signature as sp_runtime::traits::Verify>::Signer,
-        account: AccountId,
-        index: Index,
-    ) -> Option<(
-        Call,
-        <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload,
-    )> {
-        let period = BlockHashCount::get() as u64;
-        let current_block = System::block_number()
-            .saturated_into::<u64>()
-            .saturating_sub(1);
-        let tip = 0;
-        let extra: SignedExtra = (
-            frame_system::CheckSpecVersion::<Runtime>::new(),
-            frame_system::CheckTxVersion::<Runtime>::new(),
-            frame_system::CheckGenesis::<Runtime>::new(),
-            frame_system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
-            frame_system::CheckNonce::<Runtime>::from(index),
-            frame_system::CheckWeight::<Runtime>::new(),
-            pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
-        );
-
-        let raw_payload = SignedPayload::new(call, extra)
-            .map_err(|e| {
-                log::warn!("Unable to create signed payload: {:?}", e);
-            })
-            .ok()?;
-        let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
-        let address = account;
-        let (call, extra, _) = raw_payload.deconstruct();
-        Some((
-            call,
-            (sp_runtime::MultiAddress::Id(address), signature, extra),
-        ))
-    }
-}
-
-impl frame_system::offchain::SigningTypes for Runtime {
-    type Public = <Signature as sp_runtime::traits::Verify>::Signer;
-    type Signature = Signature;
-}
-
-impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
-where
-    Call: From<C>,
-{
-    type OverarchingCall = Call;
-    type Extrinsic = UncheckedExtrinsic;
-}
-```
 
 ### 1. set signer account to your node
 
-Here we need to generate an account for our offchain worker first
+Generate an account with [subkey](https://github.com/paritytech/substrate/tree/8b95e236582c209a1676d75a1db61a4916faabf5/bin/utils/subkey) for our offchain worker first
 
 ```
 $ subkey generate
@@ -170,7 +84,7 @@ If you can see the logs below in your terminal
 2021-10-31 21:59:00 bootstrap filecoindot ocw with filecoin rpc endpoint http://user:pass@infura.io
 ```
 
-the filecoindot offchain work has been set up!
+the filecoindot offchain worker has been set up!
 
 
 ### 3. Full Example
