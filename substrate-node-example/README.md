@@ -11,10 +11,10 @@ filecoindot = { git = "https://github.com/chainSafe/filecoindot",  default-featu
 ```
 
 
-### 1. configure `filecoindot` to your runtime
+### 1. configure `filecoindot` into your runtime
 
-```
-// ManagerOrigin which manages the approved relayer set, in this case root
+```rust
+/// ManagerOrigin which manages the approved relayer set, in this case root
 type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
 
 impl filecoindot::Config for Runtime {
@@ -30,7 +30,7 @@ impl filecoindot::Config for Runtime {
 ```
 
 
-### 2. implement `CreateSignedTransaction` to your runtime
+### 2. implement `CreateSignedTransaction` for your runtime
 
 ```rust
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime

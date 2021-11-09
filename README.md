@@ -10,13 +10,13 @@ framework, including Polkadot parachains.
 
 ## How to integrate the Filecoin bridge pallet into a runtime?
 
-### 0. configure `filecoindot` into your node
+#### 0. configure `filecoindot` into your node
 
-Here we need to configure filecoindot to our runtime first, see [substrate-node-example](./substrate-node-example/README.md) 
+Here we need to configure filecoindot into our runtime first, see [substrate-node-example](./substrate-node-example/README.md) 
 for detail.
 
 
-### 1. set signer account to your node
+#### 1. set signer account to your node
 
 Generate an account with [subkey](https://github.com/paritytech/substrate/tree/8b95e236582c209a1676d75a1db61a4916faabf5/bin/utils/subkey) for our offchain worker first
 
@@ -45,7 +45,7 @@ $ curl -X POST -vk 'http://localhost:9933' -H "Content-Type:application/json;cha
   }'
 ```
 
-## 2. set filecoin rpc endpoint to your node
+#### 2. set filecoin rpc endpoint to your node
 
 
 ```
@@ -87,7 +87,7 @@ If you can see the logs below in your terminal
 the filecoindot offchain worker has been set up!
 
 
-### 3. Full Example
+#### 3. Full Example
 
 See [the example runtime](./substrate-node-example/runtime/src/lib.rs) for a full example showing how to integrate the pallet into
 a substrate runtime.
