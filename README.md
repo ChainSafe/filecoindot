@@ -87,7 +87,12 @@ If you can see the logs below in your terminal
 the filecoindot offchain worker has been set up!
 
 
-#### 3. Full Example
+#### 3. set the the offchain worker's account as relayer
+
+_TODO_
+
+
+#### 4. Full Example
 
 See [the example runtime](./substrate-node-example/runtime/src/lib.rs) for a full example showing how to integrate the pallet into
 a substrate runtime.

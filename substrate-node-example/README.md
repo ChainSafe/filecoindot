@@ -2,7 +2,8 @@
 
 This is an example for configuring filecointdot to your substrate node
 
-### 0. add `filecoindot` to your runtime's Cargo.toml
+
+### 0. add `filecoindot` to your runtime
 
 ```
 //! /runtime/Cargo.toml
@@ -85,6 +86,42 @@ where
 ```
 
 This trait is required by the offchain worker, see [CreateSignedTransaction][0] for more detail.
+
+
+### 3. add `filecoindot-rpc` to your node service
+
+```toml
+# node/Cargo.toml
+
+filecoindot = { git = "https://github.com/chainSafe/filecoindot" }
+```
+
+
+### 4. extend filecoindot rpc for the rpc handler
+
+```
+//! node/src/rpc.rs
+
+/// Full client dependencies.
+pub struct FullDeps<C, P, S> {
+    /// The offchain storage instance to use.
+    pub storage: Option<Arc<RwLock<S>>>,
+    
+    // ...
+}
+
+
+/// Instantiate all full RPC extensions.
+pub fn create_full<C, P, S>(deps: FullDeps<C, P, S>) -> jsonrpc_core::IoHandler<sc_rpc::Metadata> {
+    
+    // ...
+    
+    // filecoindot rpc
+    if let Some(storage) = storage {
+        io.extend_with(FilecoindotApi::to_delegate(Filecoindot::new(storage)));
+    }
+}
+```
 
 
 [0]: https://docs.substrate.io/rustdocs/latest/frame_system/offchain/trait.CreateSignedTransaction.html
