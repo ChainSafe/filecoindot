@@ -73,7 +73,7 @@ pub mod pallet {
     /// Track the account id of each relayer
     #[pallet::storage]
     pub(crate) type Relayers<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, (), OptionQuery>;
 
     /// Count the total number of relayers
     #[pallet::storage]
@@ -99,7 +99,7 @@ pub mod pallet {
     /// Track the blocks that have been verified
     #[pallet::storage]
     pub(crate) type VerifiedBlocks<T: Config> =
-        StorageMap<_, Blake2_128Concat, BlockCid, bool, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, BlockCid, (), OptionQuery>;
 
     /// The threshold of votes required for a proposal to be qualified for approval resolution
     #[pallet::storage]
@@ -346,7 +346,7 @@ pub mod pallet {
                 Error::<T>::RelayerAlreadyExists
             );
 
-            Relayers::<T>::insert(&relayer, true);
+            Relayers::<T>::insert(&relayer, ());
             RelayerCount::<T>::mutate(|i| {
                 *i = i.saturating_add(1);
                 *i
@@ -375,7 +375,7 @@ pub mod pallet {
 
         /// Checks if who is a relayer
         fn is_relayer(who: &T::AccountId) -> bool {
-            Relayers::<T>::get(who).unwrap_or(false)
+            Relayers::<T>::get(who).map(|_| true).unwrap_or(false)
         }
 
         // ============== Voting Related =============
@@ -409,7 +409,7 @@ pub mod pallet {
             BlockSubmissionProposals::<T>::remove(&block_cid);
             MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
-            VerifiedBlocks::<T>::insert(block_cid.clone(), true);
+            VerifiedBlocks::<T>::insert(block_cid.clone(), ());
 
             Self::deposit_event(Event::ProposalApproved(block_cid));
         }
@@ -418,9 +418,7 @@ pub mod pallet {
             BlockSubmissionProposals::<T>::remove(&block_cid);
             MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
-            // TODO: In case a block is successfully challenged,
-            // then we'd purge it from the storage entirely.
-            VerifiedBlocks::<T>::insert(block_cid.clone(), false);
+            VerifiedBlocks::<T>::remove(block_cid.clone());
 
             Self::deposit_event(Event::ProposalRejected(block_cid));
         }
