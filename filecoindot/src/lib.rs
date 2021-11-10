@@ -84,6 +84,18 @@ pub mod pallet {
     pub(crate) type BlockSubmissionProposals<T: Config> =
         StorageMap<_, Blake2_128Concat, BlockCid, BlockSubmissionProposal<T>, OptionQuery>;
 
+    /// Track the accounts which voted for a particular submitted block proposal
+    #[pallet::storage]
+    pub(crate) type BlockProposalVotes<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        BlockCid,
+        Blake2_128Concat,
+        T::AccountId,
+        (),
+        OptionQuery,
+    >;
+
     /// Track the message root cid votes for block cid
     #[pallet::storage]
     pub(crate) type MessageRootCidCounter<T: Config> = StorageDoubleMap<
@@ -379,15 +391,42 @@ pub mod pallet {
         }
 
         // ============== Voting Related =============
+        /// Vote for the proposal. Will reject the operation if its status is invalid
+        /// The content of the vote is actually the message root of the block
         fn vote_block_proposal(
             block_cid: BlockCid,
             message_root_cid: Vec<u8>,
             proposal: &mut BlockSubmissionProposal<T>,
             who: T::AccountId,
         ) -> Result<(), Error<T>> {
+            ensure!(
+                !BlockProposalVotes::<T>::contains_key(block_cid.clone(), who.clone()),
+                Error::<T>::AlreadyVoted
+            );
+            ensure!(
+                *proposal.get_status() == ProposalStatus::Active,
+                Error::<T>::ProposalCompleted
+            );
+
             let now = frame_system::Pallet::<T>::block_number();
+
+            // when expired, we set the status to be rejected
+            if proposal.is_expired(&now) {
+                proposal.set_status(ProposalStatus::Rejected);
+                return Err(Error::<T>::ProposalExpired);
+            }
             let threshold = VoteThreshold::<T>::get();
-            proposal.vote(block_cid, message_root_cid, who, &now, threshold)
+
+            let count =
+                1 + MessageRootCidCounter::<T>::get(&block_cid, &message_root_cid).unwrap_or(0);
+            if count >= threshold {
+                proposal.set_status(ProposalStatus::Approved);
+            }
+
+            MessageRootCidCounter::<T>::insert(&block_cid, &message_root_cid, count);
+            BlockProposalVotes::<T>::insert(block_cid, who, ());
+
+            Ok(())
         }
 
         /// Try to resolve the proposal. If the proposal is resolved, return true, else false
@@ -407,6 +446,7 @@ pub mod pallet {
 
         fn finalize_block(block_cid: BlockCid) {
             BlockSubmissionProposals::<T>::remove(&block_cid);
+            BlockProposalVotes::<T>::remove_prefix(&block_cid, None);
             MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
             VerifiedBlocks::<T>::insert(block_cid.clone(), ());
