@@ -18,10 +18,10 @@ use frame_support::{
 };
 use frame_system::offchain::{SendSignedTransaction, Signer};
 
-mod api;
+pub mod api;
 mod de;
 mod result;
-mod types;
+pub mod types;
 
 #[cfg(test)]
 mod tests;
