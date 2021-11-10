@@ -74,7 +74,7 @@ impl<T: Config> BlockSubmissionProposal<T> {
     }
 
     /// Whether the proposal is still active, i.e. can vote
-    pub(crate) fn is_expired(&self, now: &T::BlockNumber) -> bool {
+    pub fn is_expired(&self, now: &T::BlockNumber) -> bool {
         now.gt(&self.end_block)
     }
 }
