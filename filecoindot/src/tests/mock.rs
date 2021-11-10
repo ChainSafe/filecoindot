@@ -94,7 +94,7 @@ impl frame_system::Config for Test {
     type OnSetCode = ();
 }
 
-type Extrinsic = TestXt<Call, ()>;
+pub type Extrinsic = TestXt<Call, ()>;
 
 impl frame_system::offchain::SigningTypes for Test {
     type Public = <Signature as Verify>::Signer;

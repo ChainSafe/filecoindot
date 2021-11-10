@@ -18,11 +18,6 @@ mod chain_head;
 /// Wrapper for jsonrpc result
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Resp<T> {
-    /// reponse id
-    pub id: u8,
-    /// JsonRPC version
-    #[serde(skip_deserializing)]
-    pub jsonrpc: Vec<u8>,
     /// JsonRPC result
     pub result: T,
 }
