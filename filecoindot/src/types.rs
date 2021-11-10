@@ -3,10 +3,9 @@
 
 use frame_support::pallet_prelude::*;
 use frame_support::sp_std;
-use frame_support::sp_std::collections::btree_set::BTreeSet;
 use frame_system::{Origin, RawOrigin};
 
-use crate::{pallet, Config, Error, MessageRootCidCounter, Relayers};
+use crate::{Config, Error, MessageRootCidCounter, Relayers};
 
 /// The filecoin block submission proposal
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
