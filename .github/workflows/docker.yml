@@ -25,5 +25,5 @@ jobs:
         with:
           file: "substrate-node-template/Dockerfile"
           context: "substrate-node-template"
-          push: ${{ github.event_name == "push" }}
+          push: ${{ github.event == "push" }}
           tags: ChainSafe/filecoindot-template:latest
