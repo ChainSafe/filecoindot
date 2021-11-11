@@ -1,5 +1,5 @@
 [package]
-name = "node-template"
+name = "filecoindot-template"
 version = "3.0.0"
 authors = ["Substrate DevHub <https://github.com/substrate-developer-hub>"]
 description = "A fresh FRAME-based Substrate node, ready for hacking."
