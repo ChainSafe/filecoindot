@@ -43,7 +43,7 @@ pallet-transaction-payment-rpc-runtime-api = { default-features = false, git = "
 # Used for runtime benchmarking
 frame-benchmarking = { default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
 frame-system-benchmarking = { default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
-hex-literal = { version = "0.3.3", optional = true }
+hex-literal = { version = "0.3.4", optional = true }
 
 # filecoindot dependencies
 filecoindot = { path = "../../filecoindot",  default-features = false }
