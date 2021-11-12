@@ -334,7 +334,7 @@ pub mod pallet {
 
             let now = frame_system::Pallet::<T>::block_number();
             let threshold = VoteThreshold::<T>::get();
-            p.resolve(&block_cid, &now, threshold)?;
+            Self::resolve_proposal(&mut p, &block_cid, &now, threshold)?;
 
             Self::try_resolve_proposal(block_cid, &p);
 
@@ -425,6 +425,34 @@ pub mod pallet {
 
             MessageRootCidCounter::<T>::insert(&block_cid, &message_root_cid, count);
             BlockProposalVotes::<T>::insert(block_cid, who, ());
+
+            Ok(())
+        }
+
+        pub(crate) fn resolve_proposal(
+            proposal: &mut BlockSubmissionProposal<T>,
+            block_cid: &[u8],
+            when: &T::BlockNumber,
+            threshold: u32,
+        ) -> Result<(), Error<T>> {
+            ensure!(
+                *proposal.get_status() == ProposalStatus::Active,
+                Error::<T>::ProposalCompleted
+            );
+
+            // when expired, we set the status to be rejected
+            if proposal.is_expired(when) {
+                proposal.set_status(ProposalStatus::Rejected);
+            } else {
+                // MessageRootCidCounter leaked into the struct, well not the best way for encapsulation
+                // but works for now, come back later to fix this.
+                for (_, count) in MessageRootCidCounter::<T>::iter_prefix(block_cid) {
+                    if count >= threshold {
+                        proposal.set_status(ProposalStatus::Approved);
+                        break;
+                    }
+                }
+            }
 
             Ok(())
         }

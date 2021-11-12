@@ -5,7 +5,7 @@ use frame_support::pallet_prelude::*;
 use frame_support::sp_std;
 use frame_system::{Origin, RawOrigin};
 
-use crate::{Config, Error, MessageRootCidCounter, Relayers};
+use crate::{Config, Relayers};
 
 /// The filecoin block submission proposal
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
@@ -41,35 +41,6 @@ impl<T: Config> BlockSubmissionProposal<T> {
 
     pub fn set_status(&mut self, new_status: ProposalStatus) {
         self.status = new_status;
-    }
-
-    /// Resolve the proposal status
-    pub fn resolve(
-        &mut self,
-        block_cid: &[u8],
-        when: &T::BlockNumber,
-        threshold: u32,
-    ) -> Result<(), Error<T>> {
-        ensure!(
-            self.status == ProposalStatus::Active,
-            Error::<T>::ProposalCompleted
-        );
-
-        // when expired, we set the status to be rejected
-        if self.is_expired(when) {
-            self.status = ProposalStatus::Rejected;
-        } else {
-            // MessageRootCidCounter leaked into the struct, well not the best way for encapsulation
-            // but works for now, come back later to fix this.
-            for (_, count) in MessageRootCidCounter::<T>::iter_prefix(block_cid) {
-                if count >= threshold {
-                    self.status = ProposalStatus::Approved;
-                    break;
-                }
-            }
-        }
-
-        Ok(())
     }
 
     /// Whether the proposal is still active, i.e. can vote
