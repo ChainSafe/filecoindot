@@ -17,7 +17,11 @@ pub trait HashedBits {
     fn next(&mut self, n: u8) -> Result<Self::Value, Error>;
 }
 
-pub trait HAMTNode<K, V, H>
+pub trait GetCid {
+    fn cid(&self) -> Result<Cid, Error>;
+}
+
+pub trait HAMTNode<K, V, H>: GetCid
 where
     K: Eq,
     H: HashedBits,
@@ -34,11 +38,9 @@ where
     fn get_by_cid<S: BlockStore>(&self, cid: &Cid, store: &S) -> Result<Option<Self>, Error>
     where
         Self: Sized;
-
-    fn cid(&self) -> Result<Cid, Error>;
 }
 
-pub trait AMTNode {
+pub trait AMTNode: GetCid {
     fn path_to_key<S: BlockStore>(
         &self,
         store: &S,
@@ -51,8 +53,6 @@ pub trait AMTNode {
     fn get_by_cid<S: BlockStore>(&self, cid: &Cid, store: &S, bit_width: usize) -> Result<Option<Self>, Error>
         where
             Self: Sized;
-
-    fn cid(&self) -> Result<Cid, Error>;
 }
 
 /// Wrapper for database to handle inserting and retrieving ipld data with Cids

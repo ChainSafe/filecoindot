@@ -705,6 +705,7 @@ version = "0.1.0"
 dependencies = [
  "byteorder",
  "cs_serde_bytes",
+ "cs_serde_cbor",
  "forest_cid",
  "forest_db 0.1.0 (git+https://github.com/willeslau/forest?branch=willes/filecoindot)",
  "forest_encoding",

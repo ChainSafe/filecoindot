@@ -1,13 +1,16 @@
 use crate::errors::Error;
-use crate::traits::{AMTNode, BlockStore};
+use crate::traits::{AMTNode, BlockStore, GetCid};
 use cid::Cid;
 use cid::Code::Blake2b256;
 use forest_encoding::de::{Deserialize};
 use ipld_amt::{CollapsedNode, Link, Node as ForestNode};
 use std::marker::PhantomData;
 use forest_encoding::to_vec;
-use serde::Serialize;
+use serde::{Deserializer, Serialize, Serializer};
+use serde::de::Error as SerdeError;
 use crate::amt::nodes_for_height;
+
+const DEFAULT_BIT_WIDTH: usize = 3;
 
 impl From<ipld_amt::Error> for Error {
     fn from(error: ipld_amt::Error) -> Self {
@@ -16,7 +19,7 @@ impl From<ipld_amt::Error> for Error {
     }
 }
 
-pub(crate) struct ForestAmtAdaptedNode<V> {
+pub struct ForestAmtAdaptedNode<V> {
     cid: Option<Cid>,
     inner: ForestNode<V>,
     _v: PhantomData<V>
@@ -32,6 +35,45 @@ impl <V> ForestAmtAdaptedNode<V>{
     }
 }
 
+impl<V> Serialize for ForestAmtAdaptedNode<V> where V: for<'de>Deserialize<'de> + Serialize
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+    {
+        (&self.inner).serialize(serializer)
+    }
+}
+
+impl<'de, V> Deserialize<'de> for ForestAmtAdaptedNode<V>
+    where
+        V: Serialize + for<'a> serde::Deserialize<'a>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, <D as serde::Deserializer<'de>>::Error>
+        where
+            D: Deserializer<'de>,
+    {
+        let node = Deserialize::deserialize(deserializer)?;
+        let node: CollapsedNode<V> = node;
+        let node = node
+            .expand(DEFAULT_BIT_WIDTH)
+            .map_err(|_| <D as serde::Deserializer<'de>>::Error::custom("cannot deserialized"))?;
+        Ok(ForestAmtAdaptedNode::new(None, node))
+    }
+}
+
+impl<V> GetCid for ForestAmtAdaptedNode<V> where V: Serialize + for<'de> Deserialize<'de> {
+    fn cid(&self) -> Result<Cid, Error> {
+        match self.cid {
+            Some(cid) => Ok(cid.clone()),
+            None => {
+                let bytes = to_vec(&self.inner)?;
+                Ok(cid::new_from_cbor(&bytes, Blake2b256))
+            }
+        }
+    }
+}
+
 impl <V> AMTNode for ForestAmtAdaptedNode<V> where V: for<'de>Deserialize<'de> + Serialize {
     fn path_to_key<S: BlockStore>(&self, store: &S, bit_width: usize, height: usize, i: usize, path: &mut Vec<Vec<u8>>) -> Result<bool, Error> {
         let sub_i = i / nodes_for_height(bit_width, height);
@@ -39,7 +81,7 @@ impl <V> AMTNode for ForestAmtAdaptedNode<V> where V: for<'de>Deserialize<'de> +
         match &self.inner {
             ForestNode::Leaf { vals, .. } => {
                 vals.get(i).ok_or(Error::NotFound)?;
-                path.push(self.cid()?.to_bytes());
+                path.push(to_vec(self)?);
                 Ok(true)
             },
             ForestNode::Link { links, .. } => {
@@ -98,9 +140,50 @@ impl <V> AMTNode for ForestAmtAdaptedNode<V> where V: for<'de>Deserialize<'de> +
         }
         Ok(None)
     }
+}
 
-    fn cid(&self) -> Result<Cid, Error> {
-        let bytes = to_vec(&self.inner)?;
-        Ok(cid::new_from_cbor(&bytes, Blake2b256))
+#[cfg(test)]
+mod tests {
+    use ipld_blockstore::MemoryDB;
+    use ipld_amt::Amt as ForestAmt;
+    use serde_cbor::from_slice;
+    use super::*;
+    use crate::{Amt, ForestAdaptedBlockStorage, ProofVerify};
+
+    #[test]
+    fn test_basic_proof_generation() {
+        let bs = MemoryDB::default();
+        let mut famt= ForestAmt::new(&bs);
+
+        let max = 1000;
+        for i in 1..max {
+            famt.set(i, i.to_string()).unwrap();
+        }
+
+        let cid = famt.flush().unwrap();
+        let store = ForestAdaptedBlockStorage::new(bs);
+        let amt: Amt<ForestAdaptedBlockStorage<MemoryDB>, ForestAmtAdaptedNode<String>> = Amt::load(&cid, &store).unwrap();
+        let p = amt.generate_proof(0);
+        assert_eq!(p.is_ok(), true);
+    }
+
+    #[test]
+    fn test_verify_works() {
+        let bs = MemoryDB::default();
+        let mut famt= ForestAmt::new(&bs);
+
+        let max = 1000;
+        for i in 1..max {
+            famt.set(i, i.to_string()).unwrap();
+        }
+
+        let cid = famt.flush().unwrap();
+        let store = ForestAdaptedBlockStorage::new(bs);
+        let amt: Amt<ForestAdaptedBlockStorage<MemoryDB>, ForestAmtAdaptedNode<String>> = Amt::load(&cid, &store).unwrap();
+        let p = amt.generate_proof(0).unwrap();
+        let raw_node = p.get(0).unwrap();
+        let node: ForestAmtAdaptedNode<String> = from_slice(raw_node).unwrap();
+        let r = ProofVerify::verify_proof::<ForestAmtAdaptedNode<String>>(p, &node.cid().unwrap());
+        assert_eq!(r.is_ok(), true);
     }
 }

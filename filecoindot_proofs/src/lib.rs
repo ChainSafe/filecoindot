@@ -1,7 +1,6 @@
 #![feature(in_band_lifetimes)]
 
 mod errors;
-// #[cfg(feature="forest")]
 mod forest_hamt_adaptor;
 
 mod amt;
