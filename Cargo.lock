@@ -710,6 +710,7 @@ dependencies = [
  "forest_encoding",
  "forest_hash_utils",
  "forest_ipld",
+ "ipld_amt",
  "ipld_blockstore 0.1.1 (git+https://github.com/willeslau/forest?branch=willes/filecoindot)",
  "ipld_hamt",
  "num-traits",
@@ -798,7 +799,7 @@ dependencies = [
 [[package]]
 name = "forest_db"
 version = "0.1.0"
-source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#ddc3e6c1d2505b7b018aef5885dff22a40ad043e"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#2c207aeff5fe89bd39e52237591fdae795243a9a"
 dependencies = [
  "forest_encoding",
  "parking_lot 0.11.2",
@@ -1370,6 +1371,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ipld_amt"
+version = "1.0.0"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#2c207aeff5fe89bd39e52237591fdae795243a9a"
+dependencies = [
+ "forest_cid",
+ "forest_db 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "forest_encoding",
+ "ipld_blockstore 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "itertools",
+ "once_cell",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "ipld_blockstore"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1383,7 +1399,7 @@ dependencies = [
 [[package]]
 name = "ipld_blockstore"
 version = "0.1.1"
-source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#ddc3e6c1d2505b7b018aef5885dff22a40ad043e"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#2c207aeff5fe89bd39e52237591fdae795243a9a"
 dependencies = [
  "byteorder",
  "dashmap",
@@ -1395,7 +1411,7 @@ dependencies = [
 [[package]]
 name = "ipld_hamt"
 version = "2.0.0"
-source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#ddc3e6c1d2505b7b018aef5885dff22a40ad043e"
+source = "git+https://github.com/willeslau/forest?branch=willes/filecoindot#2c207aeff5fe89bd39e52237591fdae795243a9a"
 dependencies = [
  "byteorder",
  "cs_serde_bytes",
@@ -1416,6 +1432,15 @@ name = "ipnet"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68f2d64f2edebec4ce84ad108148e67e1064789bee435edc5b60ad398714a3a9"
+
+[[package]]
+name = "itertools"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69ddb889f9d0d08a67338271fa9b62996bc788c7796a5c18cf057420aaed5eaf"
+dependencies = [
+ "either",
+]
 
 [[package]]
 name = "itoa"
@@ -3417,7 +3442,7 @@ version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f559b464de2e2bdabcac6a210d12e9b5a5973c251e102c44c585c71d51bd78e"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if 0.1.10",
  "rand 0.8.4",
  "static_assertions",
 ]

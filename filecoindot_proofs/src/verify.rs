@@ -21,10 +21,7 @@ pub fn verify(root: &Cid, proof: Vec<Vec<u8>>, cid: &Cid) -> Result<(), Error> {
 mod tests {
     use super::*;
     use crate::hamt::Hamt;
-    use crate::{
-        ForestAdaptedBlockStorage, ForestAdaptedHashAlgo, ForestAdaptedHashedBits,
-        ForestAdaptedNode,
-    };
+    use crate::{ForestAdaptedBlockStorage, ForestAdaptedHashAlgo, ForestAdaptedHashedBits, ForestAdaptedNode};
     use ipld_blockstore::MemoryDB;
     use ipld_hamt::Hamt as ForestHamt;
 

@@ -1,10 +1,15 @@
 use crate::errors::Error;
-use crate::traits::{BlockStore, HashAlgorithm, HashedBits, Node};
+use crate::traits::{BlockStore, HAMTNode, HashAlgorithm, HashedBits};
 use cid::Cid;
 use cid::Code::Blake2b256;
+use forest_encoding::de::{Deserialize, Deserializer};
 use forest_encoding::{from_slice, to_vec};
 use ipld_blockstore::BlockStore as ForestBlockStore;
-use ipld_hamt::{Bitfield, Hash, HashAlgorithm as ForestHashAlgo, Node as ForestNode, Pointer as ForestPointer, Pointer, Sha256};
+use ipld_hamt::{
+    Bitfield, Hash, HashAlgorithm as ForestHashAlgo, Node as ForestNode, Pointer as ForestPointer,
+    Pointer, Sha256,
+};
+use serde::de::DeserializeOwned;
 use serde::{Serialize, Serializer};
 use std::cmp::Ordering;
 use std::marker::PhantomData;
@@ -132,6 +137,21 @@ where
     }
 }
 
+impl<'de, K, V, Hash, HashOutput> Deserialize<'de> for ForestAdaptedNode<K, V, Hash, HashOutput>
+where
+    HashOutput: HashedBits,
+    K: Eq + Serialize + for<'a> serde::Deserialize<'a>,
+    V: Serialize + for<'a> serde::Deserialize<'a>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, <D as serde::Deserializer<'de>>::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let (bitfield, pointers) = Deserialize::deserialize(deserializer)?;
+        Ok(ForestAdaptedNode::new(None, bitfield, pointers))
+    }
+}
+
 impl<K: Eq + Serialize, V: Serialize, H, HashOutput: HashedBits>
     ForestAdaptedNode<K, V, H, HashOutput>
 {
@@ -164,13 +184,13 @@ impl<K: Eq + Serialize, V: Serialize, H, HashOutput: HashedBits>
     }
 }
 
-impl<'a, K, V, H> Node<K, V, ForestAdaptedHashedBits>
+impl<'a, K, V, H> HAMTNode<K, V, ForestAdaptedHashedBits>
     for ForestAdaptedNode<K, V, H, ForestAdaptedHashedBits>
 where
     K: Eq + Serialize + for<'de> serde::Deserialize<'de>,
     V: Serialize + for<'de> serde::Deserialize<'de>,
 {
-    fn path_to_key<S: BlockStore<K, V, ForestAdaptedHashedBits, Self>>(
+    fn path_to_key<S: BlockStore>(
         &self,
         hash_bits: &mut ForestAdaptedHashedBits,
         k: &K,
@@ -191,16 +211,17 @@ where
                 path.push(self.cid()?.to_bytes());
                 if let Some(cached_node) = cache.get() {
                     path.push(cid.to_bytes());
-                    let n = serialize_to_node(Some(*cid), &deserialize_node_slice(cached_node)?)?;
+                    let n: Self =
+                        serialize_to_node(Some(*cid), &deserialize_node_slice(cached_node)?)?;
                     n.path_to_key(hash_bits, k, path, bit_width, s)
                 } else {
-                    let n = s.get(cid)?;
+                    let n: Self = s.get(cid)?;
                     n.path_to_key(hash_bits, k, path, bit_width, s)
                 }
             }
             ForestPointer::Dirty(n) => {
                 path.push(self.cid()?.to_bytes());
-                let n = serialize_to_node(None, &deserialize_node_slice(n)?)?;
+                let n: Self = serialize_to_node(None, &deserialize_node_slice(n)?)?;
                 n.path_to_key(hash_bits, k, path, bit_width, s)
             }
             ForestPointer::Values(key_values) => match key_values.iter().find(|kv| kv.key() == k) {
@@ -213,24 +234,36 @@ where
         }
     }
 
-    fn get_by_cid<S: BlockStore<K, V, ForestAdaptedHashedBits, Self>>(&self, cid: &Cid, store: &S) -> Result<Option<Self>, Error> where Self: Sized {
+    fn get_by_cid<S: BlockStore>(&self, cid: &Cid, store: &S) -> Result<Option<Self>, Error>
+    where
+        Self: Sized,
+    {
         for pointer in &self.raw_pointers {
             match pointer {
-                Pointer::Values(_) => { continue; }
-                Pointer::Link { cid: link_cid, cache, .. } => {
+                Pointer::Values(_) => {
+                    continue;
+                }
+                Pointer::Link {
+                    cid: link_cid,
+                    cache,
+                    ..
+                } => {
                     if cid != link_cid {
                         continue;
                     }
                     return if let Some(cached_node) = cache.get() {
-                        let node = serialize_to_node(Some(*cid), &deserialize_node_slice(cached_node)?)?;
+                        let node =
+                            serialize_to_node(Some(*cid), &deserialize_node_slice(cached_node)?)?;
                         Ok(Some(node))
                     } else {
                         let n = store.get(link_cid)?;
                         Ok(Some(n))
-                    }
+                    };
                 }
                 // TODO: check again if dirty needs to be checked
-                Pointer::Dirty(_) => { continue; }
+                Pointer::Dirty(_) => {
+                    continue;
+                }
             }
         }
         Ok(None)
@@ -254,17 +287,13 @@ impl<FBS: ForestBlockStore> ForestAdaptedBlockStorage<FBS> {
     }
 }
 
-impl<'a, K, H, V, FBS>
-    BlockStore<K, V, ForestAdaptedHashedBits, ForestAdaptedNode<K, V, H, ForestAdaptedHashedBits>>
-    for ForestAdaptedBlockStorage<FBS>
+impl<FBS> BlockStore for ForestAdaptedBlockStorage<FBS>
 where
-    K: Eq + Serialize + for<'de> serde::Deserialize<'de>,
-    V: Serialize + for<'de> serde::Deserialize<'de>,
     FBS: ForestBlockStore,
 {
-    fn get(&self, cid: &Cid) -> Result<ForestAdaptedNode<K, V, H, ForestAdaptedHashedBits>, Error> {
+    fn get<T: DeserializeOwned>(&self, cid: &Cid) -> Result<T, Error> {
         let n = self.store.read(cid.to_bytes())?.ok_or(Error::NotFound)?;
-        serialize_to_node(Some(*cid), &n)
+        Ok(from_slice(&n)?)
     }
 }
 
@@ -346,12 +375,11 @@ mod tests {
             ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, _>,
             ForestAdaptedHashAlgo,
         > = Hamt::new(&cid, &store, 8).unwrap();
-        let p = hamt.generate_proof(&(max-1));
+        let p = hamt.generate_proof(&(max - 1));
         assert_eq!(p.is_ok(), true);
         let v = p.unwrap();
         assert_eq!(v.len(), 2);
         assert_eq!(v[0], cid.to_bytes());
-
     }
 
     #[test]
@@ -400,7 +428,7 @@ mod tests {
             ForestAdaptedHashAlgo,
         > = Hamt::new(&cid, &store, 8).unwrap();
 
-        let mut p = hamt.generate_proof(&(max/2)).unwrap();
+        let mut p = hamt.generate_proof(&(max / 2)).unwrap();
         let reverse_root = Cid::read_bytes(&*p[0]).unwrap();
         assert_eq!(cid, reverse_root);
         p.reverse();
@@ -430,7 +458,7 @@ mod tests {
             ForestAdaptedHashAlgo,
         > = Hamt::new(&cid, &store, 8).unwrap();
 
-        let mut p = hamt.generate_proof(&(max/2)).unwrap();
+        let mut p = hamt.generate_proof(&(max / 2)).unwrap();
         let reverse_root = Cid::read_bytes(&*p[0]).unwrap();
         assert_eq!(cid, reverse_root);
         p.reverse();
