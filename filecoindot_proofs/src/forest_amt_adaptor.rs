@@ -14,8 +14,7 @@ const DEFAULT_BIT_WIDTH: usize = 3;
 
 impl From<ipld_amt::Error> for Error {
     fn from(error: ipld_amt::Error) -> Self {
-        let error_str = format!("forest_db error: {:?}", error);
-        Error::Other(error_str)
+        Error::IPLDAmtError(error)
     }
 }
 

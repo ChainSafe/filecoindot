@@ -89,29 +89,25 @@ impl HashedBits for ForestAdaptedHashedBits {
 
 impl From<ipld_blockstore::Error> for Error {
     fn from(error: ipld_blockstore::Error) -> Self {
-        let error_str = format!("ipld_blockstore error: {:?}", error);
-        Error::Other(error_str)
+        Error::BlockStoreError(error)
     }
 }
 
 impl From<ipld_hamt::Error> for Error {
     fn from(error: ipld_hamt::Error) -> Self {
-        let error_str = format!("ipld_hamt error: {:?}", error);
-        Error::Other(error_str)
+        Error::IPLDHamtError(error)
     }
 }
 
 impl From<forest_db::Error> for Error {
     fn from(error: forest_db::Error) -> Self {
-        let error_str = format!("forest_db error: {:?}", error);
-        Error::Other(error_str)
+        Error::ForestDBError(error)
     }
 }
 
-impl From<forest_encoding::error::Error> for Error {
-    fn from(error: forest_encoding::error::Error) -> Self {
-        let error_str = format!("forest_encoding error: {:?}", error);
-        Error::Other(error_str)
+impl From<serde_cbor::Error> for Error {
+    fn from(error: serde_cbor::Error) -> Self {
+        Error::CborEncodingError(error)
     }
 }
 
