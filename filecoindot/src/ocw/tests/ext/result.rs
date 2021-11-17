@@ -13,10 +13,8 @@ pub enum Error {
     RequestFailed(#[from] reqwest::Error),
     #[error("Serialize storage key failed")]
     BuildStorageKeyFailed(#[from] bincode::Error),
-    #[error("Directory not found")]
-    DirectoryNotFound,
-    #[error("Rocksdb error")]
-    RocksDB(#[from] rocksdb::Error),
+    #[error("serde_json error")]
+    SerdeJson(#[from] serde_json::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

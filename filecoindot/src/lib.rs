@@ -13,8 +13,13 @@
 //!
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub use pallet::*;
+pub use self::{
+    crypto::{FilecoindotId, KEY_TYPE},
+    pallet::*,
+};
 
+mod crypto;
+mod ocw;
 mod types;
 
 #[cfg(test)]
@@ -22,9 +27,19 @@ mod tests;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::pallet_prelude::*;
-    use frame_support::sp_runtime::traits::Saturating;
-    use frame_system::pallet_prelude::*;
+    use frame_support::{
+        log,
+        pallet_prelude::*,
+        sp_runtime::{
+            traits::{Saturating, ValidateUnsigned},
+            transaction_validity::InvalidTransaction,
+        },
+        sp_std::prelude::*,
+    };
+    use frame_system::{
+        offchain::{AppCrypto, CreateSignedTransaction},
+        pallet_prelude::*,
+    };
 
     use crate::types::{BlockSubmissionProposal, ProposalStatus};
 
@@ -38,13 +53,17 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: CreateSignedTransaction<Call<Self>> + frame_system::Config {
+        /// The identifier type for the offchain worker.
+        type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         /// Origin used to administer the pallet
         type ManagerOrigin: EnsureOrigin<Self::Origin>;
         /// The weight for this pallet's extrinsics.
         type WeightInfo: WeightInfo;
+        /// The timeout of the http requests of ocw in milliseconds
+        type OffchainWorkerTimeout: Get<u64>;
     }
 
     #[pallet::pallet]
@@ -54,7 +73,7 @@ pub mod pallet {
     /// Track the account id of each relayer
     #[pallet::storage]
     pub(crate) type Relayers<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, (), OptionQuery>;
 
     /// Count the total number of relayers
     #[pallet::storage]
@@ -80,7 +99,7 @@ pub mod pallet {
     /// Track the blocks that have been verified
     #[pallet::storage]
     pub(crate) type VerifiedBlocks<T: Config> =
-        StorageMap<_, Blake2_128Concat, BlockCid, bool, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, BlockCid, (), OptionQuery>;
 
     /// The threshold of votes required for a proposal to be qualified for approval resolution
     #[pallet::storage]
@@ -144,7 +163,13 @@ pub mod pallet {
     }
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        fn offchain_worker(block_number: T::BlockNumber) {
+            if let Err(e) = crate::ocw::offchain_worker::<T>(block_number) {
+                log::error!("{}", e);
+            }
+        }
+    }
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
@@ -162,6 +187,23 @@ pub mod pallet {
                 vote_period: Default::default(),
                 relayers: Default::default(),
             }
+        }
+    }
+
+    #[pallet::validate_unsigned]
+    impl<T: Config> ValidateUnsigned for Pallet<T> {
+        type Call = Call<T>;
+
+        /// Validate unsigned call to this module.
+        ///
+        /// By default unsigned transactions are disallowed, but implementing the validator
+        /// here we make sure that some particular calls (the ones produced by offchain worker)
+        /// are being whitelisted and marked as valid.
+        fn validate_unsigned(
+            _source: TransactionSource,
+            _call: &Self::Call,
+        ) -> TransactionValidity {
+            InvalidTransaction::Call.into()
         }
     }
 
@@ -304,7 +346,7 @@ pub mod pallet {
                 Error::<T>::RelayerAlreadyExists
             );
 
-            Relayers::<T>::insert(&relayer, true);
+            Relayers::<T>::insert(&relayer, ());
             RelayerCount::<T>::mutate(|i| {
                 *i = i.saturating_add(1);
                 *i
@@ -333,7 +375,7 @@ pub mod pallet {
 
         /// Checks if who is a relayer
         fn is_relayer(who: &T::AccountId) -> bool {
-            Relayers::<T>::get(who).unwrap_or(false)
+            Relayers::<T>::get(who).map(|_| true).unwrap_or(false)
         }
 
         // ============== Voting Related =============
@@ -367,7 +409,7 @@ pub mod pallet {
             BlockSubmissionProposals::<T>::remove(&block_cid);
             MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
-            VerifiedBlocks::<T>::insert(block_cid.clone(), true);
+            VerifiedBlocks::<T>::insert(block_cid.clone(), ());
 
             Self::deposit_event(Event::ProposalApproved(block_cid));
         }
@@ -376,9 +418,7 @@ pub mod pallet {
             BlockSubmissionProposals::<T>::remove(&block_cid);
             MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
-            // TODO: In case a block is successfully challenged,
-            // then we'd purge it from the storage entirely.
-            VerifiedBlocks::<T>::insert(block_cid.clone(), false);
+            VerifiedBlocks::<T>::remove(block_cid.clone());
 
             Self::deposit_event(Event::ProposalRejected(block_cid));
         }

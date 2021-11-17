@@ -1,0 +1,21 @@
+[package]
+name = "filecoindot-rpc"
+authors = ['clearloop@chainsafe.io']
+description = 'filecoindot rpcs.'
+version = "0.0.1"
+license = "GPL-3.0"
+homepage = 'https://github.com/ChainSafe/filecoindot'
+repository = 'https://github.com/ChainSafe/filecoindot'
+edition = '2018'
+
+[dependencies]
+jsonrpc-core = "15.1"
+jsonrpc-core-client = "15.1"
+jsonrpc-derive = "15.1"
+derive_more = "^0.99"
+thiserror = "^1"
+parking_lot = "^0.10"
+
+# substrate dependencies
+sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10' }
+sp-offchain = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10' }

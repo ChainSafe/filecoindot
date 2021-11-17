@@ -14,8 +14,7 @@ use crate::{
 fn submit_block_vote_works() {
     let block_cid = vec![0, 1];
     let message_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_ok!(FileCoinModule::submit_block_vote(
             Origin::signed(RELAYER1),
             block_cid.clone(),
@@ -35,8 +34,7 @@ fn submit_block_vote_works() {
 fn submit_block_vote_fails_not_relayer() {
     let block_cid = vec![0, 1];
     let message_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_err!(
             FileCoinModule::submit_block_vote(
                 Origin::signed(ALICE),
@@ -45,10 +43,7 @@ fn submit_block_vote_fails_not_relayer() {
             ),
             Error::<Test>::NotRelayer
         );
-        assert_eq!(
-            MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),
-            true
-        );
+        assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
 }
 
@@ -56,8 +51,7 @@ fn submit_block_vote_fails_not_relayer() {
 fn submit_block_vote_fails_already_voted() {
     let block_cid = vec![0, 1];
     let message_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_ok!(FileCoinModule::submit_block_vote(
             Origin::signed(RELAYER1),
             block_cid.clone(),
@@ -82,8 +76,7 @@ fn submit_block_vote_fails_already_voted() {
 fn submit_block_vote_resolve_rejected() {
     let block_cid = vec![0, 1];
     let message_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_ok!(FileCoinModule::submit_block_vote(
             Origin::signed(RELAYER1),
             block_cid.clone(),
@@ -98,15 +91,9 @@ fn submit_block_vote_resolve_rejected() {
             ),
             Error::<Test>::ProposalExpired
         );
-        assert_eq!(VerifiedBlocks::<Test>::get(&block_cid).unwrap(), false);
-        assert_eq!(
-            BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),
-            true
-        );
-        assert_eq!(
-            MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),
-            true
-        );
+        assert!(!VerifiedBlocks::<Test>::contains_key(&block_cid));
+        assert!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),);
+        assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
 }
 
@@ -114,8 +101,7 @@ fn submit_block_vote_resolve_rejected() {
 fn submit_block_vote_resolve_approved() {
     let block_cid = vec![0, 1];
     let message_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_ok!(FileCoinModule::submit_block_vote(
             Origin::signed(RELAYER1),
             block_cid.clone(),
@@ -132,12 +118,9 @@ fn submit_block_vote_resolve_approved() {
             message_cid.clone()
         ));
         // assert_eq!(*p.get_status(), ProposalStatus::Approved);
-        assert_eq!(VerifiedBlocks::<Test>::get(&block_cid).unwrap(), true);
+        assert!(VerifiedBlocks::<Test>::contains_key(&block_cid));
         // assert_eq!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(), true);
-        assert_eq!(
-            MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),
-            true
-        );
+        assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
 }
 
@@ -145,8 +128,7 @@ fn submit_block_vote_resolve_approved() {
 fn submit_block_vote_resolve_completed() {
     let block_cid = vec![0, 1];
     let message_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_ok!(FileCoinModule::submit_block_vote(
             Origin::signed(RELAYER1),
             block_cid.clone(),
@@ -172,15 +154,9 @@ fn submit_block_vote_resolve_completed() {
             ),
             Error::<Test>::BlockAlreadyVerified
         );
-        assert_eq!(VerifiedBlocks::<Test>::get(&block_cid).unwrap(), true);
-        assert_eq!(
-            BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),
-            true
-        );
-        assert_eq!(
-            MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),
-            true
-        );
+        assert!(VerifiedBlocks::<Test>::contains_key(&block_cid));
+        assert!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),);
+        assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
 }
 
@@ -188,8 +164,7 @@ fn submit_block_vote_resolve_completed() {
 fn close_block_proposal_already_verified() {
     let block_cid = vec![0, 1];
     let message_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_ok!(FileCoinModule::submit_block_vote(
             Origin::signed(RELAYER1),
             block_cid.clone(),
@@ -211,23 +186,16 @@ fn close_block_proposal_already_verified() {
             FileCoinModule::close_block_proposal(Origin::signed(ALICE), block_cid.clone()),
             Error::<Test>::BlockAlreadyVerified
         );
-        assert_eq!(VerifiedBlocks::<Test>::get(&block_cid).unwrap(), true);
-        assert_eq!(
-            BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),
-            true
-        );
-        assert_eq!(
-            MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),
-            true
-        );
+        assert!(VerifiedBlocks::<Test>::contains_key(&block_cid));
+        assert!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),);
+        assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
 }
 
 #[test]
 fn close_block_proposal_not_allowed() {
     let block_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_err!(
             FileCoinModule::close_block_proposal(Origin::signed(RELAYER4), block_cid.clone()),
             BadOrigin
@@ -238,8 +206,7 @@ fn close_block_proposal_not_allowed() {
 #[test]
 fn close_block_proposal_works() {
     let block_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_ok!(FileCoinModule::submit_block_vote(
             Origin::signed(RELAYER1),
             block_cid.clone(),
@@ -260,31 +227,22 @@ fn close_block_proposal_works() {
             Origin::signed(ALICE),
             block_cid.clone(),
         ));
-        assert_eq!(VerifiedBlocks::<Test>::get(&block_cid).unwrap(), false);
-        assert_eq!(
-            BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),
-            true
+        assert!(
+            !VerifiedBlocks::<Test>::contains_key(&block_cid),
+            "{}",
+            false
         );
-        assert_eq!(
-            MessageRootCidCounter::<Test>::get(&block_cid, &vec![0, 1]).is_none(),
-            true
-        );
-        assert_eq!(
-            MessageRootCidCounter::<Test>::get(&block_cid, &vec![0, 2]).is_none(),
-            true
-        );
-        assert_eq!(
-            MessageRootCidCounter::<Test>::get(&block_cid, &vec![0, 3]).is_none(),
-            true
-        );
+        assert!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),);
+        assert!(MessageRootCidCounter::<Test>::get(&block_cid, &vec![0, 1]).is_none(),);
+        assert!(MessageRootCidCounter::<Test>::get(&block_cid, &vec![0, 2]).is_none(),);
+        assert!(MessageRootCidCounter::<Test>::get(&block_cid, &vec![0, 3]).is_none(),);
     });
 }
 
 #[test]
 fn close_block_proposal_no_effect() {
     let block_cid = vec![0, 1];
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
+    ExtBuilder::default().build().execute_with(|| {
         assert_ok!(FileCoinModule::submit_block_vote(
             Origin::signed(RELAYER1),
             block_cid.clone(),
@@ -304,7 +262,7 @@ fn close_block_proposal_no_effect() {
             Origin::signed(ALICE),
             block_cid.clone(),
         ));
-        assert_eq!(VerifiedBlocks::<Test>::get(&block_cid).is_none(), true);
+        assert!(VerifiedBlocks::<Test>::get(&block_cid).is_none());
         assert_eq!(
             BlockSubmissionProposals::<Test>::get(&block_cid)
                 .unwrap()
@@ -328,15 +286,8 @@ fn close_block_proposal_no_effect() {
 
 #[test]
 fn ensure_relayer_works() {
-    let v = ExtBuilder::default();
-    v.build().execute_with(|| {
-        assert_eq!(
-            EnsureRelayer::<Test>::try_origin(Origin::signed(RELAYER1)).is_ok(),
-            true
-        );
-        assert_eq!(
-            EnsureRelayer::<Test>::try_origin(Origin::signed(ALICE)).is_err(),
-            true
-        );
+    ExtBuilder::default().build().execute_with(|| {
+        assert!(EnsureRelayer::<Test>::try_origin(Origin::signed(RELAYER1)).is_ok(),);
+        assert!(EnsureRelayer::<Test>::try_origin(Origin::signed(ALICE)).is_err(),);
     });
 }

@@ -4,21 +4,27 @@
 use crate as pallet;
 use frame_support::construct_runtime;
 use frame_support::pallet_prelude::{EnsureOrigin, GenesisBuild};
-use frame_support::sp_runtime::AccountId32;
+use frame_support::sp_runtime::{
+    testing::TestXt,
+    traits::{Extrinsic as ExtrinsicT, Verify},
+};
 use frame_support::{parameter_types, sp_std};
 use frame_system::ensure_signed;
-use sp_core::H256;
+use sp_core::{
+    sr25519::{Public, Signature},
+    H256,
+};
 use sp_runtime::{testing::Header, traits::IdentityLookup};
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
-pub type AccountId = AccountId32;
-pub const ALICE: AccountId = AccountId32::new([1u8; 32]);
-pub const RELAYER1: AccountId = AccountId32::new([2u8; 32]);
-pub const RELAYER2: AccountId = AccountId32::new([3u8; 32]);
-pub const RELAYER3: AccountId = AccountId32::new([4u8; 32]);
-pub const RELAYER4: AccountId = AccountId32::new([5u8; 32]);
+pub type AccountId = Public;
+pub const ALICE: AccountId = Public([1u8; 32]);
+pub const RELAYER1: AccountId = Public([2u8; 32]);
+pub const RELAYER2: AccountId = Public([3u8; 32]);
+pub const RELAYER3: AccountId = Public([4u8; 32]);
+pub const RELAYER4: AccountId = Public([5u8; 32]);
 
 // Configure a mock runtime to test the pallet.
 construct_runtime!(
@@ -35,6 +41,7 @@ construct_runtime!(
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
+    pub const OffchainWorkerTimeout: u64 = 1_000_000;
 }
 
 /// An implementation of EnsureOrigin
@@ -54,6 +61,11 @@ impl EnsureOrigin<<Test as frame_system::Config>::Origin> for MockedRelayerAdmin
             Err(o)
         }
     }
+
+    #[cfg(feature = "runtime-benchmarks")]
+    fn successful_origin() -> <Test as frame_system::Config>::Origin {
+        Origin::signed(Default::default())
+    }
 }
 
 impl frame_system::Config for Test {
@@ -63,7 +75,7 @@ impl frame_system::Config for Test {
     type BlockNumber = u64;
     type Hash = H256;
     type Hashing = ::sp_runtime::traits::BlakeTwo256;
-    type AccountId = AccountId;
+    type AccountId = sp_core::sr25519::Public;
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
     type Event = Event;
@@ -82,10 +94,41 @@ impl frame_system::Config for Test {
     type OnSetCode = ();
 }
 
+pub type Extrinsic = TestXt<Call, ()>;
+
+impl frame_system::offchain::SigningTypes for Test {
+    type Public = <Signature as Verify>::Signer;
+    type Signature = Signature;
+}
+
+impl<LocalCall> frame_system::offchain::SendTransactionTypes<LocalCall> for Test
+where
+    Call: From<LocalCall>,
+{
+    type OverarchingCall = Call;
+    type Extrinsic = Extrinsic;
+}
+
+impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Test
+where
+    Call: From<LocalCall>,
+{
+    fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+        call: Call,
+        _public: <Signature as Verify>::Signer,
+        _account: AccountId,
+        nonce: u64,
+    ) -> Option<(Call, <Extrinsic as ExtrinsicT>::SignaturePayload)> {
+        Some((call, (nonce, ())))
+    }
+}
+
 impl pallet::Config for Test {
     type ManagerOrigin = MockedRelayerAdmin<Self>;
     type Event = Event;
     type WeightInfo = ();
+    type AuthorityId = pallet::FilecoindotId;
+    type OffchainWorkerTimeout = OffchainWorkerTimeout;
 }
 
 pub struct ExtBuilder {
