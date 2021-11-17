@@ -50,9 +50,14 @@ pub trait AMTNode: GetCid {
         path: &mut Vec<Vec<u8>>,
     ) -> Result<bool, Error>;
 
-    fn get_by_cid<S: BlockStore>(&self, cid: &Cid, store: &S, bit_width: usize) -> Result<Option<Self>, Error>
-        where
-            Self: Sized;
+    fn get_by_cid<S: BlockStore>(
+        &self,
+        cid: &Cid,
+        store: &S,
+        bit_width: usize,
+    ) -> Result<Option<Self>, Error>
+    where
+        Self: Sized;
 }
 
 /// Wrapper for database to handle inserting and retrieving ipld data with Cids

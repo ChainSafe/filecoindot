@@ -1,11 +1,11 @@
 // Copyright 2019-2022 ChainSafe Systems
 // SPDX-License-Identifier: Apache-2.0, MIT
 
-use cid::{Cid};
-use forest_encoding::de::Deserializer;
-use serde::{Deserialize};
 use crate::errors::Error;
 use crate::traits::{AMTNode, BlockStore};
+use cid::Cid;
+use forest_encoding::de::Deserializer;
+use serde::Deserialize;
 
 pub fn nodes_for_height(bit_width: usize, height: usize) -> usize {
     let height_log_two = bit_width * height;
@@ -27,8 +27,11 @@ pub struct Amt<'db, BS: BlockStore, N: AMTNode> {
     count: usize,
 }
 
-impl <'db, 'de, BS: BlockStore, N: AMTNode + Deserialize<'de>> Deserialize<'de> for Amt<'db, BS, N> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+impl<'db, 'de, BS: BlockStore, N: AMTNode + Deserialize<'de>> Deserialize<'de> for Amt<'db, BS, N> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let (bit_width, height, count, node): (_, _, _, N) =
             Deserialize::deserialize(deserializer)?;
         Ok(Self {
@@ -36,7 +39,7 @@ impl <'db, 'de, BS: BlockStore, N: AMTNode + Deserialize<'de>> Deserialize<'de> 
             height,
             count,
             node,
-            block_store: None
+            block_store: None,
         })
     }
 }
@@ -44,14 +47,12 @@ impl <'db, 'de, BS: BlockStore, N: AMTNode + Deserialize<'de>> Deserialize<'de> 
 impl<'db, BS, N> Amt<'db, BS, N>
 where
     BS: BlockStore,
-    N: AMTNode + for<'de> Deserialize<'de>
+    N: AMTNode + for<'de> Deserialize<'de>,
 {
-
     /// Constructs an AMT with a blockstore and a Cid of the root of the AMT
     pub fn load(cid: &Cid, block_store: &'db BS) -> Result<Self, Error> {
         // Load root bytes from database
-        let mut root = block_store
-            .get::<Self>(cid)?;
+        let mut root = block_store.get::<Self>(cid)?;
 
         // Sanity check, this should never be possible.
         if root.height > MAX_HEIGHT {
@@ -73,8 +74,13 @@ where
         }
 
         let mut path = Vec::new();
-        if self.node
-            .path_to_key(*self.block_store.as_ref().unwrap(), self.bit_width, self.height, i, &mut path)? {
+        if self.node.path_to_key(
+            *self.block_store.as_ref().unwrap(),
+            self.bit_width,
+            self.height,
+            i,
+            &mut path,
+        )? {
             Ok(path)
         } else {
             Err(Error::NotFound)

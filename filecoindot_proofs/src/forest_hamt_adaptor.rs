@@ -180,7 +180,11 @@ impl<K: Eq + Serialize, V: Serialize, H, HashOutput: HashedBits>
     }
 }
 
-impl<K, V, H> GetCid for ForestAdaptedNode<K, V, H, ForestAdaptedHashedBits> where K: Eq + Serialize + for<'de> serde::Deserialize<'de>, V: Serialize + for<'de> serde::Deserialize<'de> {
+impl<K, V, H> GetCid for ForestAdaptedNode<K, V, H, ForestAdaptedHashedBits>
+where
+    K: Eq + Serialize + for<'de> serde::Deserialize<'de>,
+    V: Serialize + for<'de> serde::Deserialize<'de>,
+{
     fn cid(&self) -> Result<Cid, Error> {
         match self.cid {
             Some(cid) => Ok(cid),
@@ -321,12 +325,13 @@ fn serialize_to_slice<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hamt::{Hamt};
+    use crate::hamt::Hamt;
+    use crate::ProofVerify;
     use ipld_blockstore::MemoryDB;
     use ipld_hamt::Hamt as ForestHamt;
-    use crate::ProofVerify;
 
-    type NodeType = ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
+    type NodeType =
+        ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
     type HamtType<'a> = Hamt<
         'a,
         ForestAdaptedBlockStorage<MemoryDB>,
@@ -461,7 +466,7 @@ mod tests {
 
         let mut p = hamt.generate_proof(&(max / 2)).unwrap();
         p.reverse();
-        let target_cid = cid::new_from_cbor(&[1,2,3], Blake2b256);
+        let target_cid = cid::new_from_cbor(&[1, 2, 3], Blake2b256);
         let r = ProofVerify::verify_proof::<NodeType>(p, &target_cid);
         assert_eq!(r.is_ok(), false);
     }
