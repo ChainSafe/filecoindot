@@ -14,7 +14,7 @@ const DEFAULT_BIT_WIDTH: usize = 3;
 
 impl From<ipld_amt::Error> for Error {
     fn from(error: ipld_amt::Error) -> Self {
-        Error::IPLDAmtError(error)
+        Error::IPLDAmt(error)
     }
 }
 
@@ -64,7 +64,7 @@ impl<'de, V> Deserialize<'de> for ForestAmtAdaptedNode<V>
 impl<V> GetCid for ForestAmtAdaptedNode<V> where V: Serialize + for<'de> Deserialize<'de> {
     fn cid(&self) -> Result<Cid, Error> {
         match self.cid {
-            Some(cid) => Ok(cid.clone()),
+            Some(cid) => Ok(cid),
             None => {
                 let bytes = to_vec(&self.inner)?;
                 Ok(cid::new_from_cbor(&bytes, Blake2b256))
@@ -92,7 +92,7 @@ impl <V> AMTNode for ForestAmtAdaptedNode<V> where V: for<'de>Deserialize<'de> +
                         let inner = store.get::<CollapsedNode<V>>(cid).map_err(|_| Error::NotFound)?
                             .expand(bit_width)?;
                         let node = ForestAmtAdaptedNode::new(
-                            Some(cid.clone()),
+                            Some(*cid),
                             inner
                         );
 
@@ -125,7 +125,7 @@ impl <V> AMTNode for ForestAmtAdaptedNode<V> where V: for<'de>Deserialize<'de> +
                             let inner = store.get::<CollapsedNode<V>>(cid).map_err(|_| Error::NotFound)?
                                 .expand(bit_width)?;
                             return Ok(Some(ForestAmtAdaptedNode::new(
-                                Some(cid.clone()),
+                                Some(*cid),
                                 inner
                             )));
                         }
