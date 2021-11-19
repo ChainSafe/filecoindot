@@ -65,3 +65,9 @@ pub trait BlockStore {
     /// Get typed object from block store by Cid.
     fn get<T: DeserializeOwned>(&self, cid: &Cid) -> Result<T, Error>;
 }
+
+/// The proof verification trait
+pub trait Verify {
+    fn verify_proof<N>(proof: Vec<Vec<u8>>, node_cid: Vec<u8>) -> Result<(), Error>
+        where N: GetCid + for<'de> serde::Deserialize<'de>;
+}

@@ -326,7 +326,7 @@ fn serialize_to_slice<
 mod tests {
     use super::*;
     use crate::hamt::Hamt;
-    use crate::ProofVerify;
+    use crate::{ProofVerify, Verify};
     use ipld_blockstore::MemoryDB;
     use ipld_hamt::Hamt as ForestHamt;
 
@@ -439,7 +439,7 @@ mod tests {
 
         let raw_node = p.get(0).unwrap();
         let node: NodeType = deserialize_to_node(None, raw_node).unwrap();
-        let r = ProofVerify::verify_proof::<NodeType>(p, &node.cid().unwrap());
+        let r = ProofVerify::verify_proof::<NodeType>(p, node.cid().unwrap().to_bytes());
         assert_eq!(r.is_ok(), true);
     }
 
@@ -467,7 +467,7 @@ mod tests {
         let mut p = hamt.generate_proof(&(max / 2)).unwrap();
         p.reverse();
         let target_cid = cid::new_from_cbor(&[1, 2, 3], Blake2b256);
-        let r = ProofVerify::verify_proof::<NodeType>(p, &target_cid);
+        let r = ProofVerify::verify_proof::<NodeType>(p, target_cid.to_bytes());
         assert_eq!(r.is_ok(), false);
     }
 }

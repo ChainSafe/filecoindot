@@ -1537,6 +1537,7 @@ dependencies = [
  "bincode",
  "derive_more",
  "dirs",
+ "filecoindot_proofs",
  "frame-benchmarking",
  "frame-support",
  "frame-system",

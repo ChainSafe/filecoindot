@@ -40,6 +40,7 @@ pub mod pallet {
         offchain::{AppCrypto, CreateSignedTransaction},
         pallet_prelude::*,
     };
+    use filecoindot_proofs::Verify;
 
     use crate::types::{BlockSubmissionProposal, ProposalStatus};
 
@@ -64,6 +65,12 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
         /// The timeout of the http requests of ocw in milliseconds
         type OffchainWorkerTimeout: Get<u64>;
+        type AMTNode: filecoindot_proofs::AMTNode;
+        type StateKey: Eq;
+        type StateVal: Eq;
+        type StateHash: filecoindot_proofs::HashedBits;
+        type HAMTNode: filecoindot_proofs::HAMTNode<Self::StateKey, Self::StateVal, Self::StateHash>;
+        type Verify: filecoindot_proofs::Verify;
     }
 
     #[pallet::pallet]
@@ -172,6 +179,8 @@ pub mod pallet {
         AlreadyVoted,
         /// The block has already been verified
         BlockAlreadyVerified,
+        /// Cannot verify the proof provided
+        VerificationError,
     }
 
     #[pallet::hooks]
@@ -343,6 +352,16 @@ pub mod pallet {
     }
 
     impl<T: Config> Pallet<T> {
+        pub fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
+            T::Verify::verify_proof::<T::AMTNode>(proof, cid)
+                .map_err(|_| Error::<T>::VerificationError)
+        }
+
+        pub fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
+            T::Verify::verify_proof::<T::HAMTNode>(proof, cid)
+                .map_err(|_| Error::<T>::VerificationError)
+        }
+
         fn ensure_admin(o: OriginFor<T>) -> DispatchResult {
             T::ManagerOrigin::try_origin(o)
                 .map(|_| ())

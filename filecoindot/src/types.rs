@@ -4,8 +4,9 @@
 use frame_support::pallet_prelude::*;
 use frame_support::sp_std;
 use frame_system::{Origin, RawOrigin};
+use filecoindot_proofs::AMTNode;
 
-use crate::{Config, Relayers};
+use crate::{Config, Error, Relayers};
 
 /// The filecoin block submission proposal
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
