@@ -1,3 +1,5 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
 use crate::amt::nodes_for_height;
 use crate::errors::Error;
 use crate::traits::{AMTNode, BlockStore, GetCid};
