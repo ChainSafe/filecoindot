@@ -18,6 +18,7 @@ pub fn nodes_for_height(bit_width: usize, height: usize) -> usize {
 const MAX_HEIGHT: usize = 8;
 const MAX_INDEX: usize = (u64::MAX - 1) as usize;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Amt<'db, BS: BlockStore, N: AMTNode> {
     node: N,
