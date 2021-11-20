@@ -43,11 +43,10 @@ pallet-transaction-payment-rpc-runtime-api = { default-features = false, git = "
 # Used for runtime benchmarking
 frame-benchmarking = { default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
 frame-system-benchmarking = { default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
-hex-literal = { version = "0.3.3", optional = true }
+hex-literal = { version = "0.3.4", optional = true }
 
 # filecoindot dependencies
 filecoindot = { path = "../../filecoindot",  default-features = false }
-#filecoindot_ocw = { path = "../../filecoindot-ocw", default-features = false }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
@@ -82,7 +81,7 @@ std = [
 	"sp-transaction-pool/std",
 	"sp-version/std",
 
-	"filecoindot/std"
+	"filecoindot/std",
 ]
 runtime-benchmarks = [
 	'frame-benchmarking',

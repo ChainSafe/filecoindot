@@ -3,20 +3,21 @@
 
 //! Filecoin APIs
 
-mod get_tip_set_by_height;
-
-pub use self::get_tip_set_by_height::{ChainGetTipSetByHeight, ChainGetTipSetByHeightResult};
-use crate::{Env, Error, Result};
-use frame_support::sp_runtime::offchain::http::Request;
+pub use self::chain_head::ChainHead;
+use frame_support::{
+    sp_runtime::offchain::{
+        http::{Error, Request},
+        Timestamp,
+    },
+    sp_std::{vec, vec::Vec},
+};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+
+mod chain_head;
 
 /// Wrapper for jsonrpc result
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Resp<T> {
-    /// reponse id
-    pub id: u8,
-    /// JsonRPC version
-    pub jsonrpc: String,
     /// JsonRPC result
     pub result: T,
 }
@@ -27,9 +28,9 @@ pub struct Req<T> {
     /// reponse id
     pub id: u8,
     /// JsonRPC method
-    pub method: String,
+    pub method: &'static str,
     /// JsonRPC version
-    pub jsonrpc: String,
+    pub jsonrpc: &'static str,
     /// JsonRPC result
     pub params: T,
 }
@@ -40,35 +41,36 @@ pub trait Api: Sized {
     type Params: Serialize + Send + Sync;
     type Result: Serialize + DeserializeOwned + core::fmt::Debug;
 
-    /// Storage key in bytes
-    fn storage_key(params: &Self::Params) -> Result<Vec<u8>> {
-        let mut key = bincode::serialize(Self::METHOD)?;
-        key.append(&mut bincode::serialize(params)?);
-        Ok(key)
-    }
-
     /// Request method with params
-    fn req(&self, params: Self::Params) -> Result<Self::Result> {
-        let base = Env::rpc()?;
+    fn req(
+        &self,
+        base: &str,
+        params: Self::Params,
+        deadline: Timestamp,
+    ) -> Result<Self::Result, Error> {
+        // set env via storage
         let req = Request::post(
-            &base,
+            base,
             vec![serde_json::to_vec(&Req {
                 id: 0,
-                method: Self::METHOD.to_string(),
-                jsonrpc: "2.0".to_string(),
+                method: Self::METHOD,
+                jsonrpc: "2.0",
                 params,
-            })?],
+            })
+            .map_err(|_| Error::IoError)?],
         )
-        .add_header("Content-Type", "application/json");
+        .add_header("Content-Type", "application/json")
+        .deadline(deadline);
 
         Ok(serde_json::from_slice::<Resp<Self::Result>>(
             &req.send()
-                .map_err(|_| Error::SendHttpRequestFailed)?
+                .map_err(|_| Error::IoError)?
                 .wait()
-                .map_err(|_| Error::GetHttpResponseFailed)?
+                .map_err(|_| Error::IoError)?
                 .body()
                 .collect::<Vec<_>>(),
-        )?
+        )
+        .map_err(|_| Error::IoError)?
         .result)
     }
 }

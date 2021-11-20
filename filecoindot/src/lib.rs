@@ -13,8 +13,13 @@
 //!
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub use pallet::*;
+pub use self::{
+    crypto::{FilecoindotId, KEY_TYPE},
+    pallet::*,
+};
 
+mod crypto;
+mod ocw;
 mod types;
 
 #[cfg(test)]
@@ -22,10 +27,19 @@ mod tests;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::pallet_prelude::*;
-    use frame_support::sp_runtime::traits::Saturating;
-    use frame_support::sp_std::prelude::*;
-    use frame_system::pallet_prelude::*;
+    use frame_support::{
+        log,
+        pallet_prelude::*,
+        sp_runtime::{
+            traits::{Saturating, ValidateUnsigned},
+            transaction_validity::InvalidTransaction,
+        },
+        sp_std::prelude::*,
+    };
+    use frame_system::{
+        offchain::{AppCrypto, CreateSignedTransaction},
+        pallet_prelude::*,
+    };
 
     use crate::types::{BlockSubmissionProposal, ProposalStatus};
 
@@ -39,13 +53,17 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: CreateSignedTransaction<Call<Self>> + frame_system::Config {
+        /// The identifier type for the offchain worker.
+        type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         /// Origin used to administer the pallet
         type ManagerOrigin: EnsureOrigin<Self::Origin>;
         /// The weight for this pallet's extrinsics.
         type WeightInfo: WeightInfo;
+        /// The timeout of the http requests of ocw in milliseconds
+        type OffchainWorkerTimeout: Get<u64>;
     }
 
     #[pallet::pallet]
@@ -55,7 +73,7 @@ pub mod pallet {
     /// Track the account id of each relayer
     #[pallet::storage]
     pub(crate) type Relayers<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, bool, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, (), OptionQuery>;
 
     /// Count the total number of relayers
     #[pallet::storage]
@@ -65,6 +83,18 @@ pub mod pallet {
     #[pallet::storage]
     pub(crate) type BlockSubmissionProposals<T: Config> =
         StorageMap<_, Blake2_128Concat, BlockCid, BlockSubmissionProposal<T>, OptionQuery>;
+
+    /// Track the accounts which voted for a particular submitted block proposal
+    #[pallet::storage]
+    pub(crate) type BlockProposalVotes<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        BlockCid,
+        Blake2_128Concat,
+        T::AccountId,
+        (),
+        OptionQuery,
+    >;
 
     /// Track the message root cid votes for block cid
     #[pallet::storage]
@@ -81,7 +111,7 @@ pub mod pallet {
     /// Track the blocks that have been verified
     #[pallet::storage]
     pub(crate) type VerifiedBlocks<T: Config> =
-        StorageMap<_, Blake2_128Concat, BlockCid, bool, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, BlockCid, (), OptionQuery>;
 
     /// The threshold of votes required for a proposal to be qualified for approval resolution
     #[pallet::storage]
@@ -145,7 +175,13 @@ pub mod pallet {
     }
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        fn offchain_worker(block_number: T::BlockNumber) {
+            if let Err(e) = crate::ocw::offchain_worker::<T>(block_number) {
+                log::error!("{}", e);
+            }
+        }
+    }
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
@@ -163,6 +199,23 @@ pub mod pallet {
                 vote_period: Default::default(),
                 relayers: Default::default(),
             }
+        }
+    }
+
+    #[pallet::validate_unsigned]
+    impl<T: Config> ValidateUnsigned for Pallet<T> {
+        type Call = Call<T>;
+
+        /// Validate unsigned call to this module.
+        ///
+        /// By default unsigned transactions are disallowed, but implementing the validator
+        /// here we make sure that some particular calls (the ones produced by offchain worker)
+        /// are being whitelisted and marked as valid.
+        fn validate_unsigned(
+            _source: TransactionSource,
+            _call: &Self::Call,
+        ) -> TransactionValidity {
+            InvalidTransaction::Call.into()
         }
     }
 
@@ -281,7 +334,7 @@ pub mod pallet {
 
             let now = frame_system::Pallet::<T>::block_number();
             let threshold = VoteThreshold::<T>::get();
-            p.resolve(&block_cid, &now, threshold)?;
+            Self::resolve_proposal(&mut p, &block_cid, &now, threshold)?;
 
             Self::try_resolve_proposal(block_cid, &p);
 
@@ -305,7 +358,7 @@ pub mod pallet {
                 Error::<T>::RelayerAlreadyExists
             );
 
-            Relayers::<T>::insert(&relayer, true);
+            Relayers::<T>::insert(&relayer, ());
             RelayerCount::<T>::mutate(|i| {
                 *i = i.saturating_add(1);
                 *i
@@ -334,19 +387,74 @@ pub mod pallet {
 
         /// Checks if who is a relayer
         fn is_relayer(who: &T::AccountId) -> bool {
-            Relayers::<T>::get(who).unwrap_or(false)
+            Relayers::<T>::get(who).map(|_| true).unwrap_or(false)
         }
 
         // ============== Voting Related =============
+        /// Vote for the proposal. Will reject the operation if its status is invalid
+        /// The content of the vote is actually the message root of the block
         fn vote_block_proposal(
             block_cid: BlockCid,
             message_root_cid: Vec<u8>,
             proposal: &mut BlockSubmissionProposal<T>,
             who: T::AccountId,
         ) -> Result<(), Error<T>> {
+            ensure!(
+                !BlockProposalVotes::<T>::contains_key(block_cid.clone(), who.clone()),
+                Error::<T>::AlreadyVoted
+            );
+            ensure!(
+                *proposal.get_status() == ProposalStatus::Active,
+                Error::<T>::ProposalCompleted
+            );
+
             let now = frame_system::Pallet::<T>::block_number();
+
+            // when expired, we set the status to be rejected
+            if proposal.is_expired(&now) {
+                proposal.set_status(ProposalStatus::Rejected);
+                return Err(Error::<T>::ProposalExpired);
+            }
             let threshold = VoteThreshold::<T>::get();
-            proposal.vote(block_cid, message_root_cid, who, &now, threshold)
+
+            let count =
+                1 + MessageRootCidCounter::<T>::get(&block_cid, &message_root_cid).unwrap_or(0);
+            if count >= threshold {
+                proposal.set_status(ProposalStatus::Approved);
+            }
+
+            MessageRootCidCounter::<T>::insert(&block_cid, &message_root_cid, count);
+            BlockProposalVotes::<T>::insert(block_cid, who, ());
+
+            Ok(())
+        }
+
+        pub(crate) fn resolve_proposal(
+            proposal: &mut BlockSubmissionProposal<T>,
+            block_cid: &[u8],
+            when: &T::BlockNumber,
+            threshold: u32,
+        ) -> Result<(), Error<T>> {
+            ensure!(
+                *proposal.get_status() == ProposalStatus::Active,
+                Error::<T>::ProposalCompleted
+            );
+
+            // when expired, we set the status to be rejected
+            if proposal.is_expired(when) {
+                proposal.set_status(ProposalStatus::Rejected);
+            } else {
+                // MessageRootCidCounter leaked into the struct, well not the best way for encapsulation
+                // but works for now, come back later to fix this.
+                for (_, count) in MessageRootCidCounter::<T>::iter_prefix(block_cid) {
+                    if count >= threshold {
+                        proposal.set_status(ProposalStatus::Approved);
+                        break;
+                    }
+                }
+            }
+
+            Ok(())
         }
 
         /// Try to resolve the proposal. If the proposal is resolved, return true, else false
@@ -366,9 +474,10 @@ pub mod pallet {
 
         fn finalize_block(block_cid: BlockCid) {
             BlockSubmissionProposals::<T>::remove(&block_cid);
+            BlockProposalVotes::<T>::remove_prefix(&block_cid, None);
             MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
-            VerifiedBlocks::<T>::insert(block_cid.clone(), true);
+            VerifiedBlocks::<T>::insert(block_cid.clone(), ());
 
             Self::deposit_event(Event::ProposalApproved(block_cid));
         }
@@ -377,9 +486,7 @@ pub mod pallet {
             BlockSubmissionProposals::<T>::remove(&block_cid);
             MessageRootCidCounter::<T>::remove_prefix(&block_cid, None);
 
-            // TODO: In case a block is successfully challenged,
-            // then we'd purge it from the storage entirely.
-            VerifiedBlocks::<T>::insert(block_cid.clone(), false);
+            VerifiedBlocks::<T>::remove(block_cid.clone());
 
             Self::deposit_event(Event::ProposalRejected(block_cid));
         }

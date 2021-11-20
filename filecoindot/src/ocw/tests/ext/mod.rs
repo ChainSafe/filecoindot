@@ -1,18 +1,14 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
-#[cfg(test)]
-mod tests;
+//! offchain ext for testing usages
 
-mod api;
 mod db;
-mod env;
 mod ext;
 mod result;
 mod state;
-pub mod types;
-pub use crate::{
-    env::Env,
+
+pub use self::{
     ext::OffchainExt,
     result::{Error, Result},
 };

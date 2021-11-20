@@ -91,7 +91,7 @@ fn submit_block_vote_resolve_rejected() {
             ),
             Error::<Test>::ProposalExpired
         );
-        assert!(!VerifiedBlocks::<Test>::get(&block_cid).unwrap());
+        assert!(!VerifiedBlocks::<Test>::contains_key(&block_cid));
         assert!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),);
         assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
@@ -118,7 +118,7 @@ fn submit_block_vote_resolve_approved() {
             message_cid.clone()
         ));
         // assert_eq!(*p.get_status(), ProposalStatus::Approved);
-        assert!(VerifiedBlocks::<Test>::get(&block_cid).unwrap());
+        assert!(VerifiedBlocks::<Test>::contains_key(&block_cid));
         // assert_eq!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(), true);
         assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
@@ -154,7 +154,7 @@ fn submit_block_vote_resolve_completed() {
             ),
             Error::<Test>::BlockAlreadyVerified
         );
-        assert!(VerifiedBlocks::<Test>::get(&block_cid).unwrap());
+        assert!(VerifiedBlocks::<Test>::contains_key(&block_cid));
         assert!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),);
         assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
@@ -186,7 +186,7 @@ fn close_block_proposal_already_verified() {
             FileCoinModule::close_block_proposal(Origin::signed(ALICE), block_cid.clone()),
             Error::<Test>::BlockAlreadyVerified
         );
-        assert!(VerifiedBlocks::<Test>::get(&block_cid).unwrap());
+        assert!(VerifiedBlocks::<Test>::contains_key(&block_cid));
         assert!(BlockSubmissionProposals::<Test>::get(&block_cid).is_none(),);
         assert!(MessageRootCidCounter::<Test>::get(&block_cid, &message_cid).is_none(),);
     });
@@ -228,7 +228,7 @@ fn close_block_proposal_works() {
             block_cid.clone(),
         ));
         assert!(
-            !VerifiedBlocks::<Test>::get(&block_cid).unwrap(),
+            !VerifiedBlocks::<Test>::contains_key(&block_cid),
             "{}",
             false
         );
