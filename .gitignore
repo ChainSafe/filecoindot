@@ -1,2 +1,4 @@
-.idea/
-target/
+.idea
+.log
+target
+node_modules

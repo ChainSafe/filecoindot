@@ -1,0 +1,17 @@
+{
+  "name": "@filecoindot/e2e",
+  "version": "0.1.0",
+  "description": "e2e testing for filecoindot",
+  "main": "index.js",
+  "repository": "https://github.com/chainSafe/filecoindot/",
+  "author": "clearloop",
+  "license": "MIT",
+  "dependencies": {
+    "@polkadot/api": "^6.9.2",
+    "@polkadot/keyring": "^7.9.2",
+    "@polkadot/types": "^6.9.2"
+  },
+  "scripts": {
+    "build": "tsc --noEmit"
+  }
+}
