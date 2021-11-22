@@ -10,7 +10,8 @@ ENV CARGO_TERM_COLOR=always
 RUN --mount=type=cache,target=/usr/local/cargo/git \
     --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,sharing=private,target=target \
-    cargo build --release \
+    cd node \
+    && cargo build --release \
     && mv target/release/filecoindot-template /filecoindot-template
 
 # Release
