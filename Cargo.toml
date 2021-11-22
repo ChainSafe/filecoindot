@@ -1,8 +1,8 @@
 [workspace]
 members = [
     "filecoindot",
+    "filecoindot_proofs",
     "filecoindot-rpc",
-
     # node-example
     "substrate-node-example/node",
     "substrate-node-example/runtime"
