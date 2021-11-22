@@ -9,4 +9,19 @@ const types = {
   MessageRootCid: "Vec<u8>",
 };
 
-export default types;
+const rpc = {
+  filecoindot: {
+    setRpcEndpoint: {
+      description: "set filecoin rpc http endpoint",
+      params: [
+        {
+          name: "url",
+          type: "String",
+        },
+      ],
+      type: "()",
+    },
+  },
+};
+
+export { rpc, types };

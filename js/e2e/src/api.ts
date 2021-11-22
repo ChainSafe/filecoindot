@@ -4,7 +4,7 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair } from "@polkadot/keyring/types";
-import types from "@filecoindot/types";
+import { rpc, types } from "@filecoindot/types";
 
 export default class Api {
   _: ApiPromise;
@@ -15,7 +15,7 @@ export default class Api {
    */
   static async New(ws: string): Promise<Api> {
     const provider = new WsProvider(ws);
-    const api = await ApiPromise.create({ provider, types });
+    const api = await ApiPromise.create({ provider, types, rpc });
 
     const keyring = new Keyring({ type: "sr25519" });
     const signer = keyring.addFromUri("//Alice");
