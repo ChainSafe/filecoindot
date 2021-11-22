@@ -25,6 +25,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: "substrate-node-template/Dockerfile"
-          context: "substrate-node-template"
+          context: "substrate-node-example"
           push: ${{  github.event_name == 'push' }}
           tags: ChainSafe/filecoindot-template:latest
