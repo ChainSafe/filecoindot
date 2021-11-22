@@ -16,6 +16,7 @@
 pub use self::{
     crypto::{FilecoindotId, KEY_TYPE},
     pallet::*,
+    types::Verify
 };
 
 mod crypto;
@@ -40,9 +41,8 @@ pub mod pallet {
         offchain::{AppCrypto, CreateSignedTransaction},
         pallet_prelude::*,
     };
-    use filecoindot_proofs::Verify;
 
-    use crate::types::{BlockSubmissionProposal, ProposalStatus};
+    use crate::types::{Verify, BlockSubmissionProposal, ProposalStatus};
 
     pub(crate) const DEFAULT_VOTE_THRESHOLD: u32 = 1;
 
@@ -65,12 +65,7 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
         /// The timeout of the http requests of ocw in milliseconds
         type OffchainWorkerTimeout: Get<u64>;
-        type AMTNode: filecoindot_proofs::AMTNode;
-        type StateKey: Eq;
-        type StateVal: Eq;
-        type StateHash: filecoindot_proofs::HashedBits;
-        type HAMTNode: filecoindot_proofs::HAMTNode<Self::StateKey, Self::StateVal, Self::StateHash>;
-        type Verify: filecoindot_proofs::Verify;
+        type Verify: Verify<Self>;
     }
 
     #[pallet::pallet]
@@ -353,13 +348,11 @@ pub mod pallet {
 
     impl<T: Config> Pallet<T> {
         pub fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
-            T::Verify::verify_proof::<T::AMTNode>(proof, cid)
-                .map_err(|_| Error::<T>::VerificationError)
+            T::Verify::verify_receipt(proof, cid)
         }
 
         pub fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
-            T::Verify::verify_proof::<T::HAMTNode>(proof, cid)
-                .map_err(|_| Error::<T>::VerificationError)
+            T::Verify::verify_state(proof, cid)
         }
 
         fn ensure_admin(o: OriginFor<T>) -> DispatchResult {

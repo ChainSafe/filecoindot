@@ -4,8 +4,6 @@
 use frame_support::pallet_prelude::*;
 use frame_support::sp_std;
 use frame_system::{Origin, RawOrigin};
-use filecoindot_proofs::AMTNode;
-
 use crate::{Config, Error, Relayers};
 
 /// The filecoin block submission proposal
@@ -91,4 +89,9 @@ impl<O: Into<Result<Origin<T>, O>> + From<Origin<T>> + Clone, T: Config> EnsureO
     fn successful_origin() -> O {
         RawOrigin::Signed(Default::default()).into()
     }
+}
+
+pub trait Verify<T: Config> {
+    fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>>;
+    fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>>;
 }

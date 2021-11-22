@@ -43,6 +43,7 @@ use pallet_transaction_payment::CurrencyAdapter;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{generic::SignedPayload, Perbill, Permill, SaturatedConversion};
+use filecoindot::Error;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -277,12 +278,27 @@ parameter_types! {
 // ManagerOrigin as root
 type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
 
+pub struct ProofVerification;
+
+impl filecoindot::Verify<Runtime> for ProofVerification {
+    fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<Runtime>> {
+        ProofVerify::verify_proof::<ForestAmtAdaptedNode<String>>(proof, cid)
+            .map_err(|_| Error::<Runtime>::VerificationError)
+    }
+
+    fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<Runtime>> {
+        ProofVerify::verify_proof::<HAMTNodeType>(proof, cid)
+            .map_err(|_| Error::<Runtime>::VerificationError)
+    }
+}
+
 impl filecoindot::Config for Runtime {
     type ManagerOrigin = ManagerOrigin;
     type Event = Event;
     type WeightInfo = ();
     type AuthorityId = filecoindot::FilecoindotId;
     type OffchainWorkerTimeout = OffchainWorkerTimeout;
+    type Verify = ProofVerification;
 }
 
 // For pallet-example-offchain-worker

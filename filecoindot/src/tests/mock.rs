@@ -15,6 +15,8 @@ use sp_core::{
     H256,
 };
 use sp_runtime::{testing::Header, traits::IdentityLookup};
+use filecoindot_proofs::{ForestAmtAdaptedNode, HAMTNodeType, ProofVerify, Verify as FilecoinVerify};
+use crate::Error;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -123,12 +125,27 @@ where
     }
 }
 
+pub struct ProofVerification;
+
+impl crate::types::Verify<Test> for ProofVerification {
+    fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<Test>> {
+        ProofVerify::verify_proof::<ForestAmtAdaptedNode<String>>(proof, cid)
+            .map_err(|_| Error::<Test>::VerificationError)
+    }
+
+    fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<Test>> {
+        ProofVerify::verify_proof::<HAMTNodeType>(proof, cid)
+            .map_err(|_| Error::<Test>::VerificationError)
+    }
+}
+
 impl pallet::Config for Test {
     type ManagerOrigin = MockedRelayerAdmin<Self>;
     type Event = Event;
     type WeightInfo = ();
     type AuthorityId = pallet::FilecoindotId;
     type OffchainWorkerTimeout = OffchainWorkerTimeout;
+    type Verify = ProofVerification;
 }
 
 pub struct ExtBuilder {

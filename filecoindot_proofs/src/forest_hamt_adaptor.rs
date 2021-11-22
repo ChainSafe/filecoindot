@@ -111,7 +111,7 @@ impl From<serde_cbor::Error> for Error {
     }
 }
 
-pub(crate) struct ForestAdaptedNode<K: Eq + Serialize, V: Serialize, Hash, HashOutput: HashedBits> {
+pub struct ForestAdaptedNode<K: Eq + Serialize, V: Serialize, Hash, HashOutput: HashedBits> {
     cid: Option<Cid>,
     // we keep the original data for cid derivation
     bitfield: Bitfield,
@@ -322,6 +322,8 @@ fn serialize_to_slice<
     Ok(to_vec(node)?)
 }
 
+pub type HAMTNodeType = ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -330,15 +332,13 @@ mod tests {
     use ipld_blockstore::MemoryDB;
     use ipld_hamt::Hamt as ForestHamt;
 
-    type NodeType =
-        ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
     type HamtType<'a> = Hamt<
         'a,
         ForestAdaptedBlockStorage<MemoryDB>,
         usize,
         String,
         ForestAdaptedHashedBits,
-        NodeType,
+        HAMTNodeType,
         ForestAdaptedHashAlgo,
     >;
 
@@ -438,8 +438,8 @@ mod tests {
         p.reverse();
 
         let raw_node = p.get(0).unwrap();
-        let node: NodeType = deserialize_to_node(None, raw_node).unwrap();
-        let r = ProofVerify::verify_proof::<NodeType>(p, node.cid().unwrap().to_bytes());
+        let node: HAMTNodeType = deserialize_to_node(None, raw_node).unwrap();
+        let r = ProofVerify::verify_proof::<HAMTNodeType>(p, node.cid().unwrap().to_bytes());
         assert_eq!(r.is_ok(), true);
     }
 
@@ -467,7 +467,7 @@ mod tests {
         let mut p = hamt.generate_proof(&(max / 2)).unwrap();
         p.reverse();
         let target_cid = cid::new_from_cbor(&[1, 2, 3], Blake2b256);
-        let r = ProofVerify::verify_proof::<NodeType>(p, target_cid.to_bytes());
+        let r = ProofVerify::verify_proof::<HAMTNodeType>(p, target_cid.to_bytes());
         assert_eq!(r.is_ok(), false);
     }
 }

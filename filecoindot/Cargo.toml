@@ -39,6 +39,12 @@ sp-runtime = { git = 'https://github.com/paritytech/substrate', branch = 'polkad
 sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 sp-keystore = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 
+ipld_hamt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
+ipld_amt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
+ipld_blockstore = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
+cid = { package = "forest_cid", version = "0.3" }
+serde_cbor = { version = "0.12", features = ["tags"], package = "cs_serde_cbor" }
+
 [features]
 default = ['std']
 runtime-benchmarks = [
