@@ -1,0 +1,9 @@
+{
+  "name": "@filecoindot/types",
+  "version": "0.1.0",
+  "description": "Types bundle for filecoindot",
+  "main": "index.ts",
+  "repository": "https://github.com/chainSafe/filecoindot/",
+  "author": "clearloop",
+  "license": "MIT"
+}
