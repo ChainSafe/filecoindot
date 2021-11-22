@@ -2,12 +2,8 @@
   "name": "@filecoindot/types",
   "version": "0.1.0",
   "description": "Types bundle for filecoindot",
-  "main": "index.js",
+  "main": "index.ts",
   "repository": "https://github.com/chainSafe/filecoindot/",
   "author": "clearloop",
-  "license": "MIT",
-  "dependencies": {
-    "@polkadot/api": "^6.9.2",
-    "@polkadot/types": "^6.9.2"
-  }
+  "license": "MIT"
 }
