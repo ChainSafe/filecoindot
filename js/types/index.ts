@@ -1,3 +1,6 @@
+/**
+ * filecoindot types
+ */
 const types = {
   BlockCid: "Vec<u8>",
   BlockSubmissionProposal: {
@@ -9,6 +12,9 @@ const types = {
   MessageRootCid: "Vec<u8>",
 };
 
+/**
+ * rpc methods
+ */
 const rpc = {
   filecoindot: {
     setRpcEndpoint: {
