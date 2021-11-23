@@ -344,14 +344,30 @@ pub mod pallet {
 
             Ok(())
         }
+
+        /// Verify the receipt of the filecoin
+        #[pallet::weight(T::WeightInfo::verify_receipt())]
+        pub fn verify_receipt(origin: OriginFor<T>, proof: Vec<Vec<u8>>, cid: Vec<u8>) -> DispatchResult {
+            ensure_signed(origin)?;
+            Self::verify_receipt_inner(proof, cid)?;
+            Ok(())
+        }
+
+        /// Verify the state of the filecoin
+        #[pallet::weight(T::WeightInfo::verify_receipt())]
+        pub fn verify_state(origin: OriginFor<T>, proof: Vec<Vec<u8>>, cid: Vec<u8>) -> DispatchResult {
+            ensure_signed(origin)?;
+            Self::verify_state_inner(proof, cid)?;
+            Ok(())
+        }
     }
 
     impl<T: Config> Pallet<T> {
-        pub fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
+        pub fn verify_receipt_inner(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
             T::Verify::verify_receipt(proof, cid)
         }
 
-        pub fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
+        pub fn verify_state_inner(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
             T::Verify::verify_state(proof, cid)
         }
 
@@ -511,6 +527,8 @@ pub mod pallet {
         fn set_vote_threshold() -> Weight;
         fn new_submission() -> Weight;
         fn close_block_proposal() -> Weight;
+        fn verify_receipt() -> Weight;
+        fn verify_state() -> Weight;
     }
 
     /// For backwards compatibility and tests
@@ -538,5 +556,9 @@ pub mod pallet {
         fn close_block_proposal() -> Weight {
             Default::default()
         }
+
+        fn verify_receipt() -> Weight { Default::default() }
+
+        fn verify_state() -> Weight { Default::default() }
     }
 }

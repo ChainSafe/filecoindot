@@ -59,7 +59,7 @@ fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
 fn verify_state_works() {
     let (proof, cid) = hamt_proof_generation(100);
     ExtBuilder::default().build().execute_with(|| {
-        assert_ok!(FileCoinModule::verify_state(
+        assert_ok!(FileCoinModule::verify_receipt_inner(
             proof,
             cid.to_bytes()
         ));
@@ -70,7 +70,7 @@ fn verify_state_works() {
 fn verify_receipt_works() {
     let (proof, cid) = amt_proof_generation(100);
     ExtBuilder::default().build().execute_with(|| {
-        assert_ok!(FileCoinModule::verify_receipt(
+        assert_ok!(FileCoinModule::verify_receipt_inner(
             proof,
             cid.to_bytes()
         ));
