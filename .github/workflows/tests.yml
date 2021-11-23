@@ -18,7 +18,9 @@ jobs:
           override: true
       - env:
           FILECOIN_RPC: ${{ secrets.FILECOIN_RPC }}
-        run: cargo t --all-features
+        run: |
+          cargo t --all-features
+          cargo run --all-features benchmark -p "*" -e "*" --wasm-execution compiled
 
   fmt:
     name: Rustfmt

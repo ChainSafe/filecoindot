@@ -1,3 +1,5 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
 use crate::errors::Error;
 use crate::traits::{BlockStore, GetCid, HAMTNode, HashAlgorithm, HashedBits};
 use cid::Cid;
