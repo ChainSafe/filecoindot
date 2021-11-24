@@ -5,6 +5,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { rpc, types } from "@filecoindot/types";
+import { EventRecord, Event, Phase } from "@polkadot/types/interfaces";
 
 export default class Api {
   _: ApiPromise;
@@ -26,5 +27,39 @@ export default class Api {
   constructor(api: ApiPromise, signer: KeyringPair) {
     this._ = api;
     this.signer = signer;
+  }
+
+  /**
+   * traverse events
+   */
+  public async events(handler: (event: Event, phase: Phase) => void) {
+    // Subscribe to system events via storage
+    this._.query.system.events((events: EventRecord[]) => {
+      events.forEach((record) => {
+        const { event, phase } = record;
+        handler(event, phase);
+      });
+    });
+  }
+
+  /**
+   * 0. insert author key
+   */
+  public async insertAuthor(id: string, suri: string, addr: string) {
+    return this._.rpc.author.insertKey(id, suri, addr);
+  }
+
+  /**
+   * 1. set filecoindot rpc endpoint
+   */
+  public async setEndpoint(url: string) {
+    return (this._.rpc as any).filecoindot.setRpcEndpoint(url);
+  }
+
+  /**
+   * 2. add relayer
+   */
+  public async addRelayer(addr: string) {
+    return this._.tx.filecoindot.add_relayer(addr).signAndSend(this.signer);
   }
 }
