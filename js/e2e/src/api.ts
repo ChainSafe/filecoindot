@@ -76,8 +76,8 @@ export default class Api {
    * 2. add relayer
    */
   public async addRelayer() {
-    return await this._.tx.filecoindot
-      .addRelayer(this.suri.address)
+    return await this._.tx.sudo
+      .sudo(this._.tx.filecoindot.addRelayer(this.suri.address))
       .signAndSend(this.signer);
   }
 }

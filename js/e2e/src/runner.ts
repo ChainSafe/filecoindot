@@ -48,7 +48,7 @@ export default class Runner {
   }
 
   public async run() {
-    console.log("bootsrap filecoindot template...");
+    console.log("bootstrap filecoindot template...");
     const ps = await Launch.launch("pipe");
 
     // bootstrap testing
@@ -68,11 +68,17 @@ export default class Runner {
         (event.data[0] as DispatchError).asModule.toU8a()
       );
       console.log(`${error.section}.${error.method}: ${error.docs}`);
+      process.exit(1);
     }
-    console.log(
-      `\t${event.section}:${event.method}:: (phase=${phase.toString()})`
-    );
-    console.log(`\t\t${event.meta.docs.toString()}`);
+
+    if (event.method == "RelayerAdded") {
+      console.log(
+        `\t${event.section}:${event.method}:: (phase=${phase.toString()})`
+      );
+      console.log(`\t\t${event.meta.docs.toString()}`);
+      console.log("Relayer has been added!");
+      process.exit(0);
+    }
   }
 
   /**

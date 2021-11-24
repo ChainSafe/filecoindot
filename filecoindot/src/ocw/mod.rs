@@ -52,6 +52,7 @@ fn bootstrap<T: Config>(_: T::BlockNumber, url: &str) -> Result<()> {
 }
 
 fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -> Result<()> {
+    log::info!("bootstrap ocw with rpc endpoint: {}", url);
     let pairs = ChainHead
         .req(
             url,
