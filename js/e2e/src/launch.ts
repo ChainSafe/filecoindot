@@ -19,7 +19,12 @@ async function launch(stdio?: StdioOptions): Promise<ChildProcess> {
   }
 
   // spawn `fileconidot-template`
-  return spawn(bin, ["--dev", "--tmp"], { stdio });
+  return spawn(bin, ["--dev", "--tmp"], {
+    stdio,
+    env: {
+      RUST_LOG: "runtime",
+    },
+  });
 }
 
 export default {
