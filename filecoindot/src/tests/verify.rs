@@ -13,7 +13,7 @@ use ipld_hamt::Hamt as ForestHamt;
 use ipld_amt::Amt as ForestAmt;
 use serde_cbor::from_slice;
 
-fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
+pub fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
     let bs = MemoryDB::default();
     let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
 
@@ -40,7 +40,7 @@ fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
 }
 
 
-fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
+pub fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
     let bs = MemoryDB::default();
     let mut famt = ForestAmt::new(&bs);
 
