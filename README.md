@@ -89,11 +89,11 @@ the filecoindot offchain worker has been set up!
 
 #### 3. set the the offchain worker's account as relayer
 
-In the provided [substrate-node-example](./substrate-node-example/README.md), we configured the [ManagerOrigin](https://github.com/ChainSafe/filecoindot/blob/5da77ea5ad329ce1e9009f5afd4f54dabbdaa6ee/substrate-node-example/runtime/src/lib.rs#L278) of `filecoindot` with `frame_system::EnsureRoot<AccountId>`, so here we need to `add_relayer` with sudo access.
+In the provided [substrate-node-example](./substrate-node-example/README.md), we configured the `type ManagerOrigin` of `filecoindot` with `frame_system::EnsureRoot<AccountId>`, so here we need to `add_relayer` with sudo access.
 
 For setting relayer in `polkadot.js.org/apps`, we need to click `Developer -> Sudo -> filecoindot -> add_relayer` and choose an account to be the new relayer.
 
-Or with `@polkadot/api`, you can use the code below:
+Or with [@polkadot/api](https://polkadot.js.org/docs/), you can use the code below:
 
 ```typescript
 import { ApiPromise, WsProvider } from "@polkadot/api";
