@@ -3,12 +3,12 @@
  */
 import { ChildProcess, StdioOptions, spawn, spawnSync } from "child_process";
 import fs from "fs";
-import { findUpSync } from "find-up";
+import findUp from "find-up";
 import path from "path";
 
-export async function launch(stdio?: StdioOptions): Promise<ChildProcess> {
-  const root = path.resolve(String(findUpSync("Cargo.toml")), "..");
-  const bin = path.resolve(String(root), "target/release/filecoindot-template");
+async function launch(stdio?: StdioOptions): Promise<ChildProcess> {
+  const root = path.resolve(String(await findUp("Cargo.toml")), "..");
+  const bin = path.resolve(root, "target/release/filecoindot-template");
 
   // Build binary if not exist
   if (!fs.existsSync(bin)) {
@@ -21,3 +21,7 @@ export async function launch(stdio?: StdioOptions): Promise<ChildProcess> {
   // spawn `fileconidot-template`
   return spawn(bin, ["--dev", "--tmp"], { stdio });
 }
+
+export default {
+  launch,
+};

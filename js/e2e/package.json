@@ -11,10 +11,9 @@
     "@polkadot/api": "^6.9.2",
     "@polkadot/keyring": "^7.9.2",
     "@polkadot/types": "^6.9.2",
-    "@types/find-up": "^4.0.0",
-    "find-up": "^6.2.0"
+    "find-up": "^5.0.0"
   },
   "scripts": {
-    "build": "tsc --noEmit"
+    "build": "tsc --strict"
   }
 }
