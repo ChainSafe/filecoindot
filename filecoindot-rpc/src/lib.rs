@@ -17,6 +17,40 @@ pub trait FilecoindotApi {
     /// set filecoin rpc endpoint for filecoindot
     #[rpc(name = "filecoindot_setRpcEndpoint")]
     fn set_rpc_endpoint(&self, url: String) -> Result<()>;
+
+    /// Given the CID of a message, its containing block and the path in
+    /// the blocks messages merkle DAG.
+    ///
+    /// return true if the message is included in the given block and if
+    /// that block has been voted as accepted.
+    #[rpc(name = "filecoindot_verifyMessage")]
+    fn verify_message(
+        &self,
+        message_cid: String,
+        block_header: String,
+        path: String,
+    ) -> Result<bool>;
+
+    /// API. Given the CID of a message, its containing block and the path in the
+    /// blocks messages merkle DAG.
+    ///
+    /// return if the message is included in the given block and if that block
+    /// has been voted as accepted.
+    #[rpc(name = "filecoindot_verifyReceipt")]
+    fn verify_receipt(
+        &self,
+        message_cid: String,
+        block_header: String,
+        path: String,
+    ) -> Result<bool>;
+
+    /// API. Given a state kv pair, its containing block header and the path in the
+    /// state merkle DAG.
+    ///
+    /// return if the given entry is included in the state at the given block and
+    /// if that block has been voted as accepted.
+    #[rpc(name = "filecoindot_verifyState")]
+    fn verify_state(&self, kv_pair: String, block_header: String, path: String) -> Result<bool>;
 }
 
 /// filecoindot rpc handler
@@ -47,5 +81,27 @@ where
         } else {
             Err(Error::InvalidEndpoint)
         }
+    }
+
+    fn verify_message(
+        &self,
+        _message_cid: String,
+        _block_header: String,
+        _path: String,
+    ) -> Result<bool> {
+        Ok(false)
+    }
+
+    fn verify_receipt(
+        &self,
+        _message_cid: String,
+        _block_header: String,
+        _path: String,
+    ) -> Result<bool> {
+        Ok(false)
+    }
+
+    fn verify_state(&self, _kv_pair: String, _block_header: String, _path: String) -> Result<bool> {
+        Ok(false)
     }
 }
