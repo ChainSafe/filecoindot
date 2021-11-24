@@ -4,8 +4,10 @@
 import Api from "./api";
 import Launch from "./launch";
 import { ChildProcess } from "child_process";
+import { Event, Phase, DispatchError } from "@polkadot/types/interfaces";
+import { ApiPromise } from "@polkadot/api";
 
-const OCW = "offchain-worker";
+const OCW = "filecoindot";
 const OCW_PREPARED = "haven't set filecoin rpc yet";
 
 // Kill subprocesses
@@ -29,7 +31,6 @@ function killAll(ps: ChildProcess, exitCode: number) {
  * e2e runner config
  */
 export interface RunnerConfig {
-  address: string;
   filecoindotRpc: string;
   id: string;
   suri: string;
@@ -47,34 +48,75 @@ export default class Runner {
   }
 
   public async run() {
-    const { ws, filecoindotRpc, id, suri, address } = this.config;
-
-    // start launching
     console.log("bootsrap filecoindot template...");
     const ps = await Launch.launch("pipe");
+
+    // bootstrap testing
+    let started: boolean = false;
+    this.listenStdout(ps);
+    this.listenStderr(ps, started);
+    this.listenExit(ps);
+  }
+
+  /**
+   * check filecoindot events
+   */
+  private checkEvents(api: ApiPromise, event: Event, phase: Phase) {
+    const maybeErr = event.data[0];
+    if (maybeErr && (maybeErr as DispatchError).isModule) {
+      const error = api.registry.findMetaError(
+        (event.data[0] as DispatchError).asModule.toU8a()
+      );
+      console.log(`${error.section}.${error.method}: ${error.docs}`);
+    }
+    console.log(
+      `\t${event.section}:${event.method}:: (phase=${phase.toString()})`
+    );
+    console.log(`\t\t${event.meta.docs.toString()}`);
+  }
+
+  /**
+   * init offchain worker
+   */
+  private async tests() {
+    const { ws, filecoindotRpc, id, suri } = this.config;
+    const api = await Api.New(ws);
+    await api.insertAuthor(id, suri);
+    await api.setEndpoint(filecoindotRpc);
+    await api.addRelayer();
+    api.events(this.checkEvents);
+  }
+
+  /**
+   * listen stderr
+   */
+  private listenStderr(ps: ChildProcess, started: boolean) {
+    if (ps.stderr) {
+      ps.stderr.on("data", async (chunk: Buffer) => {
+        chunk.includes(OCW) && process.stderr.write(chunk.toString());
+        if (!started && chunk.includes(OCW_PREPARED)) {
+          await this.tests();
+          started = true;
+        }
+      });
+    }
+  }
+
+  /**
+   * listen stdout
+   */
+  private listenStdout(ps: ChildProcess) {
     if (ps.stdout) {
       ps.stdout.on("data", async (chunk: Buffer) => {
         process.stdout.write(chunk.toString());
       });
     }
+  }
 
-    // start testing
-    let started: boolean = false;
-    if (ps.stderr) {
-      ps.stderr.on("data", async (chunk: Buffer) => {
-        chunk.includes(OCW) && process.stderr.write(chunk.toString());
-        if (chunk.includes(OCW_PREPARED)) {
-          if (!started) {
-            started = true;
-            const api = await Api.New(ws);
-            await api.insertAuthor(id, suri);
-            await api.setEndpoint(filecoindotRpc);
-            await api.addRelayer(address);
-          }
-        }
-      });
-    }
-
+  /**
+   * listen the exit signal and kill all processes
+   */
+  private listenExit(ps: ChildProcess) {
     // kill all processes when exiting.
     process.on("exit", () => {
       killAll(ps, Number(process.exitCode));
