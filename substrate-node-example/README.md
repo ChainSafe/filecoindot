@@ -92,16 +92,13 @@ where
 This trait is required by the offchain worker, see [CreateSignedTransaction][0] for more detail.
 
 
-### 3. add `filecoindot-rpc` to your node service
+### 3. extend rpc handler with `filecoindot-rpc`
 
 ```toml
 # node/Cargo.toml
 
 filecoindot = { git = "https://github.com/chainSafe/filecoindot" }
 ```
-
-
-### 4. extend filecoindot rpc for the rpc handler
 
 ```rust
 //! node/src/rpc.rs
@@ -125,6 +122,27 @@ pub fn create_full<C, P, S>(deps: FullDeps<C, P, S>) -> jsonrpc_core::IoHandler<
         io.extend_with(FilecoindotApi::to_delegate(Filecoindot::new(storage)));
     }
 }
+```
+
+### 4. extend runtime interfaces with filecoindot's host functions
+
+```toml
+# node/Cargo.toml
+
+filecoindot-io = { git = "https://github.com/chainSafe/filecoindot" }
+```
+
+```rust
+//! node/src/service.rs
+native_executor_instance!(
+    pub Executor,
+    node_template_runtime::api::dispatch,
+    node_template_runtime::native_version,
+    (
+        filecoindot_io::forest_proof_verify::HostFunctions,
+        frame_benchmarking::benchmarking::HostFunctions,
+    ),
+);
 ```
 
 
