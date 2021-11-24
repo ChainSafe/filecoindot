@@ -4,7 +4,10 @@
 use frame_support::pallet_prelude::*;
 use frame_support::sp_std;
 use frame_system::{Origin, RawOrigin};
-use crate::{Config, Error, Relayers};
+use sp_runtime_interface::{runtime_interface};
+use sp_std::prelude::*;
+// use filecoindot_proofs::{ForestAmtAdaptedNode, HAMTNodeType, ProofVerify, Verify};
+use crate::{Config, Relayers};
 
 /// The filecoin block submission proposal
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
@@ -91,7 +94,29 @@ impl<O: Into<Result<Origin<T>, O>> + From<Origin<T>> + Clone, T: Config> EnsureO
     }
 }
 
-pub trait Verify<T: Config> {
-    fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>>;
-    fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>>;
+// pub trait Verify {
+//     fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()>;
+//     fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()>;
+// }
+
+// #[runtime_interface]
+// pub trait ForestProofVerify {
+//     fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()> {
+//         ProofVerify::verify_proof::<ForestAmtAdaptedNode<String>>(proof, cid).ok()
+//     }
+//
+//     fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()> {
+//         ProofVerify::verify_proof::<HAMTNodeType>(proof, cid).ok()
+//     }
+// }
+
+#[runtime_interface]
+pub trait ForestProofVerify {
+    fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()> {
+        None
+    }
+
+    fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()> {
+        None
+    }
 }

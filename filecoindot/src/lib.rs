@@ -16,7 +16,6 @@
 pub use self::{
     crypto::{FilecoindotId, KEY_TYPE},
     pallet::*,
-    types::Verify
 };
 
 mod crypto;
@@ -42,7 +41,7 @@ pub mod pallet {
         pallet_prelude::*,
     };
 
-    use crate::types::{Verify, BlockSubmissionProposal, ProposalStatus};
+    use crate::types::{forest_proof_verify, BlockSubmissionProposal, ProposalStatus};
 
     pub(crate) const DEFAULT_VOTE_THRESHOLD: u32 = 1;
 
@@ -65,7 +64,6 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
         /// The timeout of the http requests of ocw in milliseconds
         type OffchainWorkerTimeout: Get<u64>;
-        type Verify: Verify<Self>;
     }
 
     #[pallet::pallet]
@@ -364,11 +362,11 @@ pub mod pallet {
 
     impl<T: Config> Pallet<T> {
         pub fn verify_receipt_inner(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
-            T::Verify::verify_receipt(proof, cid)
+            forest_proof_verify::verify_receipt(proof, cid).ok_or(Error::VerificationError)
         }
 
         pub fn verify_state_inner(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
-            T::Verify::verify_state(proof, cid)
+            forest_proof_verify::verify_state(proof, cid).ok_or(Error::VerificationError)
         }
 
         fn ensure_admin(o: OriginFor<T>) -> DispatchResult {

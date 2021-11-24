@@ -1,6 +1,7 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 #![feature(in_band_lifetimes)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 mod errors;
 mod forest_hamt_adaptor;

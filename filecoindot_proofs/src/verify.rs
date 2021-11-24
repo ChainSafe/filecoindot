@@ -1,11 +1,11 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
+use std::convert::TryFrom;
 use crate::errors::Error;
 use crate::traits::{GetCid, Verify};
 use cid::Cid;
 use serde_cbor::de::from_slice;
-use std::convert::TryFrom;
 
 pub struct ProofVerify;
 

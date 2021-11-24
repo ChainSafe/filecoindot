@@ -1556,6 +1556,7 @@ dependencies = [
  "sp-io",
  "sp-keystore",
  "sp-runtime",
+ "sp-runtime-interface",
  "thiserror",
  "tokio 1.14.0",
 ]
