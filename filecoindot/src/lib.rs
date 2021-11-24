@@ -41,7 +41,8 @@ pub mod pallet {
         pallet_prelude::*,
     };
 
-    use crate::types::{forest_proof_verify, BlockSubmissionProposal, ProposalStatus};
+    use crate::types::{BlockSubmissionProposal, ProposalStatus};
+    use filecoindot_io::forest_proof_verify;
 
     pub(crate) const DEFAULT_VOTE_THRESHOLD: u32 = 1;
 
@@ -345,7 +346,11 @@ pub mod pallet {
 
         /// Verify the receipt of the filecoin
         #[pallet::weight(T::WeightInfo::verify_receipt())]
-        pub fn verify_receipt(origin: OriginFor<T>, proof: Vec<Vec<u8>>, cid: Vec<u8>) -> DispatchResult {
+        pub fn verify_receipt(
+            origin: OriginFor<T>,
+            proof: Vec<Vec<u8>>,
+            cid: Vec<u8>,
+        ) -> DispatchResult {
             ensure_signed(origin)?;
             Self::verify_receipt_inner(proof, cid)?;
             Ok(())
@@ -353,7 +358,11 @@ pub mod pallet {
 
         /// Verify the state of the filecoin
         #[pallet::weight(T::WeightInfo::verify_receipt())]
-        pub fn verify_state(origin: OriginFor<T>, proof: Vec<Vec<u8>>, cid: Vec<u8>) -> DispatchResult {
+        pub fn verify_state(
+            origin: OriginFor<T>,
+            proof: Vec<Vec<u8>>,
+            cid: Vec<u8>,
+        ) -> DispatchResult {
             ensure_signed(origin)?;
             Self::verify_state_inner(proof, cid)?;
             Ok(())
@@ -555,8 +564,12 @@ pub mod pallet {
             Default::default()
         }
 
-        fn verify_receipt() -> Weight { Default::default() }
+        fn verify_receipt() -> Weight {
+            Default::default()
+        }
 
-        fn verify_state() -> Weight { Default::default() }
+        fn verify_state() -> Weight {
+            Default::default()
+        }
     }
 }

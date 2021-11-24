@@ -1,0 +1,24 @@
+[package]
+name = "filecoindot-io"
+authors = ['tianyi@chainsafe.io']
+description = 'filecoindot runtime interfaces.'
+version = "0.0.1"
+license = "GPL-3.0"
+homepage = 'https://github.com/ChainSafe/filecoindot'
+repository = 'https://github.com/ChainSafe/filecoindot'
+edition = "2018"
+
+[dependencies]
+sp-std = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+sp-runtime-interface = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+
+# fileconidot deps
+filecoindot-proofs = { path = "../filecoindot-proofs", optional = true }
+
+[features]
+default = [ "std" ]
+std = [
+  "sp-runtime-interface/std",
+  "sp-std/std",
+  "filecoindot-proofs"
+]

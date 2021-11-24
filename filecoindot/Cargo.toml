@@ -22,10 +22,9 @@ frame-benchmarking = { git = 'https://github.com/paritytech/substrate', branch =
 frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
-sp-runtime-interface = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
 
 # filecoindot related
-# filecoindot_proofs = { path = "../filecoindot_proofs", default-features = false }
+filecoindot-io = { path = "../filecoindot-io", default-features = false }
 
 [dev-dependencies]
 serde = "1.0.130"
@@ -59,5 +58,5 @@ std = [
 	'frame-support/std',
 	'frame-system/std',
 	'frame-benchmarking/std',
-	# 'filecoindot_proofs/std',
+	'filecoindot-io/std',
 ]

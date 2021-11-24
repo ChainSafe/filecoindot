@@ -1538,6 +1538,7 @@ dependencies = [
  "cs_serde_cbor",
  "derive_more",
  "dirs",
+ "filecoindot-io",
  "forest_cid",
  "frame-benchmarking",
  "frame-support",
@@ -1555,9 +1556,17 @@ dependencies = [
  "sp-io",
  "sp-keystore",
  "sp-runtime",
- "sp-runtime-interface",
  "thiserror",
  "tokio 1.14.0",
+]
+
+[[package]]
+name = "filecoindot-io"
+version = "0.0.1"
+dependencies = [
+ "filecoindot-proofs",
+ "sp-runtime-interface",
+ "sp-std",
 ]
 
 [[package]]
