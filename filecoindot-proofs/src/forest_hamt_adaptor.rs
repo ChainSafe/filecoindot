@@ -300,7 +300,7 @@ where
     }
 }
 
-fn deserialize_to_node<
+pub fn deserialize_to_node<
     'a,
     K: Eq + Serialize + for<'de> serde::Deserialize<'de>,
     V: Serialize + for<'de> serde::Deserialize<'de>,
@@ -313,7 +313,7 @@ fn deserialize_to_node<
     Ok(ForestAdaptedNode::new(cid, bitfield, pointers))
 }
 
-fn serialize_to_slice<
+pub fn serialize_to_slice<
     'a,
     K: Serialize + for<'de> serde::Deserialize<'de>,
     V: Serialize + for<'de> serde::Deserialize<'de>,

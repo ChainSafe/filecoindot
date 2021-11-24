@@ -45,6 +45,7 @@ ipld_amt = { git = "https://github.com/willeslau/forest", branch = "willes/filec
 ipld_blockstore = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
 cid = { package = "forest_cid", version = "0.3" }
 serde_cbor = { version = "0.12", features = ["tags"], package = "cs_serde_cbor" }
+filecoindot-proofs = { path = "../filecoindot-proofs", default-features = false }
 
 [features]
 default = ['std']

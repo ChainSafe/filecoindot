@@ -1539,6 +1539,7 @@ dependencies = [
  "derive_more",
  "dirs",
  "filecoindot-io",
+ "filecoindot-proofs",
  "forest_cid",
  "frame-benchmarking",
  "frame-support",

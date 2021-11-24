@@ -8,4 +8,5 @@ mod mock;
 mod ocw;
 mod relayer;
 mod vote;
+#[cfg(test)]
 mod verify;

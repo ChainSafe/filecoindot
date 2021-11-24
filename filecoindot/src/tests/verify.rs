@@ -3,7 +3,7 @@
 
 use cid::Cid;
 use frame_support::{assert_ok};
-use filecoindot_proofs::{GetCid, Amt, ForestAdaptedBlockStorage, ForestAdaptedHashAlgo, ForestAdaptedHashedBits, ForestAdaptedNode, ForestAmtAdaptedNode, Hamt};
+use filecoindot_proofs::{GetCid, Amt, ForestAdaptedBlockStorage, ForestAdaptedHashAlgo, ForestAdaptedHashedBits, ForestAdaptedNode, ForestAmtAdaptedNode, Hamt, HAMTNodeType, deserialize_to_node};
 
 use crate::{
     tests::mock::*,
@@ -13,7 +13,7 @@ use ipld_hamt::Hamt as ForestHamt;
 use ipld_amt::Amt as ForestAmt;
 use serde_cbor::from_slice;
 
-fn hamt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
+fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
     let bs = MemoryDB::default();
     let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
 
@@ -32,7 +32,11 @@ fn hamt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
         ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, _>,
         ForestAdaptedHashAlgo,
     > = Hamt::new(&cid, &store, 8).unwrap();
-    (hamt.generate_proof(&n).unwrap(), cid)
+    let mut p = hamt.generate_proof(&(max / 2)).unwrap();
+    p.reverse();
+    let raw_node = p.get(0).unwrap();
+    let node: HAMTNodeType = deserialize_to_node(None, raw_node).unwrap();
+    (p, node.cid().unwrap())
 }
 
 
@@ -57,9 +61,9 @@ fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
 
 #[test]
 fn verify_state_works() {
-    let (proof, cid) = hamt_proof_generation(100);
+    let (proof, cid) = hamt_proof_generation();
     ExtBuilder::default().build().execute_with(|| {
-        assert_ok!(FileCoinModule::verify_receipt_inner(
+        assert_ok!(FileCoinModule::verify_state_inner(
             proof,
             cid.to_bytes()
         ));

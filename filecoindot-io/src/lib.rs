@@ -5,15 +5,16 @@
 use sp_runtime_interface::runtime_interface;
 use sp_std::vec::Vec;
 
+
 #[runtime_interface]
 pub trait ForestProofVerify {
-    fn verify_receipt(_proof: Vec<Vec<u8>>, _cid: Vec<u8>) -> Option<()> {
-        use filecoindot_proofs::ProofVerify;
-        None
+    fn verify_receipt(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()> {
+        use filecoindot_proofs::{ForestAmtAdaptedNode, ProofVerify, Verify};
+        ProofVerify::verify_proof::<ForestAmtAdaptedNode<String>>(proof, cid).ok()
     }
 
-    fn verify_state(_proof: Vec<Vec<u8>>, _cid: Vec<u8>) -> Option<()> {
-        use filecoindot_proofs::ProofVerify;
-        None
+    fn verify_state(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()> {
+        use filecoindot_proofs::{HAMTNodeType, ProofVerify, Verify};
+        ProofVerify::verify_proof::<HAMTNodeType>(proof, cid).ok()
     }
 }
