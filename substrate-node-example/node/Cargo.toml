@@ -56,8 +56,9 @@ frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate.git", 
 
 node-template-runtime = { path = "../runtime" }
 
-# filecoindot deps
+# filecoindot related
 filecoindot-rpc = { path = "../../filecoindot-rpc" }
+filecoindot-io = { path = "../../filecoindot-io" }
 
 
 [build-dependencies]

@@ -4122,6 +4122,7 @@ dependencies = [
 name = "node-template"
 version = "3.0.0"
 dependencies = [
+ "filecoindot-io",
  "filecoindot-rpc",
  "frame-benchmarking",
  "frame-benchmarking-cli",
