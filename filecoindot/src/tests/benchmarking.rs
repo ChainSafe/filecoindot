@@ -4,8 +4,8 @@
 //! Benchmarking setup for filecoindot
 
 use crate::tests::mock::{Origin, Test, ALICE, RELAYER4};
-use crate::*;
 use crate::tests::verify::{amt_proof_generation, hamt_proof_generation};
+use crate::*;
 
 #[allow(unused)]
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, vec, whitelisted_caller};

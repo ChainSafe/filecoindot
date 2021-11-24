@@ -10,9 +10,11 @@
     "@filecoindot/types": "0.1.0",
     "@polkadot/api": "^6.9.2",
     "@polkadot/keyring": "^7.9.2",
-    "@polkadot/types": "^6.9.2"
+    "@polkadot/types": "^6.9.2",
+    "@polkadot/util": "^7.9.2",
+    "find-up": "^5.0.0"
   },
   "scripts": {
-    "build": "tsc --noEmit"
+    "build": "tsc --strict"
   }
 }

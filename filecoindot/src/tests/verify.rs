@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
 use cid::Cid;
-use frame_support::{assert_ok};
-use filecoindot_proofs::{GetCid, Amt, ForestAdaptedBlockStorage, ForestAdaptedHashAlgo, ForestAdaptedHashedBits, ForestAdaptedNode, ForestAmtAdaptedNode, Hamt, HAMTNodeType, deserialize_to_node};
-
-use crate::{
-    tests::mock::*,
+use filecoindot_proofs::{
+    deserialize_to_node, Amt, ForestAdaptedBlockStorage, ForestAdaptedHashAlgo,
+    ForestAdaptedHashedBits, ForestAdaptedNode, ForestAmtAdaptedNode, GetCid, HAMTNodeType, Hamt,
 };
+use frame_support::assert_ok;
+
+use crate::tests::mock::*;
+use ipld_amt::Amt as ForestAmt;
 use ipld_blockstore::MemoryDB;
 use ipld_hamt::Hamt as ForestHamt;
-use ipld_amt::Amt as ForestAmt;
 use serde_cbor::from_slice;
 
 pub fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
@@ -39,7 +40,6 @@ pub fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
     (p, node.cid().unwrap())
 }
 
-
 pub fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
     let bs = MemoryDB::default();
     let mut famt = ForestAmt::new(&bs);
@@ -63,10 +63,7 @@ pub fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
 fn verify_state_works() {
     let (proof, cid) = hamt_proof_generation();
     ExtBuilder::default().build().execute_with(|| {
-        assert_ok!(FileCoinModule::verify_state_inner(
-            proof,
-            cid.to_bytes()
-        ));
+        assert_ok!(FileCoinModule::verify_state_inner(proof, cid.to_bytes()));
     });
 }
 
@@ -74,9 +71,6 @@ fn verify_state_works() {
 fn verify_receipt_works() {
     let (proof, cid) = amt_proof_generation(100);
     ExtBuilder::default().build().execute_with(|| {
-        assert_ok!(FileCoinModule::verify_receipt_inner(
-            proof,
-            cid.to_bytes()
-        ));
+        assert_ok!(FileCoinModule::verify_receipt_inner(proof, cid.to_bytes()));
     });
 }

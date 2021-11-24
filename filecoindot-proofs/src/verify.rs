@@ -1,18 +1,18 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
-use std::convert::TryFrom;
 use crate::errors::Error;
 use crate::traits::{GetCid, Verify};
 use cid::Cid;
 use serde_cbor::de::from_slice;
+use std::convert::TryFrom;
 
 pub struct ProofVerify;
 
 impl ProofVerify {
     fn traverse_and_match<N>(proof: &[Vec<u8>], index: usize, target_cid: &Cid) -> Result<(), Error>
-        where
-            N: GetCid + for<'de> serde::Deserialize<'de>,
+    where
+        N: GetCid + for<'de> serde::Deserialize<'de>,
     {
         let current_node: N = from_slice(&*proof[index]).map_err(|_| Error::VerificationFailed)?;
         if current_node.cid()? == *target_cid {

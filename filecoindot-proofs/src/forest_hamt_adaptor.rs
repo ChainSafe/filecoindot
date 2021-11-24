@@ -324,7 +324,8 @@ pub fn serialize_to_slice<
     Ok(to_vec(node)?)
 }
 
-pub type HAMTNodeType = ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
+pub type HAMTNodeType =
+    ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
 
 #[cfg(test)]
 mod tests {
