@@ -9,6 +9,18 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@cspotcode/source-map-consumer@0.8.0":
+  version "0.8.0"
+  resolved "https://registry.nlark.com/@cspotcode/source-map-consumer/download/@cspotcode/source-map-consumer-0.8.0.tgz#33bf4b7b39c178821606f669bbc447a6a629786b"
+  integrity sha1-M79LeznBeIIWBvZpu8RHpqYpeGs=
+
+"@cspotcode/source-map-support@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.npmmirror.com/@cspotcode/source-map-support/download/@cspotcode/source-map-support-0.7.0.tgz?cache=0&sync_timestamp=1633908984001&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2F%40cspotcode%2Fsource-map-support%2Fdownload%2F%40cspotcode%2Fsource-map-support-0.7.0.tgz#4789840aa859e46d2f3173727ab707c66bf344f5"
+  integrity sha1-R4mECqhZ5G0vMXNyercHxmvzRPU=
+  dependencies:
+    "@cspotcode/source-map-consumer" "0.8.0"
+
 "@polkadot/api-derive@6.9.2":
   version "6.9.2"
   resolved "https://registry.npmmirror.com/@polkadot/api-derive/download/@polkadot/api-derive-6.9.2.tgz#a26949775c24234651031323b6e92cc0b55ac197"
@@ -209,6 +221,26 @@
     "@types/websocket" "^1.0.4"
     websocket "^1.0.34"
 
+"@tsconfig/node10@^1.0.7":
+  version "1.0.8"
+  resolved "https://registry.nlark.com/@tsconfig/node10/download/@tsconfig/node10-1.0.8.tgz?cache=0&sync_timestamp=1623230113943&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40tsconfig%2Fnode10%2Fdownload%2F%40tsconfig%2Fnode10-1.0.8.tgz#c1e4e80d6f964fbecb3359c43bd48b40f7cadad9"
+  integrity sha1-weToDW+WT77LM1nEO9SLQPfK2tk=
+
+"@tsconfig/node12@^1.0.7":
+  version "1.0.9"
+  resolved "https://registry.nlark.com/@tsconfig/node12/download/@tsconfig/node12-1.0.9.tgz#62c1f6dee2ebd9aead80dc3afa56810e58e1a04c"
+  integrity sha1-YsH23uLr2a6tgNw6+laBDljhoEw=
+
+"@tsconfig/node14@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.nlark.com/@tsconfig/node14/download/@tsconfig/node14-1.0.1.tgz?cache=0&sync_timestamp=1623230113946&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40tsconfig%2Fnode14%2Fdownload%2F%40tsconfig%2Fnode14-1.0.1.tgz#95f2d167ffb9b8d2068b0b235302fafd4df711f2"
+  integrity sha1-lfLRZ/+5uNIGiwsjUwL6/U33EfI=
+
+"@tsconfig/node16@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.nlark.com/@tsconfig/node16/download/@tsconfig/node16-1.0.2.tgz?cache=0&sync_timestamp=1626840702633&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40tsconfig%2Fnode16%2Fdownload%2F%40tsconfig%2Fnode16-1.0.2.tgz#423c77877d0569db20e1fc80885ac4118314010e"
+  integrity sha1-Qjx3h30Fadsg4fyAiFrEEYMUAQ4=
+
 "@types/bn.js@^4.11.6":
   version "4.11.6"
   resolved "https://registry.npmmirror.com/@types/bn.js/download/@types/bn.js-4.11.6.tgz#c306c70d9358aaea33cd4eda092a742b9505967c"
@@ -235,6 +267,21 @@
   integrity sha1-HcSXKA2ASaVFCFTdaY7n5uqeYLg=
   dependencies:
     "@types/node" "*"
+
+acorn-walk@^8.1.1:
+  version "8.2.0"
+  resolved "https://registry.nlark.com/acorn-walk/download/acorn-walk-8.2.0.tgz?cache=0&sync_timestamp=1630916608758&other_urls=https%3A%2F%2Fregistry.nlark.com%2Facorn-walk%2Fdownload%2Facorn-walk-8.2.0.tgz#741210f2e2426454508853a2f44d0ab83b7f69c1"
+  integrity sha1-dBIQ8uJCZFRQiFOi9E0KuDt/acE=
+
+acorn@^8.4.1:
+  version "8.6.0"
+  resolved "https://registry.npmmirror.com/acorn/download/acorn-8.6.0.tgz?cache=0&sync_timestamp=1637225522161&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Facorn%2Fdownload%2Facorn-8.6.0.tgz#e3692ba0eb1a0c83eaa4f37f5fa7368dd7142895"
+  integrity sha512-U1riIR+lBSNi3IbxtaHOIKdH8sLFv3NYfNv8sg7ZsNhcfl4HF2++BfqqrNAxoCLQW1iiylOj76ecnaUxz+z9yw==
+
+arg@^4.1.0:
+  version "4.1.3"
+  resolved "https://registry.nlark.com/arg/download/arg-4.1.3.tgz?cache=0&sync_timestamp=1629166537485&other_urls=https%3A%2F%2Fregistry.nlark.com%2Farg%2Fdownload%2Farg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
+  integrity sha1-Jp/HrVuOQstjyJbVZmAXJhwUQIk=
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -294,6 +341,11 @@ create-hash@^1.2.0:
     ripemd160 "^2.0.1"
     sha.js "^2.4.0"
 
+create-require@^1.1.0:
+  version "1.1.1"
+  resolved "https://registry.npm.taobao.org/create-require/download/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
+  integrity sha1-wdfo8eX2z8n/ZfnNNS03NIdWwzM=
+
 cuint@^0.2.2:
   version "0.2.2"
   resolved "https://registry.nlark.com/cuint/download/cuint-0.2.2.tgz#408086d409550c2631155619e9fa7bcadc3b991b"
@@ -318,6 +370,11 @@ delayed-stream@~1.0.0:
   version "1.0.0"
   resolved "https://registry.nlark.com/delayed-stream/download/delayed-stream-1.0.0.tgz#df3ae199acadfb7d440aaae0b29e2272b24ec619"
   integrity sha1-3zrhmayt+31ECqrgsp4icrJOxhk=
+
+diff@^4.0.1:
+  version "4.0.2"
+  resolved "https://registry.npm.taobao.org/diff/download/diff-4.0.2.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fdiff%2Fdownload%2Fdiff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
+  integrity sha1-YPOuy4nV+uUgwRqhnvwruYKq3n0=
 
 ed2curve@^0.3.0:
   version "0.3.0"
@@ -377,6 +434,14 @@ ext@^1.1.2:
   dependencies:
     type "^2.5.0"
 
+find-up@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmmirror.com/find-up/download/find-up-5.0.0.tgz?cache=0&sync_timestamp=1633620747957&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Ffind-up%2Fdownload%2Ffind-up-5.0.0.tgz#4c92819ecb7083561e4f4a240a86be5198f536fc"
+  integrity sha1-TJKBnstwg1YeT0okCoa+UZj1Nvw=
+  dependencies:
+    locate-path "^6.0.0"
+    path-exists "^4.0.0"
+
 form-data@^3.0.0:
   version "3.0.1"
   resolved "https://registry.nlark.com/form-data/download/form-data-3.0.1.tgz#ebd53791b78356a99af9a300d4282c4d5eb9755f"
@@ -431,6 +496,18 @@ js-sha3@^0.8.0:
   version "0.8.0"
   resolved "https://registry.npm.taobao.org/js-sha3/download/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
   integrity sha1-ubel2nOvrX3t0PjEY5VMveaBiEA=
+
+locate-path@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.nlark.com/locate-path/download/locate-path-6.0.0.tgz#55321eb309febbc59c4801d931a72452a681d286"
+  integrity sha1-VTIeswn+u8WcSAHZMackUqaB0oY=
+  dependencies:
+    p-locate "^5.0.0"
+
+make-error@^1.1.1:
+  version "1.3.6"
+  resolved "https://registry.nlark.com/make-error/download/make-error-1.3.6.tgz#2eb2e37ea9b67c4891f684a1394799af484cf7a2"
+  integrity sha1-LrLjfqm2fEiR9oShOUeZr0hM96I=
 
 md5.js@^1.3.4:
   version "1.3.5"
@@ -489,6 +566,25 @@ node-gyp-build@^4.3.0:
   version "4.3.0"
   resolved "https://registry.nlark.com/node-gyp-build/download/node-gyp-build-4.3.0.tgz#9f256b03e5826150be39c764bf51e993946d71a3"
   integrity sha1-nyVrA+WCYVC+Ocdkv1Hpk5RtcaM=
+
+p-limit@^3.0.2:
+  version "3.1.0"
+  resolved "https://registry.nlark.com/p-limit/download/p-limit-3.1.0.tgz#e1daccbe78d0d1388ca18c64fea38e3e57e3706b"
+  integrity sha1-4drMvnjQ0TiMoYxk/qOOPlfjcGs=
+  dependencies:
+    yocto-queue "^0.1.0"
+
+p-locate@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.nlark.com/p-locate/download/p-locate-5.0.0.tgz?cache=0&sync_timestamp=1629892721671&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fp-locate%2Fdownload%2Fp-locate-5.0.0.tgz#83c8315c6785005e3bd021839411c9e110e6d834"
+  integrity sha1-g8gxXGeFAF470CGDlBHJ4RDm2DQ=
+  dependencies:
+    p-limit "^3.0.2"
+
+path-exists@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.nlark.com/path-exists/download/path-exists-4.0.0.tgz#513bdbe2d3b95d7762e8c1137efa195c6c61b5b3"
+  integrity sha1-UTvb4tO5XXdi6METfvoZXGxhtbM=
 
 readable-stream@^3.6.0:
   version "3.6.0"
@@ -549,6 +645,24 @@ tr46@~0.0.3:
   resolved "https://registry.npmmirror.com/tr46/download/tr46-0.0.3.tgz?cache=0&sync_timestamp=1633302501959&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Ftr46%2Fdownload%2Ftr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=
 
+ts-node@^10.4.0:
+  version "10.4.0"
+  resolved "https://registry.npmmirror.com/ts-node/download/ts-node-10.4.0.tgz#680f88945885f4e6cf450e7f0d6223dd404895f7"
+  integrity sha1-aA+IlFiF9ObPRQ5/DWIj3UBIlfc=
+  dependencies:
+    "@cspotcode/source-map-support" "0.7.0"
+    "@tsconfig/node10" "^1.0.7"
+    "@tsconfig/node12" "^1.0.7"
+    "@tsconfig/node14" "^1.0.0"
+    "@tsconfig/node16" "^1.0.2"
+    acorn "^8.4.1"
+    acorn-walk "^8.1.1"
+    arg "^4.1.0"
+    create-require "^1.1.0"
+    diff "^4.0.1"
+    make-error "^1.1.1"
+    yn "3.1.1"
+
 tslib@~2.1.0:
   version "2.1.0"
   resolved "https://registry.nlark.com/tslib/download/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
@@ -575,6 +689,11 @@ typedarray-to-buffer@^3.1.5:
   integrity sha1-qX7nqf9CaRufeD/xvFES/j/KkIA=
   dependencies:
     is-typedarray "^1.0.0"
+
+typescript@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.npmmirror.com/typescript/download/typescript-4.5.2.tgz#8ac1fba9f52256fdb06fb89e4122fa6a346c2998"
+  integrity sha512-5BlMof9H1yGt0P8/WF+wPNw6GfctgGjXp5hkblpyT+8rkASSmkUKMXrxR0Xg8ThVCi/JnHQiKXeBaEwCeQwMFw==
 
 utf-8-validate@^5.0.2:
   version "5.0.7"
@@ -624,3 +743,13 @@ yaeti@^0.0.6:
   version "0.0.6"
   resolved "https://registry.npm.taobao.org/yaeti/download/yaeti-0.0.6.tgz#f26f484d72684cf42bedfb76970aa1608fbf9577"
   integrity sha1-8m9ITXJoTPQr7ft2lwqhYI+/lXc=
+
+yn@3.1.1:
+  version "3.1.1"
+  resolved "https://registry.nlark.com/yn/download/yn-3.1.1.tgz?cache=0&sync_timestamp=1628975005240&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fyn%2Fdownload%2Fyn-3.1.1.tgz#1e87401a09d767c1d5eab26a6e4c185182d2eb50"
+  integrity sha1-HodAGgnXZ8HV6rJqbkwYUYLS61A=
+
+yocto-queue@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.nlark.com/yocto-queue/download/yocto-queue-0.1.0.tgz?cache=0&sync_timestamp=1628813299341&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fyocto-queue%2Fdownload%2Fyocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
+  integrity sha1-ApTrPe4FAo0x7hpfosVWpqrxChs=

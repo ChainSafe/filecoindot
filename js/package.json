@@ -1,4 +1,14 @@
 {
   "private": true,
-  "workspaces": ["e2e", "types"]
+  "workspaces": [
+    "e2e",
+    "types"
+  ],
+  "devDependencies": {
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  },
+  "scripts": {
+    "e2e": "ts-node e2e/index.ts"
+  }
 }

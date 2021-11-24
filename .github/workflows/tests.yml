@@ -16,11 +16,13 @@ jobs:
           target: wasm32-unknown-unknown
           toolchain: nightly
           override: true
-      - env:
-          FILECOIN_RPC: ${{ secrets.FILECOIN_RPC }}
-        run: |
-          cargo t --all-features
-          cargo run --all-features benchmark -p "*" -e "*" --wasm-execution compiled
+      - run: cargo b --all-features --release
+      - run: cargo t --all-features --release
+      - run: ./target/release/filecoindot-template benchmark -p "*" -e "*" --wasm-execution compiled
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - run: cd js && yarn && yarn e2e
 
   fmt:
     name: Rustfmt

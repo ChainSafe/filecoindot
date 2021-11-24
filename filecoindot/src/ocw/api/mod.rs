@@ -5,6 +5,7 @@
 
 pub use self::chain_head::ChainHead;
 use frame_support::{
+    log,
     sp_runtime::offchain::{
         http::{Error, Request},
         Timestamp,
@@ -64,13 +65,22 @@ pub trait Api: Sized {
 
         Ok(serde_json::from_slice::<Resp<Self::Result>>(
             &req.send()
-                .map_err(|_| Error::IoError)?
+                .map_err(|e| {
+                    log::error!("send request failed {:?}", e);
+                    Error::IoError
+                })?
                 .wait()
-                .map_err(|_| Error::IoError)?
+                .map_err(|e| {
+                    log::error!("wait request faild {:?}", e);
+                    Error::IoError
+                })?
                 .body()
                 .collect::<Vec<_>>(),
         )
-        .map_err(|_| Error::IoError)?
+        .map_err(|e| {
+            log::error!("parse result failed {:?}", e);
+            Error::IoError
+        })?
         .result)
     }
 }

@@ -36,15 +36,11 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
         .map_err(|_| Error::GetStorageFailed)?
         .ok_or(Error::FilecoinRpcNotSet)?;
 
-    // log out filecoin rpc endpoint
-    let url_str = core::str::from_utf8(&url).map_err(|_| Error::FormatBytesFailed)?;
-    log::info!(
-        "bootstrap filecoindot ocw with filecoin rpc endpoint {}",
-        url_str
-    );
-
     // log errors from ocw
-    bootstrap::<T>(block_number, url_str)?;
+    bootstrap::<T>(
+        block_number,
+        core::str::from_utf8(&url).map_err(|_| Error::FormatBytesFailed)?,
+    )?;
 
     Ok(())
 }
@@ -56,10 +52,11 @@ fn bootstrap<T: Config>(_: T::BlockNumber, url: &str) -> Result<()> {
 }
 
 fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -> Result<()> {
+    log::info!("bootstrap ocw with rpc endpoint: {}", url);
     let pairs = ChainHead
         .req(
             url,
-            Default::default(),
+            Vec::new(),
             Timestamp::from_unix_millis(T::OffchainWorkerTimeout::get()),
         )
         .map_err(|_| Error::HttpError)?
