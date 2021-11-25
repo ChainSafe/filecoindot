@@ -1,6 +1,6 @@
 [package]
 name = "filecoindot-rpc"
-authors = ['clearloop@chainsafe.io']
+authors = ['tianyi@chainsafe.io']
 description = 'filecoindot rpcs.'
 version = "0.0.1"
 license = "GPL-3.0"

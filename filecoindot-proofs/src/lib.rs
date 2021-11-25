@@ -16,4 +16,5 @@ pub use crate::amt::Amt;
 pub use crate::forest_amt_adaptor::*;
 pub use crate::forest_hamt_adaptor::*;
 pub use crate::hamt::Hamt;
+pub use crate::traits::{AMTNode, GetCid, HAMTNode, HashedBits, Verify};
 pub use crate::verify::*;

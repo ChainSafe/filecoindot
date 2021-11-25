@@ -168,7 +168,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Amt, ForestAdaptedBlockStorage, ProofVerify};
+    use crate::{Amt, ForestAdaptedBlockStorage, ProofVerify, Verify};
     use ipld_amt::Amt as ForestAmt;
     use ipld_blockstore::MemoryDB;
     use serde_cbor::from_slice;
@@ -208,7 +208,10 @@ mod tests {
         let p = amt.generate_proof(0).unwrap();
         let raw_node = p.get(0).unwrap();
         let node: ForestAmtAdaptedNode<String> = from_slice(raw_node).unwrap();
-        let r = ProofVerify::verify_proof::<ForestAmtAdaptedNode<String>>(p, &node.cid().unwrap());
+        let r = ProofVerify::verify_proof::<ForestAmtAdaptedNode<String>>(
+            p,
+            node.cid().unwrap().to_bytes(),
+        );
         assert_eq!(r.is_ok(), true);
     }
 }
