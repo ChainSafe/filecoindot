@@ -1555,6 +1555,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "filecoindot-cli"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "filecoindot_proofs",
+ "forest_cid",
+ "hex",
+ "parity-scale-codec",
+ "type-cli",
+]
+
+[[package]]
 name = "filecoindot-rpc"
 version = "0.0.1"
 dependencies = [
@@ -8380,6 +8392,29 @@ dependencies = [
  "cfg-if 1.0.0",
  "rand 0.8.4",
  "static_assertions",
+]
+
+[[package]]
+name = "type-cli"
+version = "0.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e56a19d046a5954383ca084d9a07cb1f6b632b0d244585fd1fb06b4aaf6749bf"
+dependencies = [
+ "thiserror",
+ "type-cli-derive",
+]
+
+[[package]]
+name = "type-cli-derive"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e3dca4c2a071e67915c29f1761996441566f611229b7ba360a37136e593ce6a"
+dependencies = [
+ "proc-macro-crate 0.1.5",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "syn",
 ]
 
 [[package]]

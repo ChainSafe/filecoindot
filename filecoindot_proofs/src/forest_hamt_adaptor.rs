@@ -300,7 +300,7 @@ where
     }
 }
 
-fn deserialize_to_node<
+pub(crate) fn deserialize_to_node<
     'a,
     K: Eq + Serialize + for<'de> serde::Deserialize<'de>,
     V: Serialize + for<'de> serde::Deserialize<'de>,
@@ -438,11 +438,15 @@ mod tests {
 
         let mut p = hamt.generate_proof(&(max / 2)).unwrap();
         p.reverse();
+        dbg!(&p);
 
         let raw_node = p.get(0).unwrap();
         let node: NodeType = deserialize_to_node(None, raw_node).unwrap();
-        let r = ProofVerify::verify_proof::<NodeType>(p, &node.cid().unwrap());
+        let cid = node.cid().unwrap();
+        dbg!(&cid);
+        let r = ProofVerify::verify_proof::<NodeType>(p, &cid);
         assert_eq!(r.is_ok(), true);
+        panic!();
     }
 
     #[test]

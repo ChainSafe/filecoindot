@@ -3,6 +3,7 @@
 
 use crate::errors::Error;
 use crate::traits::GetCid;
+use crate::{ForestAdaptedHashAlgo, ForestAdaptedHashedBits, ForestAdaptedNode};
 use cid::Cid;
 use serde_cbor::de::from_slice;
 
@@ -43,4 +44,11 @@ impl ProofVerify {
         // now we search the previous index as we traverse deeper in to the trie
         Self::traverse_and_match::<N>(proof, index - 1, target_cid)
     }
+}
+
+pub(crate) type NodeType =
+    ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
+
+pub fn generic_verify(proof: Vec<Vec<u8>>, cid: &Cid) -> Result<(), Error> {
+    ProofVerify::verify_proof::<NodeType>(proof, cid)
 }
