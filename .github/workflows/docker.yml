@@ -22,10 +22,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: PrepareReg Names
+        run: echo IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           # push: ${{  github.event_name == 'push' }}
           push: true
-          tags: ChainSafe/filecoindot:latest
+          tags: ${{ IMAGE_REPOSITORY }}/filecoindot:latest
