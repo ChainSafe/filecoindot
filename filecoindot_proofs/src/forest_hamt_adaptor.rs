@@ -438,15 +438,11 @@ mod tests {
 
         let mut p = hamt.generate_proof(&(max / 2)).unwrap();
         p.reverse();
-        dbg!(&p);
 
         let raw_node = p.get(0).unwrap();
         let node: NodeType = deserialize_to_node(None, raw_node).unwrap();
-        let cid = node.cid().unwrap();
-        dbg!(&cid);
-        let r = ProofVerify::verify_proof::<NodeType>(p, &cid);
+        let r = ProofVerify::verify_proof::<NodeType>(p, &node.cid().unwrap());
         assert_eq!(r.is_ok(), true);
-        panic!();
     }
 
     #[test]
