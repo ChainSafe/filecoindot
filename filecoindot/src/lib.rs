@@ -42,6 +42,7 @@ pub mod pallet {
     };
 
     use crate::types::{BlockSubmissionProposal, ProposalStatus};
+    use filecoindot_io::forest_proof_verify;
 
     pub(crate) const DEFAULT_VOTE_THRESHOLD: u32 = 1;
 
@@ -172,6 +173,8 @@ pub mod pallet {
         AlreadyVoted,
         /// The block has already been verified
         BlockAlreadyVerified,
+        /// Cannot verify the proof provided
+        VerificationError,
     }
 
     #[pallet::hooks]
@@ -340,9 +343,41 @@ pub mod pallet {
 
             Ok(())
         }
+
+        /// Verify the receipt of the filecoin
+        #[pallet::weight(T::WeightInfo::verify_receipt())]
+        pub fn verify_receipt(
+            origin: OriginFor<T>,
+            proof: Vec<Vec<u8>>,
+            cid: Vec<u8>,
+        ) -> DispatchResult {
+            ensure_signed(origin)?;
+            Self::verify_receipt_inner(proof, cid)?;
+            Ok(())
+        }
+
+        /// Verify the state of the filecoin
+        #[pallet::weight(T::WeightInfo::verify_receipt())]
+        pub fn verify_state(
+            origin: OriginFor<T>,
+            proof: Vec<Vec<u8>>,
+            cid: Vec<u8>,
+        ) -> DispatchResult {
+            ensure_signed(origin)?;
+            Self::verify_state_inner(proof, cid)?;
+            Ok(())
+        }
     }
 
     impl<T: Config> Pallet<T> {
+        pub fn verify_receipt_inner(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
+            forest_proof_verify::verify_receipt(proof, cid).ok_or(Error::VerificationError)
+        }
+
+        pub fn verify_state_inner(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<(), Error<T>> {
+            forest_proof_verify::verify_state(proof, cid).ok_or(Error::VerificationError)
+        }
+
         fn ensure_admin(o: OriginFor<T>) -> DispatchResult {
             T::ManagerOrigin::try_origin(o)
                 .map(|_| ())
@@ -499,6 +534,8 @@ pub mod pallet {
         fn set_vote_threshold() -> Weight;
         fn new_submission() -> Weight;
         fn close_block_proposal() -> Weight;
+        fn verify_receipt() -> Weight;
+        fn verify_state() -> Weight;
     }
 
     /// For backwards compatibility and tests
@@ -524,6 +561,14 @@ pub mod pallet {
         }
 
         fn close_block_proposal() -> Weight {
+            Default::default()
+        }
+
+        fn verify_receipt() -> Weight {
+            Default::default()
+        }
+
+        fn verify_state() -> Weight {
             Default::default()
         }
     }

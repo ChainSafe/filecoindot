@@ -18,11 +18,17 @@ use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::{sync::Arc, time::Duration};
 
 // Our native executor instance.
+//
+// docs:
+// https://github.com/paritytech/substrate/blob/acb44df78015906174daf359b40916b7bef58c57/client/executor/src/native_executor.rs#L565
 native_executor_instance!(
     pub Executor,
     node_template_runtime::api::dispatch,
     node_template_runtime::native_version,
-    frame_benchmarking::benchmarking::HostFunctions,
+    (
+        filecoindot_io::forest_proof_verify::HostFunctions,
+        frame_benchmarking::benchmarking::HostFunctions,
+    ),
 );
 
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;

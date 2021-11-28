@@ -4,7 +4,9 @@
 //! Benchmarking setup for filecoindot
 
 use crate::tests::mock::{Origin, Test, ALICE, RELAYER4};
+use crate::tests::verify::{amt_proof_generation, hamt_proof_generation};
 use crate::*;
+
 #[allow(unused)]
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, vec, whitelisted_caller};
 
@@ -38,6 +40,18 @@ benchmarks! {
         Pallet::<Test>::submit_block_vote(Origin::signed(ALICE), vec![0], vec![0])?;
     } verify {
         assert!(!BlockSubmissionProposals::<Test>::contains_key(&vec![0]));
+    }
+
+    verify_receipt {
+        let (proof, cid) = amt_proof_generation(100);
+    }: {
+        Pallet::<Test>::verify_receipt(Origin::signed(ALICE), proof, cid.to_bytes())?;
+    }
+
+    verify_state {
+        let (proof, cid) = hamt_proof_generation();
+    }: {
+        Pallet::<Test>::verify_state(Origin::signed(ALICE), proof, cid.to_bytes())?;
     }
 }
 

@@ -7,4 +7,6 @@ mod benchmarking;
 mod mock;
 mod ocw;
 mod relayer;
+#[cfg(test)]
+mod verify;
 mod vote;

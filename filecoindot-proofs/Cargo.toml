@@ -1,5 +1,5 @@
 [package]
-name = "filecoindot_proofs"
+name = "filecoindot-proofs"
 version = "0.1.0"
 edition = "2018"
 
