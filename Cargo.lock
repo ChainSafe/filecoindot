@@ -1598,6 +1598,7 @@ name = "filecoindot-rpc"
 version = "0.0.1"
 dependencies = [
  "derive_more",
+ "filecoindot-proofs",
  "jsonrpc-core",
  "jsonrpc-core-client",
  "jsonrpc-derive",

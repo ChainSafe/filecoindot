@@ -19,3 +19,6 @@ parking_lot = "^0.10"
 # substrate dependencies
 sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10' }
 sp-offchain = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10' }
+
+# filecoindot dependencies
+filecoindot-proofs = { path = "../filecoindot-proofs" }
