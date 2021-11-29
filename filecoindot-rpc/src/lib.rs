@@ -1,5 +1,6 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
+use filecoindot_proofs::{ForestAmtAdaptedNode, HAMTNodeType, ProofVerify, Verify};
 use jsonrpc_derive::rpc;
 use parking_lot::RwLock;
 use result::{Error, Result};
@@ -17,6 +18,14 @@ pub trait FilecoindotApi {
     /// set filecoin rpc endpoint for filecoindot
     #[rpc(name = "filecoindot_setRpcEndpoint")]
     fn set_rpc_endpoint(&self, url: String) -> Result<()>;
+
+    // verify receipt
+    #[rpc(name = "filecoindot_verifyReceipt")]
+    fn verify_receipt(&self, proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<bool>;
+
+    // verify state
+    #[rpc(name = "filecoindot_verifyState")]
+    fn verify_state(&self, proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<bool>;
 }
 
 /// filecoindot rpc handler
@@ -47,5 +56,15 @@ where
         } else {
             Err(Error::InvalidEndpoint)
         }
+    }
+
+    // verify receipt
+    fn verify_receipt(&self, proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<bool> {
+        Ok(ProofVerify::verify_proof::<ForestAmtAdaptedNode<String>>(proof, cid).is_ok())
+    }
+
+    // verify state
+    fn verify_state(&self, proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Result<bool> {
+        Ok(ProofVerify::verify_proof::<HAMTNodeType>(proof, cid).is_ok())
     }
 }
