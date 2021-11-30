@@ -49,38 +49,41 @@ pub trait Api: Sized {
         params: Self::Params,
         deadline: Timestamp,
     ) -> Result<Self::Result, Error> {
-        // set env via storage
-        let req = Request::post(
-            base,
-            vec![serde_json::to_vec(&Req {
-                id: 0,
-                method: Self::METHOD,
-                jsonrpc: "2.0",
-                params,
-            })
-            .map_err(|_| Error::IoError)?],
-        )
-        .add_header("Content-Type", "application/json")
-        .deadline(deadline);
+        let body = serde_json::to_vec(&Req {
+            id: 0,
+            method: Self::METHOD,
+            jsonrpc: "2.0",
+            params,
+        })
+        .map_err(|_| Error::IoError)?;
 
-        Ok(serde_json::from_slice::<Resp<Self::Result>>(
-            &req.send()
-                .map_err(|e| {
-                    log::error!("send request failed {:?}", e);
-                    Error::IoError
-                })?
-                .wait()
-                .map_err(|e| {
-                    log::error!("wait request faild {:?}", e);
-                    Error::IoError
-                })?
-                .body()
-                .collect::<Vec<_>>(),
-        )
-        .map_err(|e| {
-            log::error!("parse result failed {:?}", e);
-            Error::IoError
-        })?
-        .result)
+        // build request
+        let req = Request::post(base, vec![body])
+            .add_header("Content-Type", "application/json")
+            .deadline(deadline);
+
+        // get response
+        let resp = req
+            .send()
+            .map_err(|e| {
+                log::error!("send request failed {:?}", e);
+                Error::IoError
+            })?
+            .wait()
+            .map_err(|e| {
+                log::error!("wait request faild {:?}", e);
+                Error::IoError
+            })?
+            .body()
+            .collect::<Vec<_>>();
+
+        // deserialize response
+        Ok(serde_json::from_slice::<Resp<Self::Result>>(&resp)
+            .map_err(|e| {
+                log::error!("result {:?}", resp);
+                log::error!("parse result failed {:?}", e);
+                Error::IoError
+            })?
+            .result)
     }
 }

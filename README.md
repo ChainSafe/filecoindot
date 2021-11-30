@@ -32,14 +32,14 @@ Secret phrase `brief outside human axis reveal boat warm amateur dish sample enr
 and then, post your account to the node
 
 ```
-$ curl -X POST -vk 'http://localhost:9933' -H "Content-Type:application/json;charset=utf-8" \
+$ curl -X POST 'http://localhost:9933' -H "Content-Type:application/json;charset=utf-8" \
   -d '{
     "jsonrpc":2.0,
     "id":1,
     "method":"author_insertKey",
     "params": [
       "fdot",
-      "0x4ebb14295f95e62a865a457629a8e6d96ef5f3cf1896a9624d2e91e09f4cdc65",
+      "brief outside human axis reveal boat warm amateur dish sample enroll moment",
       "0x0676a4b19c66b31e12d15fe31ccbc775d3d2cda6e1c8686e395118f808eaa118"
     ]
   }'
