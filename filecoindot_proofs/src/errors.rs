@@ -17,15 +17,15 @@ pub enum Error {
     #[error("Cid not found `{0}`")]
     CidNotFound(String),
     #[error("IPLD AMT error `{0}`")]
-    IPLDAmt(ipld_amt::Error),
+    IPLDAmt(#[from] ipld_amt::Error),
     #[error("IPLD HAMT error `{0}`")]
-    IPLDHamt(ipld_hamt::Error),
+    IPLDHamt(#[from] ipld_hamt::Error),
     #[error("ForestDB error `{0}`")]
-    ForestDB(forest_db::Error),
+    ForestDB(#[from] forest_db::Error),
     #[error("CborEncoding error `{0}`")]
-    CborEncoding(serde_cbor::Error),
+    CborEncoding(#[from] serde_cbor::Error),
     #[error("IPLD blockstore error `{0}`")]
-    BlockStore(ipld_blockstore::Error),
+    BlockStore(#[from] ipld_blockstore::Error),
     #[error("Generic error `{0}`")]
     Other(String),
 }
