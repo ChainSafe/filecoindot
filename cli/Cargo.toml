@@ -12,6 +12,7 @@ type-cli = "0.0.3"
 codec = { package = "parity-scale-codec", version = "2.3.1", default-features = false }
 hex = "0.4.3"
 anyhow = "1"
+thiserror = "1"
 filecoindot_proofs = { path = "../filecoindot_proofs" }
 cid = { package = "forest_cid", version = "0.3" }
 

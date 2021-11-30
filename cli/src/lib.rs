@@ -1,11 +1,19 @@
 #![deny(warnings)]
 use codec::{Decode, Encode};
 
+#[derive(thiserror::Error, Debug)]
+pub enum DecodeError {
+    #[error("Error decoding from hex: {0}")]
+    FromHex(#[from] hex::FromHexError),
+    #[error("codec error: {0}")]
+    CodecError(#[from] codec::Error),
+}
+
 pub fn hex_encode_proof(proof: Vec<Vec<u8>>) -> String {
     hex::encode(proof.encode())
 }
 
-pub fn decode_proof_from_hex(hex: &str) -> anyhow::Result<Vec<Vec<u8>>> {
+pub fn decode_proof_from_hex(hex: &str) -> Result<Vec<Vec<u8>>, DecodeError> {
     let p = hex::decode(hex)?;
     let decoded = Decode::decode(&mut &*p)?;
     Ok(decoded)
