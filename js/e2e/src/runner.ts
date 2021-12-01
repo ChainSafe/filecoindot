@@ -18,8 +18,8 @@ function killAll(ps: ChildProcess, exitCode: number) {
     }
     ps.kill("SIGINT");
   } catch (e) {
-    if (e.code !== "EPERM") {
-      process.stdout.write(e);
+    if ((e as any).code !== "EPERM") {
+      process.stdout.write(JSON.stringify(e));
       process.exit(2);
     }
   }
@@ -34,6 +34,7 @@ export interface RunnerConfig {
   filecoindotRpc: string;
   id: string;
   suri: string;
+  addr: string;
   ws: string;
 }
 
@@ -71,12 +72,12 @@ export default class Runner {
       process.exit(1);
     }
 
-    if (event.method == "RelayerAdded") {
+    if (event.method == "VoteCasted") {
       console.log(
         `\t${event.section}:${event.method}:: (phase=${phase.toString()})`
       );
       console.log(`\t\t${event.meta.docs.toString()}`);
-      console.log("Relayer has been added!");
+      console.log("votes from ocw has been accepted!");
       process.exit(0);
     }
   }
@@ -85,11 +86,12 @@ export default class Runner {
    * init offchain worker
    */
   private async tests() {
-    const { ws, filecoindotRpc, id, suri } = this.config;
+    const { addr, ws, filecoindotRpc, id, suri } = this.config;
     const api = await Api.New(ws);
-    await api.insertAuthor(id, suri);
+    await api.insertAuthor(id, suri, addr);
     await api.setEndpoint(filecoindotRpc);
-    await api.addRelayer();
+    await api.depositFund(addr, 1000);
+    await api.addRelayer(addr);
     api.events(this.checkEvents);
   }
 

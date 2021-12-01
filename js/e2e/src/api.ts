@@ -6,11 +6,6 @@ import { Keyring } from "@polkadot/keyring";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { rpc as filecoindotRpc, types } from "@filecoindot/types";
 import { EventRecord, Event, Phase } from "@polkadot/types/interfaces";
-import { hexToU8a } from "@polkadot/util";
-
-// testing account
-const SURI: string =
-  "0x4ebb14295f95e62a865a457629a8e6d96ef5f3cf1896a9624d2e91e09f4cdc65";
 
 /**
  * filecoindot api
@@ -18,7 +13,6 @@ const SURI: string =
 export default class Api {
   _: ApiPromise;
   signer: KeyringPair;
-  suri: KeyringPair;
 
   /**
    * new filecoindot api
@@ -33,15 +27,13 @@ export default class Api {
 
     const keyring = new Keyring({ type: "sr25519" });
     const signer = keyring.createFromUri("//Alice");
-    const suri = keyring.addFromSeed(hexToU8a(SURI));
 
-    return new Api(api, signer, suri);
+    return new Api(api, signer);
   }
 
-  constructor(api: ApiPromise, signer: KeyringPair, suri: KeyringPair) {
+  constructor(api: ApiPromise, signer: KeyringPair) {
     this._ = api;
     this.signer = signer;
-    this.suri = suri;
   }
 
   /**
@@ -61,8 +53,8 @@ export default class Api {
   /**
    * 0. insert author key
    */
-  public async insertAuthor(id: string, suri: string) {
-    return await this._.rpc.author.insertKey(id, suri, this.suri.address);
+  public async insertAuthor(id: string, suri: string, addr: string) {
+    return await this._.rpc.author.insertKey(id, suri, addr);
   }
 
   /**
@@ -73,11 +65,20 @@ export default class Api {
   }
 
   /**
-   * 2. add relayer
+   * 2. depoit some fund to the testing account
    */
-  public async addRelayer() {
+  public async depositFund(addr: string, unit: number) {
+    return await this._.tx.balances
+      .transferKeepAlive(addr, unit)
+      .signAndSend(this.signer);
+  }
+
+  /**
+   * 3. add relayer
+   */
+  public async addRelayer(addr: string) {
     return await this._.tx.sudo
-      .sudo(this._.tx.filecoindot.addRelayer(this.suri.address))
+      .sudo(this._.tx.filecoindot.addRelayer(addr))
       .signAndSend(this.signer);
   }
 }
