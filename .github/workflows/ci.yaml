@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: "*"
+jobs:
+  check:
+    timeout-minutes: 15
+    name: "Check Types/Build"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup nodejs
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            .cache
+          key: ubuntu-latest-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --prefer-offline --nonInteractive --frozen-lockfile
+      - run: yarn run lint
+      - run: yarn run lint:types
+      - run: yarn run build --if-present
