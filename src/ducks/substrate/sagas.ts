@@ -15,14 +15,17 @@ function* initialization(): Generator<CallEffect | PutEffect, void, InjectedExte
         yield put(setSubstrateState(PluginState.INJECTED));
 
         const extensions = yield call(web3Enable, DAPP_NAME);
-        if (!extensions.length) {
-            yield put(setSubstrateState(PluginState.UNAUTHORIZED));
-        }
+        if (!extensions.length) throw new Error('Not authorised page');
+
         yield put(setSubstrateState(PluginState.AUTHORIZED));
 
         const accounts = yield call(web3Accounts);
         yield put(setAccounts(accounts));
+
+        // on every account change (delete, add) will send new account list, we should handle it!
+        // web3AccountsSubscribe(console.log);
     } catch (e) {
+        yield put(setSubstrateState(PluginState.UNAUTHORIZED));
         console.error(e);
     }
 }
