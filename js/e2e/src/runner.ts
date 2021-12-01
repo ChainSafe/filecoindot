@@ -6,6 +6,7 @@ import Launch from "./launch";
 import { ChildProcess } from "child_process";
 import { Event, Phase, DispatchError } from "@polkadot/types/interfaces";
 import { ApiPromise } from "@polkadot/api";
+import BN from "bn.js";
 
 const OCW = "filecoindot";
 const OCW_PREPARED = "haven't set filecoin rpc yet";
@@ -34,7 +35,6 @@ export interface RunnerConfig {
   filecoindotRpc: string;
   id: string;
   suri: string;
-  addr: string;
   ws: string;
 }
 
@@ -86,12 +86,12 @@ export default class Runner {
    * init offchain worker
    */
   private async tests() {
-    const { addr, ws, filecoindotRpc, id, suri } = this.config;
-    const api = await Api.New(ws);
-    await api.insertAuthor(id, suri, addr);
+    const { ws, filecoindotRpc, id, suri } = this.config;
+    const api = await Api.New(ws, suri);
+    await api.insertAuthor(id);
     await api.setEndpoint(filecoindotRpc);
-    await api.depositFund(addr, 1000);
-    await api.addRelayer(addr);
+    await api.addRelayer();
+    await api.depositFund(1000);
     api.events(this.checkEvents);
   }
 

@@ -6,18 +6,23 @@ import { Keyring } from "@polkadot/keyring";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { rpc as filecoindotRpc, types } from "@filecoindot/types";
 import { EventRecord, Event, Phase } from "@polkadot/types/interfaces";
+import { Balance } from "@polkadot/types/interfaces/runtime";
+import { BN, u8aToHex } from "@polkadot/util";
 
 /**
  * filecoindot api
  */
 export default class Api {
   _: ApiPromise;
+  suri: string;
+  keyring: Keyring;
   signer: KeyringPair;
+  testSigner: KeyringPair;
 
   /**
    * new filecoindot api
    */
-  static async New(ws: string): Promise<Api> {
+  static async New(ws: string, suri: string): Promise<Api> {
     const provider = new WsProvider(ws);
     const api = await ApiPromise.create({
       provider,
@@ -27,13 +32,23 @@ export default class Api {
 
     const keyring = new Keyring({ type: "sr25519" });
     const signer = keyring.createFromUri("//Alice");
+    const testSigner = keyring.addFromMnemonic(suri);
 
-    return new Api(api, signer);
+    return new Api(api, suri, keyring, signer, testSigner);
   }
 
-  constructor(api: ApiPromise, signer: KeyringPair) {
+  constructor(
+    api: ApiPromise,
+    suri: string,
+    keyring: Keyring,
+    signer: KeyringPair,
+    testSigner: KeyringPair
+  ) {
     this._ = api;
+    this.suri = suri;
+    this.keyring = keyring;
     this.signer = signer;
+    this.testSigner = testSigner;
   }
 
   /**
@@ -53,8 +68,12 @@ export default class Api {
   /**
    * 0. insert author key
    */
-  public async insertAuthor(id: string, suri: string, addr: string) {
-    return await this._.rpc.author.insertKey(id, suri, addr);
+  public async insertAuthor(id: string) {
+    return await this._.rpc.author.insertKey(
+      id,
+      this.suri,
+      u8aToHex(this.testSigner.addressRaw)
+    );
   }
 
   /**
@@ -67,18 +86,22 @@ export default class Api {
   /**
    * 2. depoit some fund to the testing account
    */
-  public async depositFund(addr: string, unit: number) {
+  public async depositFund(value: number) {
+    const UNIT: Balance = this._.createType(
+      "Balance",
+      Math.pow(10, this._.registry.chainDecimals[0])
+    );
     return await this._.tx.balances
-      .transferKeepAlive(addr, unit)
-      .signAndSend(this.signer);
+      .transfer(this.testSigner.address, UNIT.mul(new BN(value)))
+      .signAndSend(this.signer, { nonce: 0 });
   }
 
   /**
    * 3. add relayer
    */
-  public async addRelayer(addr: string) {
+  public async addRelayer() {
     return await this._.tx.sudo
-      .sudo(this._.tx.filecoindot.addRelayer(addr))
-      .signAndSend(this.signer);
+      .sudo(this._.tx.filecoindot.addRelayer(this.testSigner.address))
+      .signAndSend(this.signer, { nonce: 1 });
   }
 }
