@@ -11,8 +11,7 @@ use get_tip_set_by_height::ChainGetTipSetByHeight;
 use sp_core::offchain::{OffchainDbExt, OffchainWorkerExt};
 
 // infura rpc for testing
-const FILECOIN_RPC: &str =
-    "https://1zU9AC0P1BFAsHqQbf6GkeZlruY:4dd07f0d703733799dc8b220fd351cf8@filecoin.infura.io";
+const FILECOIN_RPC: &str = "https://api.node.glif.io";
 
 #[test]
 fn test_http_request() {

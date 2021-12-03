@@ -6,6 +6,7 @@ import Launch from "./launch";
 import { ChildProcess } from "child_process";
 import { Event, Phase, DispatchError } from "@polkadot/types/interfaces";
 import { ApiPromise } from "@polkadot/api";
+import BN from "bn.js";
 
 const OCW = "filecoindot";
 const OCW_PREPARED = "haven't set filecoin rpc yet";
@@ -18,8 +19,8 @@ function killAll(ps: ChildProcess, exitCode: number) {
     }
     ps.kill("SIGINT");
   } catch (e) {
-    if (e.code !== "EPERM") {
-      process.stdout.write(e);
+    if ((e as any).code !== "EPERM") {
+      process.stdout.write(JSON.stringify(e));
       process.exit(2);
     }
   }
@@ -71,12 +72,12 @@ export default class Runner {
       process.exit(1);
     }
 
-    if (event.method == "RelayerAdded") {
+    if (event.method == "VoteCasted") {
       console.log(
         `\t${event.section}:${event.method}:: (phase=${phase.toString()})`
       );
       console.log(`\t\t${event.meta.docs.toString()}`);
-      console.log("Relayer has been added!");
+      console.log("votes from ocw has been accepted!");
       process.exit(0);
     }
   }
@@ -86,10 +87,11 @@ export default class Runner {
    */
   private async tests() {
     const { ws, filecoindotRpc, id, suri } = this.config;
-    const api = await Api.New(ws);
-    await api.insertAuthor(id, suri);
+    const api = await Api.New(ws, suri);
+    await api.insertAuthor(id);
     await api.setEndpoint(filecoindotRpc);
     await api.addRelayer();
+    await api.depositFund(1000);
     api.events(this.checkEvents);
   }
 

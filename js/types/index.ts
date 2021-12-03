@@ -27,6 +27,34 @@ const rpc = {
       ],
       type: "()",
     },
+    verifyReceipt: {
+      description: "verify filecoin receipt",
+      params: [
+        {
+          name: "proof",
+          type: "Vec<u8>",
+        },
+        {
+          name: "cid",
+          type: "Vec<u8>",
+        },
+      ],
+      type: "()",
+    },
+    verifyState: {
+      description: "verify filecoin state",
+      params: [
+        {
+          name: "proof",
+          type: "Vec<u8>",
+        },
+        {
+          name: "cid",
+          type: "Vec<u8>",
+        },
+      ],
+      type: "()",
+    },
   },
 };
 
