@@ -16,7 +16,7 @@ num-traits = "0.2.14"
 ipld_hamt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
 ipld_amt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
 forest_ipld = { version = "0.1.1" }
-forest_encoding = { version = "0.2.1" }
+forest_encoding = { version = "0.2.2" }
 forest_hash_utils = { version = "0.1" }
 forest_db = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
 ipld_blockstore = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }

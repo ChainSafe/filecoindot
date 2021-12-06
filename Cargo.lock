@@ -1736,9 +1736,9 @@ dependencies = [
 
 [[package]]
 name = "forest_encoding"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "350965034d9cc9a73dfaaf270851c9486269c36d1c0b18c38ac7151c6cac9060"
+checksum = "41c8339c6dc1741c3144ba06cfb0512a2e858bd603be97bff24bf630d91cce7d"
 dependencies = [
  "blake2b_simd",
  "cs_serde_bytes",
