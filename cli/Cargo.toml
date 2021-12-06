@@ -1,0 +1,25 @@
+[package]
+name = "filecoindot-cli"
+description = 'Pallet that bridges Filecoin to substrate based chains.'
+version = '0.0.1'
+license = "GPL-3.0"
+homepage = 'https://github.com/ChainSafe/filecoindot'
+repository = 'https://github.com/ChainSafe/filecoindot'
+edition = '2018'
+
+[dependencies]
+type-cli = "0.0.3"
+codec = { package = "parity-scale-codec", version = "2.3.1", default-features = false }
+hex = "0.4.3"
+anyhow = "1"
+thiserror = "1"
+filecoindot-proofs = { path = "../filecoindot-proofs" }
+cid = { package = "forest_cid", version = "0.3" }
+
+
+[features]
+default = ['std']
+std = [
+	'codec/std',
+    'hex/std',
+]

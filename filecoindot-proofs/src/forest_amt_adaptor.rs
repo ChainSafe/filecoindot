@@ -14,12 +14,6 @@ use std::marker::PhantomData;
 
 const DEFAULT_BIT_WIDTH: usize = 3;
 
-impl From<ipld_amt::Error> for Error {
-    fn from(error: ipld_amt::Error) -> Self {
-        Error::IPLDAmt(error)
-    }
-}
-
 pub struct ForestAmtAdaptedNode<V> {
     cid: Option<Cid>,
     inner: ForestNode<V>,
