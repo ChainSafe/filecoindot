@@ -20,11 +20,11 @@ enum Filecoindot {
 #[derive(Error, Debug)]
 enum CliError {
     #[error("CID error: {0}")]
-    CidError(#[from] filecoindot_proofs::cid::Error),
+    Cid(#[from] filecoindot_proofs::cid::Error),
     #[error("Verification Error: {0}")]
-    VerificationError(#[from] filecoindot_proofs::Error),
+    Verification(#[from] filecoindot_proofs::Error),
     #[error("decode error: {0}")]
-    DecodeError(#[from] DecodeError),
+    Decode(#[from] DecodeError),
 }
 
 fn main() -> Result<(), CliError> {
