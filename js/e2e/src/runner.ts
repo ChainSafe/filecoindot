@@ -32,7 +32,7 @@ function killAll(ps: ChildProcess, exitCode: number) {
  * e2e runner config
  */
 export interface RunnerConfig {
-  filecoindotRpc: string;
+  filecoindotRpc: string[];
   id: string;
   suri: string;
   ws: string;
