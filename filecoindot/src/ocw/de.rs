@@ -6,7 +6,7 @@ use serde::de::{Deserialize, Deserializer, Error as _};
 use serde_json::Value;
 
 /// deserialize json `Value` to `Vec<u8>`
-pub fn bytes<'de, D>(data: D) -> Result<Vec<u8>, D::Error>
+pub fn bytes<'de, D>(data: D) -> core::result::Result<Vec<u8>, D::Error>
 where
     D: Deserializer<'de>,
 {
