@@ -1,3 +1,6 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
+
 use cid::Cid;
 use filecoindot_cli::hex_encode_proof;
 use filecoindot_proofs::generic_verify;
