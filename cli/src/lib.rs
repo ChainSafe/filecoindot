@@ -1,3 +1,6 @@
+// Copyright 2021 ChainSafe Systems
+// SPDX-License-Identifier: LGPL-3.0-only
+
 #![deny(warnings)]
 use codec::{Decode, Encode};
 
@@ -9,10 +12,12 @@ pub enum DecodeError {
     CodecError(#[from] codec::Error),
 }
 
+/// encode a Vec of Vec of bytes into a String using hex encoding
 pub fn hex_encode_proof(proof: Vec<Vec<u8>>) -> String {
     hex::encode(proof.encode())
 }
 
+/// decode a hex String into a Vec of Vec of bytes
 pub fn decode_proof_from_hex(hex: &str) -> Result<Vec<Vec<u8>>, DecodeError> {
     let p = hex::decode(hex)?;
     let decoded = Decode::decode(&mut &*p)?;
