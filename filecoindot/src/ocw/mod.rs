@@ -42,10 +42,6 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
         .split(',')
         .collect();
 
-    frame_support::sp_std::if_std! {
-        println!("endpoints: {:?}", endpoints);
-    }
-
     // check if endpoints is empty
     if endpoints.is_empty() {
         return Err(Error::FilecoinRpcNotSet);
