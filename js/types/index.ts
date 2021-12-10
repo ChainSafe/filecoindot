@@ -22,7 +22,7 @@ const rpc = {
       params: [
         {
           name: "url",
-          type: "Vec<String>",
+          type: "String",
         },
       ],
       type: "()",

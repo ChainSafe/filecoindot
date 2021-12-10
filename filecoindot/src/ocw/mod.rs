@@ -10,7 +10,6 @@ use crate::{
     },
     Call, Config,
 };
-use codec::Decode;
 use frame_support::{
     sp_runtime::offchain::{storage::StorageValueRef, Timestamp},
     sp_std::vec::Vec,
@@ -38,12 +37,14 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
         .ok_or(Error::FilecoinRpcNotSet)?;
 
     // decode endpoints
-    let bytes_array =
-        <Vec<Vec<u8>>>::decode(&mut urls.as_slice()).map_err(|_| Error::FormatBytesFailed)?;
-    let endpoints = bytes_array
-        .iter()
-        .map(|url| core::str::from_utf8(url).map_err(|_| Error::FormatBytesFailed))
-        .collect::<Result<Vec<&str>>>()?;
+    let endpoints: Vec<&str> = core::str::from_utf8(&urls)
+        .map_err(|_| Error::FormatBytesFailed)?
+        .split(",")
+        .collect();
+
+    frame_support::sp_std::if_std! {
+        println!("endpoints: {:?}", endpoints);
+    }
 
     // check if endpoints is empty
     if endpoints.is_empty() {
