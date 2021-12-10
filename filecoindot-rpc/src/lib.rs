@@ -50,7 +50,7 @@ where
     fn set_rpc_endpoint(&self, urls: String) -> Result<()> {
         if urls.is_empty()
             || urls
-                .split(",")
+                .split(',')
                 .collect::<Vec<&str>>()
                 .iter()
                 .any(|url| !url.starts_with("http"))

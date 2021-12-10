@@ -39,7 +39,7 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
     // decode endpoints
     let endpoints: Vec<&str> = core::str::from_utf8(&urls)
         .map_err(|_| Error::FormatBytesFailed)?
-        .split(",")
+        .split(',')
         .collect();
 
     frame_support::sp_std::if_std! {

@@ -11,7 +11,7 @@ use crate::{
 };
 use sp_core::{
     offchain::{testing, OffchainDbExt, OffchainWorkerExt, TransactionPoolExt},
-    Decode, Encode,
+    Decode,
 };
 use sp_keystore::{testing::KeyStore, KeystoreExt, SyncCryptoStore};
 use sp_runtime::{offchain::storage::StorageValueRef, RuntimeAppPublic};
@@ -111,7 +111,7 @@ fn should_submit_vote_in_ocw() {
     t.execute_with(|| {
         // set rpc endpoint
         let rpc = StorageValueRef::persistent("FILECOIN_RPC".as_bytes());
-        rpc.set(&vec![FILECOIN_API].encode());
+        rpc.set(&FILECOIN_API.as_bytes());
 
         // bootstrap ocw on block 1
         offchain_worker::<Test>(1u32.into()).unwrap();
