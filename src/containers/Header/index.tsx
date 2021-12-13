@@ -1,20 +1,19 @@
 import AppBar from "@mui/material/AppBar";
 import React from "react";
-import {Avatar, Box, Button, Fab, IconButton, Toolbar, Tooltip, Typography} from "@mui/material";
+import {Avatar, Box, Button, IconButton, Toolbar, Tooltip, Typography} from "@mui/material";
 import {AccountSelect} from "../AccountSelect";
 import {Identicon} from "@polkadot/react-identicon";
 import {useSelector} from "react-redux";
 import {getAccount} from "../../ducks/substrate/selectors";
+import {Link} from "react-router-dom";
 
 export const Header: React.FC = () => {
     const selectedAccount = useSelector(getAccount);
 
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
     };
-
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
@@ -34,21 +33,21 @@ export const Header: React.FC = () => {
                 {selectedAccount &&
                     <>
                     <Box sx={{ flexGrow: 1, display: 'flex' }}>
-                <Button sx={{ my: 2, color: 'white', display: 'block' }}>
+                <Button component={Link} to="/" sx={{ my: 2, color: 'white', display: 'block' }}>
                     Show my NFT's
                 </Button>
-                <Button sx={{ my: 2, color: 'white', display: 'block' }}>
+                <Button component={Link} to="/add" sx={{ my: 2, color: 'white', display: 'block' }}>
                     Mint new NFT
                 </Button>
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Select Account">
-                            <IconButton onClick={handleOpenUserMenu}>
-                                <Avatar sx={{ bgcolor: 'background.paper' }}>
-                                    <Identicon value={selectedAccount.address} theme="substrate" size={40} />
-                                </Avatar>
-                            </IconButton>
+                    <IconButton onClick={handleOpenUserMenu}>
+                        <Avatar sx={{ bgcolor: 'background.paper' }}>
+                            <Identicon value={selectedAccount.address} theme="substrate" size={32} />
+                        </Avatar>
+                    </IconButton>
                 </Tooltip>
                 <AccountSelect
                     anchorEl={anchorElUser}

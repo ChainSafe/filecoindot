@@ -1,12 +1,14 @@
 import React from 'react';
 import './App.css';
-import {BrowserRouter} from "react-router-dom";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import { Provider } from 'react-redux';
 import {store} from "./ducks/store";
 import {Home} from "./pages/Home";
 import {Settings} from "./containers/Settings";
 import {Header} from "./containers/Header";
 import Container from '@mui/material/Container';
+import {MintNFT} from "./pages/MintNFT";
+import {UserSpace} from "./containers/UserSpace";
 
 function App() {
   return (
@@ -14,7 +16,12 @@ function App() {
         <Provider store={store}>
             <Header />
             <Container fixed>
-                <Home />
+                <UserSpace>
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/add" element={<MintNFT />} />
+                    </Routes>
+                </UserSpace>
             </Container>
             <Settings />
         </Provider>
