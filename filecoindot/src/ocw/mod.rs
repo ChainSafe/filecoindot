@@ -69,8 +69,9 @@ fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -
             //
             // still requires taking the ownership even under `into_iter()`
             let (_, res) = signer
-                .send_signed_transaction(|_| {
-                    Call::submit_block_vote { block_cid: cid.to_vec(), message_root_cid: msg_root.to_vec() }
+                .send_signed_transaction(|_| Call::submit_block_vote {
+                    block_cid: cid.to_vec(),
+                    message_root_cid: msg_root.to_vec(),
                 })
                 .ok_or(Error::NoTxResult)?;
 

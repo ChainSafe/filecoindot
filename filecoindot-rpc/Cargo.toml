@@ -9,9 +9,9 @@ repository = 'https://github.com/ChainSafe/filecoindot'
 edition = "2021"
 
 [dependencies]
-jsonrpc-core = "15.1"
-jsonrpc-core-client = "15.1"
-jsonrpc-derive = "15.1"
+jsonrpc-core = "18"
+jsonrpc-core-client = "18"
+jsonrpc-derive = "18"
 derive_more = "^0.99"
 thiserror = "^1"
 parking_lot = "^0.10"

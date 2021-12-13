@@ -4,8 +4,8 @@
 use frame_support::pallet_prelude::*;
 use frame_support::sp_std;
 use frame_system::{Origin, RawOrigin};
-use sp_std::prelude::*;
 use scale_info::TypeInfo;
+use sp_std::prelude::*;
 // use filecoindot_proofs::{ForestAmtAdaptedNode, HAMTNodeType, ProofVerify, Verify};
 use crate::{Config, Relayers};
 
@@ -22,11 +22,7 @@ pub(crate) struct BlockSubmissionProposal<AccountId, BlockNumber: PartialOrd> {
 }
 
 impl<AccountId, BlockNumber: PartialOrd> BlockSubmissionProposal<AccountId, BlockNumber> {
-    pub fn new(
-        proposer: AccountId,
-        start_block: BlockNumber,
-        end_block: BlockNumber,
-    ) -> Self {
+    pub fn new(proposer: AccountId, start_block: BlockNumber, end_block: BlockNumber) -> Self {
         BlockSubmissionProposal {
             proposer,
             //voted: BTreeSet::new(),

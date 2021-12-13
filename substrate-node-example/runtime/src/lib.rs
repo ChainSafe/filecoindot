@@ -9,6 +9,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use orml_nft;
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -25,7 +26,6 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-use orml_nft;
 // A few exports that help ease life for downstream crates.
 use codec::Encode;
 pub use frame_support::{
@@ -200,7 +200,7 @@ impl frame_system::Config for Runtime {
 impl pallet_randomness_collective_flip::Config for Runtime {}
 
 parameter_types! {
-	pub const MaxAuthorities: u32 = 32;
+    pub const MaxAuthorities: u32 = 32;
 }
 
 impl pallet_aura::Config for Runtime {
@@ -294,8 +294,8 @@ impl filecoindot::Config for Runtime {
 }
 
 parameter_types! {
-	pub MaxClassMetadata: u32 = 1024;
-	pub MaxTokenMetadata: u32 = 1024;
+    pub MaxClassMetadata: u32 = 1024;
+    pub MaxTokenMetadata: u32 = 1024;
 }
 
 impl orml_nft::Config for Runtime {
