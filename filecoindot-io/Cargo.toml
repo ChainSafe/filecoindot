@@ -6,11 +6,11 @@ version = "0.0.1"
 license = "GPL-3.0"
 homepage = 'https://github.com/ChainSafe/filecoindot'
 repository = 'https://github.com/ChainSafe/filecoindot'
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-sp-std = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
-sp-runtime-interface = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.10', default-features = false }
+sp-std = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
+sp-runtime-interface = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
 
 # fileconidot deps
 filecoindot-proofs = { path = "../filecoindot-proofs", optional = true }

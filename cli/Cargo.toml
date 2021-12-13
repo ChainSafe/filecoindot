@@ -5,7 +5,7 @@ version = '0.0.1'
 license = "GPL-3.0"
 homepage = 'https://github.com/ChainSafe/filecoindot'
 repository = 'https://github.com/ChainSafe/filecoindot'
-edition = '2018'
+edition = "2021"
 
 [dependencies]
 type-cli = "0.0.3"

@@ -125,10 +125,10 @@ fn should_submit_vote_in_ocw() {
             assert_eq!(tx.signature, Some((i as u64, ())));
             assert_eq!(
                 tx.call,
-                Call::FileCoinModule(crate::Call::submit_block_vote(
-                    resp.cids[i].inner.to_vec(),
-                    resp.blocks[i].messages.inner.to_vec()
-                ))
+                Call::FileCoinModule(crate::Call::submit_block_vote {
+                    block_cid: resp.cids[i].inner.to_vec(),
+                    message_root_cid: resp.blocks[i].messages.inner.to_vec()
+                })
             );
         }
     });
