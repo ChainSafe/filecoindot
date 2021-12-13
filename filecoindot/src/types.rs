@@ -5,26 +5,27 @@ use frame_support::pallet_prelude::*;
 use frame_support::sp_std;
 use frame_system::{Origin, RawOrigin};
 use sp_std::prelude::*;
+use scale_info::TypeInfo;
 // use filecoindot_proofs::{ForestAmtAdaptedNode, HAMTNodeType, ProofVerify, Verify};
 use crate::{Config, Relayers};
 
 /// The filecoin block submission proposal
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-pub(crate) struct BlockSubmissionProposal<T: Config> {
-    proposer: T::AccountId,
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
+pub(crate) struct BlockSubmissionProposal<AccountId, BlockNumber: PartialOrd> {
+    proposer: AccountId,
     /// The status of the proposal
     status: ProposalStatus,
     /// The block number that the proposal started
-    start_block: T::BlockNumber,
+    start_block: BlockNumber,
     /// The block number that the proposal ended
-    end_block: T::BlockNumber,
+    end_block: BlockNumber,
 }
 
-impl<T: Config> BlockSubmissionProposal<T> {
+impl<AccountId, BlockNumber: PartialOrd> BlockSubmissionProposal<AccountId, BlockNumber> {
     pub fn new(
-        proposer: T::AccountId,
-        start_block: T::BlockNumber,
-        end_block: T::BlockNumber,
+        proposer: AccountId,
+        start_block: BlockNumber,
+        end_block: BlockNumber,
     ) -> Self {
         BlockSubmissionProposal {
             proposer,
@@ -45,7 +46,7 @@ impl<T: Config> BlockSubmissionProposal<T> {
     }
 
     /// Whether the proposal is still active, i.e. can vote
-    pub fn is_expired(&self, now: &T::BlockNumber) -> bool {
+    pub fn is_expired(&self, now: &BlockNumber) -> bool {
         now.gt(&self.end_block)
     }
 }
@@ -55,7 +56,7 @@ impl<T: Config> BlockSubmissionProposal<T> {
 ///     Active -> Approved -> Executed
 ///               Rejected    Canceled
 ///                           Expired
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub(crate) enum ProposalStatus {
     /// The proposal is active and relayers can start voting
     Active,

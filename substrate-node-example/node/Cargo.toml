@@ -40,7 +40,7 @@ sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "po
 sp-timestamp = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13" }
 
 # These dependencies are used for the node template's RPCs
-jsonrpc-core = "15.1"
+jsonrpc-core = '18.0.0'
 sc-rpc = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13" }
 sp-api = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13" }
 sc-rpc-api = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13" }
@@ -55,6 +55,9 @@ frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", bran
 frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13" }
 
 node-template-runtime = { path = "../runtime" }
+
+# orml dependencies
+orml-nft = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.13", optional = true }
 
 # filecoindot related
 filecoindot-rpc = { path = "../../filecoindot-rpc" }
