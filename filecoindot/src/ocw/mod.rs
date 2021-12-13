@@ -37,10 +37,11 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
         .ok_or(Error::FilecoinRpcNotSet)?;
 
     // decode endpoints
-    let endpoints: Vec<&str> = core::str::from_utf8(&urls)
+    let endpoints = core::str::from_utf8(&urls)
         .map_err(|_| Error::FormatBytesFailed)?
         .split(',')
-        .collect();
+        .map(|s|s.trim())
+        .collect::<Vec<&str>>();
 
     // check if endpoints is empty
     if endpoints.is_empty() {
