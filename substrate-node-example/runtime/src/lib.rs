@@ -28,6 +28,7 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 // A few exports that help ease life for downstream crates.
 use codec::Encode;
+use filecoindot_nft::{ClassData, TokenData};
 pub use frame_support::{
     construct_runtime, log, parameter_types,
     traits::{KeyOwnerProofSystem, Randomness, StorageInfo},
@@ -301,10 +302,20 @@ parameter_types! {
 impl orml_nft::Config for Runtime {
     type ClassId = u32;
     type TokenId = u32;
-    type ClassData = Vec<u8>;
-    type TokenData = Vec<u8>;
+    type ClassData = ClassData;
+    type TokenData = TokenData;
     type MaxClassMetadata = MaxClassMetadata;
     type MaxTokenMetadata = MaxTokenMetadata;
+}
+
+parameter_types! {
+    pub DefaultClassId: u32 = 0;
+}
+
+impl filecoindot_nft::Config for Runtime {
+    type Event = Event;
+    type DefaultClassId = DefaultClassId;
+    type WeightInfo = ();
 }
 
 // For pallet-example-offchain-worker
@@ -388,6 +399,8 @@ construct_runtime!(
 
         // filecoindot
         Filecoindot: filecoindot::{Pallet, Call, Config<T>, Storage, Event<T>},
+        NFT: orml_nft::{Pallet, Config<T>, Storage},
+        FilecoindotNFT: filecoindot_nft::{Pallet, Call, Config<T>, Event<T>},
     }
 );
 
