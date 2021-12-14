@@ -40,7 +40,7 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
     let endpoints = core::str::from_utf8(&urls)
         .map_err(|_| Error::FormatBytesFailed)?
         .split(',')
-        .map(|s|s.trim())
+        .map(|s| s.trim())
         .collect::<Vec<&str>>();
 
     // check if endpoints is empty
