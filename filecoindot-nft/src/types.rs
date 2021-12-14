@@ -7,19 +7,11 @@ use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_std::prelude::*;
 
-#[derive(Encode, Decode, Clone, RuntimeDebug, PartialEq, Eq, TypeInfo)]
+#[derive(Encode, Decode, Clone, RuntimeDebug, PartialEq, Eq, TypeInfo, Default)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ClassData {
     /// The data stored in the class
     pub data: Vec<u8>,
-}
-
-impl Default for ClassData {
-    fn default() -> Self {
-        ClassData {
-            data: Default::default(),
-        }
-    }
 }
 
 impl ClassData {
@@ -33,10 +25,11 @@ impl ClassData {
 pub struct TokenData {
     /// The cid of the data in filecoin
     pub cid: Vec<u8>,
+    pub proof: Vec<Vec<u8>>
 }
 
 impl TokenData {
-    pub fn new(cid: Vec<u8>) -> Self {
-        TokenData { cid }
+    pub fn new(cid: Vec<u8>, proof: Vec<Vec<u8>>) -> Self {
+        TokenData { cid, proof }
     }
 }

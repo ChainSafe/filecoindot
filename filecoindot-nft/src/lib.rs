@@ -91,13 +91,13 @@ pub mod pallet {
         // **************** Relayer Add/Remove *****************
         /// Adds a new relayer to the relayer set.
         #[pallet::weight(T::WeightInfo::mint())]
-        pub fn mint(origin: OriginFor<T>, cid: Vec<u8>) -> DispatchResult {
+        pub fn mint(origin: OriginFor<T>, cid: Vec<u8>, proof: Vec<Vec<u8>>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             orml_nft::Pallet::<T>::mint(
                 &who,
                 T::DefaultClassId::get(),
                 vec![],
-                TokenData::new(cid),
+                TokenData::new(cid, proof),
             )?;
             Self::deposit_event(Event::MintedToken(who, T::DefaultClassId::get(), 1));
             Ok(())
@@ -121,6 +121,12 @@ pub mod pallet {
                 token_id,
             ));
             Ok(())
+        }
+    }
+
+    impl <T: Config> Pallet<T> {
+        pub fn balance(who: &T::AccountId) -> u128 {
+            orml_nft::TokensByOwner::<T>::iter_prefix((who,)).count() as u128
         }
     }
 
