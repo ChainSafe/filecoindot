@@ -3,6 +3,7 @@
 
 use crate::errors::Error;
 use crate::traits::{GetCid, Verify};
+use crate::HAMTNodeType;
 use cid::Cid;
 use serde_cbor::de::from_slice;
 use std::convert::TryFrom;
@@ -47,4 +48,11 @@ impl Verify for ProofVerify {
         }
         Self::traverse_and_match::<N>(&proof, proof.len() - 1, &node_cid)
     }
+}
+
+/// Verify a proof against a Cid.
+///
+/// Note: this is using HAMTNodeType
+pub fn generic_verify(proof: Vec<Vec<u8>>, cid: &Cid) -> Result<(), Error> {
+    ProofVerify::verify_proof::<HAMTNodeType>(proof, cid.to_bytes())
 }

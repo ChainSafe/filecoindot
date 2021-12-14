@@ -32,6 +32,7 @@ pub struct FullDeps<C, P, S> {
 }
 
 /// Instantiate all full RPC extensions.
+// pub fn create_full<C, P， S>(deps: FullDeps<C, P， S>) -> jsonrpc_core::IoHandler<sc_rpc::Metadata>
 pub fn create_full<C, P, S>(deps: FullDeps<C, P, S>) -> jsonrpc_core::IoHandler<sc_rpc::Metadata>
 where
     C: ProvideRuntimeApi<Block>,

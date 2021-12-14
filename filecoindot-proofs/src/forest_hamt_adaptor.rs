@@ -89,30 +89,6 @@ impl HashedBits for ForestAdaptedHashedBits {
     }
 }
 
-impl From<ipld_blockstore::Error> for Error {
-    fn from(error: ipld_blockstore::Error) -> Self {
-        Error::BlockStore(error)
-    }
-}
-
-impl From<ipld_hamt::Error> for Error {
-    fn from(error: ipld_hamt::Error) -> Self {
-        Error::IPLDHamt(error)
-    }
-}
-
-impl From<forest_db::Error> for Error {
-    fn from(error: forest_db::Error) -> Self {
-        Error::ForestDB(error)
-    }
-}
-
-impl From<serde_cbor::Error> for Error {
-    fn from(error: serde_cbor::Error) -> Self {
-        Error::CborEncoding(error)
-    }
-}
-
 pub struct ForestAdaptedNode<K: Eq + Serialize, V: Serialize, Hash, HashOutput: HashedBits> {
     cid: Option<Cid>,
     // we keep the original data for cid derivation

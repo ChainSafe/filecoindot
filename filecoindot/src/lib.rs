@@ -46,6 +46,11 @@ pub mod pallet {
 
     pub(crate) const DEFAULT_VOTE_THRESHOLD: u32 = 1;
 
+    pub(crate) type BlockSubmissionProposalOf<T> = BlockSubmissionProposal<
+        <T as frame_system::Config>::AccountId,
+        <T as frame_system::Config>::BlockNumber,
+    >;
+
     // TODO: clarify the exact type, too many clones
     pub(crate) type BlockCid = Vec<u8>;
 
@@ -83,7 +88,7 @@ pub mod pallet {
     /// Track the block submission related proposals stored
     #[pallet::storage]
     pub(crate) type BlockSubmissionProposals<T: Config> =
-        StorageMap<_, Blake2_128Concat, BlockCid, BlockSubmissionProposal<T>, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, BlockCid, BlockSubmissionProposalOf<T>, OptionQuery>;
 
     /// Track the accounts which voted for a particular submitted block proposal
     #[pallet::storage]
@@ -123,7 +128,6 @@ pub mod pallet {
     pub(super) type VotingPeriod<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
 
     #[pallet::event]
-    #[pallet::metadata(T::AccountId = "AccountId")]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// Relayer added to set
@@ -431,7 +435,7 @@ pub mod pallet {
         fn vote_block_proposal(
             block_cid: BlockCid,
             message_root_cid: Vec<u8>,
-            proposal: &mut BlockSubmissionProposal<T>,
+            proposal: &mut BlockSubmissionProposalOf<T>,
             who: T::AccountId,
         ) -> Result<(), Error<T>> {
             ensure!(
@@ -465,7 +469,7 @@ pub mod pallet {
         }
 
         pub(crate) fn resolve_proposal(
-            proposal: &mut BlockSubmissionProposal<T>,
+            proposal: &mut BlockSubmissionProposalOf<T>,
             block_cid: &[u8],
             when: &T::BlockNumber,
             threshold: u32,
@@ -493,7 +497,7 @@ pub mod pallet {
         }
 
         /// Try to resolve the proposal. If the proposal is resolved, return true, else false
-        fn try_resolve_proposal(block_cid: BlockCid, prop: &BlockSubmissionProposal<T>) -> bool {
+        fn try_resolve_proposal(block_cid: BlockCid, prop: &BlockSubmissionProposalOf<T>) -> bool {
             match prop.get_status() {
                 ProposalStatus::Approved => {
                     Self::finalize_block(block_cid);
