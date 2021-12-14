@@ -1,3 +1,3 @@
-import {substrateSlice} from "./slice";
+import { substrateSlice } from './slice';
 
 export const { setSubstrateState, setSelectedAccountIndex, setAccounts } = substrateSlice.actions;
