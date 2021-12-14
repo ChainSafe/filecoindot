@@ -1,6 +1,6 @@
 import AppBar from "@mui/material/AppBar";
 import React from "react";
-import {Avatar, Box, Button, IconButton, Toolbar, Tooltip, Typography} from "@mui/material";
+import {Avatar, Box, Button, Container, IconButton, Toolbar, Tooltip, Typography} from "@mui/material";
 import {AccountSelect} from "../AccountSelect";
 import {Identicon} from "@polkadot/react-identicon";
 import {useSelector} from "react-redux";
@@ -20,7 +20,8 @@ export const Header: React.FC = () => {
 
     return (
         <AppBar>
-            <Toolbar>
+            <Container maxWidth="xl">
+            <Toolbar disableGutters>
             <Typography
                 variant="h6"
                 noWrap
@@ -43,7 +44,7 @@ export const Header: React.FC = () => {
 
             <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Select Account">
-                    <IconButton onClick={handleOpenUserMenu}>
+                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                         <Avatar sx={{ bgcolor: 'background.paper' }}>
                             <Identicon value={selectedAccount.address} theme="substrate" size={32} />
                         </Avatar>
@@ -69,7 +70,7 @@ export const Header: React.FC = () => {
                                 display: 'block',
                                 position: 'absolute',
                                 top: 0,
-                                right: 24,
+                                right: 16,
                                 width: 10,
                                 height: 10,
                                 bgcolor: 'background.paper',
@@ -84,6 +85,7 @@ export const Header: React.FC = () => {
             </Box>
                     </>}
             </Toolbar>
+                </Container>
         </AppBar>
     );
 }

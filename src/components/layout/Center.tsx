@@ -8,7 +8,7 @@ export const Center: React.FC = ({ children }) => (
         direction="column"
         alignItems="center"
         justifyContent="center"
-        style={{ minHeight: '100vh' }}
+        style={{ height: '100%' }}
     >
         <Grid item xs={3}>
             {children}

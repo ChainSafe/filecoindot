@@ -15,7 +15,7 @@ function App() {
       <BrowserRouter>
         <Provider store={store}>
             <Header />
-            <Container fixed>
+            <Container fixed sx={{ paddingTop: '6rem' }}>
                 <UserSpace>
                     <Routes>
                         <Route path="/" element={<Home />} />
