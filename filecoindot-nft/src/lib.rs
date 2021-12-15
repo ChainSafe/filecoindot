@@ -95,7 +95,11 @@ pub mod pallet {
                 vec![],
                 TokenData::new(cid, proof),
             )?;
-            Self::deposit_event(Event::MintedToken(who, T::DefaultClassId::get(), MINT_QUANTITY));
+            Self::deposit_event(Event::MintedToken(
+                who,
+                T::DefaultClassId::get(),
+                MINT_QUANTITY,
+            ));
             Ok(())
         }
 
@@ -120,7 +124,7 @@ pub mod pallet {
         }
     }
 
-    impl <T: Config> Pallet<T> {
+    impl<T: Config> Pallet<T> {
         /// Get the balance of the account
         pub fn balance(who: &T::AccountId) -> u128 {
             orml_nft::TokensByOwner::<T>::iter_prefix((who,)).count() as u128

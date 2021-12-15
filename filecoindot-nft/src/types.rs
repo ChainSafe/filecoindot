@@ -25,7 +25,7 @@ impl ClassData {
 pub struct TokenData {
     /// The cid of the data in filecoin
     pub cid: Vec<u8>,
-    pub proof: Vec<Vec<u8>>
+    pub proof: Vec<Vec<u8>>,
 }
 
 impl TokenData {
