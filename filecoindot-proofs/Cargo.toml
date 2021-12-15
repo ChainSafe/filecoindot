@@ -10,7 +10,7 @@ cid = { package = "forest_cid", version = "0.3" }
 serde_bytes = { package = "cs_serde_bytes", version = "0.12" }
 thiserror = "1.0"
 sha2 = "0.9.1"
-once_cell = "1.5"
+once_cell = "1.9"
 parking_lot = "0.11"
 num-traits = "0.2.14"
 ipld_hamt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
