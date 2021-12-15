@@ -1,15 +1,10 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 
-//! # Filecoin Governance Pallet
+//! # Filecoin NFT Pallet
 //!
-//! This pallet uses a set of AccountIds to identify who
-//! can vote on proposals. Relayers may be added, removed.
-//! There is no bound on how many members may exist in the committee.
-//!
-//! For each block addition proposal, relayers can vote on them.
-//! The pallet will lazily resolve all the proposals.
-//! Admin could also resolve manually.
+//! This pallet will enabled users to mint NFTs
+//! providing the cid and proof.
 //!
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -25,6 +20,8 @@ pub mod pallet {
 
     pub type TokenIdOf<T> = <T as orml_nft::Config>::TokenId;
     pub type ClassIdOf<T> = <T as orml_nft::Config>::ClassId;
+
+    const MINT_QUANTITY: u32 = 1;
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
@@ -99,7 +96,7 @@ pub mod pallet {
                 vec![],
                 TokenData::new(cid, proof),
             )?;
-            Self::deposit_event(Event::MintedToken(who, T::DefaultClassId::get(), 1));
+            Self::deposit_event(Event::MintedToken(who, T::DefaultClassId::get(), MINT_QUANTITY));
             Ok(())
         }
 
