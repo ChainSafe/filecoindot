@@ -85,8 +85,7 @@ pub mod pallet {
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        // **************** Relayer Add/Remove *****************
-        /// Adds a new relayer to the relayer set.
+        /// Mint the nft from cid and proof
         #[pallet::weight(T::WeightInfo::mint())]
         pub fn mint(origin: OriginFor<T>, cid: Vec<u8>, proof: Vec<Vec<u8>>) -> DispatchResult {
             let who = ensure_signed(origin)?;
@@ -100,7 +99,7 @@ pub mod pallet {
             Ok(())
         }
 
-        /// Removes an existing relayer from the set.
+        /// Transfer the nft specified with `token_id` from the sender to `to` account
         #[pallet::weight(T::WeightInfo::transfer())]
         pub fn transfer(
             origin: OriginFor<T>,
@@ -122,6 +121,7 @@ pub mod pallet {
     }
 
     impl <T: Config> Pallet<T> {
+        /// Get the balance of the account
         pub fn balance(who: &T::AccountId) -> u128 {
             orml_nft::TokensByOwner::<T>::iter_prefix((who,)).count() as u128
         }
