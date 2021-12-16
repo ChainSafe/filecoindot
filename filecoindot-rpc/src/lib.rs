@@ -6,6 +6,7 @@ use parking_lot::RwLock;
 use result::{Error, Result};
 use sp_core::{offchain::OffchainStorage, Encode};
 use std::sync::Arc;
+use url::Url;
 
 /// filecoin rpc config
 pub const FILECOIN_RPC: &[u8] = b"FILECOIN_RPC";
@@ -53,7 +54,7 @@ where
                 .split(',')
                 .collect::<Vec<&str>>()
                 .iter()
-                .any(|url| !url.starts_with("http"))
+                .any(|url| !url.starts_with("http") || Url::parse(url).is_err())
         {
             return Err(Error::InvalidEndpoint);
         }

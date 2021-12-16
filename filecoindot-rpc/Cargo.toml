@@ -15,6 +15,7 @@ jsonrpc-derive = "18"
 derive_more = "^0.99"
 thiserror = "^1"
 parking_lot = "^0.10"
+url = "2.2.2"
 
 # substrate dependencies
 sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
