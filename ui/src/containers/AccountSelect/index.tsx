@@ -1,10 +1,8 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAccounts } from '../../ducks/substrate/selectors';
 import { CardHeader, IconButton, Menu, MenuItem } from '@mui/material';
 import { Identicon } from '@polkadot/react-identicon';
-import { setSelectedAccountIndex } from '../../ducks/substrate/actions';
 import { MenuProps } from '@mui/material/Menu/Menu';
+import { useAccountList } from '../../contexts/AccountsContext';
 
 interface Props extends Omit<MenuProps, 'open' | 'onClose' | 'anchorEl'> {
   anchorEl: null | HTMLElement;
@@ -12,17 +10,21 @@ interface Props extends Omit<MenuProps, 'open' | 'onClose' | 'anchorEl'> {
 }
 
 export const AccountSelect: React.FC<Props> = ({ anchorEl, onClose, ...props }) => {
-  const accounts = useSelector(getAccounts);
-  const dispatch = useDispatch();
+
+  const {accountList, selectAccount} = useAccountList()
+
+  if (!accountList) {
+    return null
+  }
 
   const handleSelect = (address: string, index: number) => () => {
-    dispatch(setSelectedAccountIndex(index));
+    selectAccount(address)
     onClose();
   };
 
   return (
     <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose} {...props}>
-      {accounts.map((account, index) => (
+      {accountList.map((account, index) => (
         <MenuItem key={account.address} onClick={handleSelect(account.address, index)}>
           <CardHeader
             avatar={

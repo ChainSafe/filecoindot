@@ -3,17 +3,16 @@ import React from 'react';
 import { Avatar, Box, Button, Container, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
 import { AccountSelect } from '../AccountSelect';
 import { Identicon } from '@polkadot/react-identicon';
-import { useSelector } from 'react-redux';
-import { getAccount } from '../../ducks/substrate/selectors';
 import { Link } from 'react-router-dom';
+import { useAccountList } from '../../contexts/AccountsContext';
 
 export const Header: React.FC = () => {
-  const selectedAccount = useSelector(getAccount);
-
+  const {selected} = useAccountList()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
@@ -26,7 +25,7 @@ export const Header: React.FC = () => {
             Filecoin Substrate pallet demo
           </Typography>
 
-          {selectedAccount && (
+          {selected && (
             <>
               <Box sx={{ flexGrow: 1, display: 'flex' }}>
                 <Button component={Link} to="/" sx={{ my: 2, color: 'white', display: 'block' }}>
@@ -41,7 +40,7 @@ export const Header: React.FC = () => {
                 <Tooltip title="Select Account">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar sx={{ bgcolor: 'background.paper' }}>
-                      <Identicon value={selectedAccount.address} theme="substrate" size={32} />
+                      <Identicon value={selected} theme="substrate" size={32} />
                     </Avatar>
                   </IconButton>
                 </Tooltip>

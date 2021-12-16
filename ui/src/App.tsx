@@ -1,19 +1,19 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { store } from './ducks/store';
 import { Home } from './pages/Home';
 import { Settings } from './containers/Settings';
 import { Header } from './containers/Header';
 import Container from '@mui/material/Container';
 import { MintNFT } from './pages/MintNFT';
 import { UserSpace } from './containers/UserSpace';
+import { AccountContextProvider } from './contexts/AccountsContext';
 
 function App() {
   return (
     <BrowserRouter>
-      <Provider store={store}>
+      {/* <Provider store={store}> */}
+      <AccountContextProvider>
         <Header />
         <Container fixed sx={{ paddingTop: '6rem' }}>
           <UserSpace>
@@ -24,7 +24,8 @@ function App() {
           </UserSpace>
         </Container>
         <Settings />
-      </Provider>
+      </AccountContextProvider>
+      {/* </Provider> */}
     </BrowserRouter>
   );
 }
