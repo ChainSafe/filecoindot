@@ -29,22 +29,32 @@ function killAll(ps: ChildProcess, exitCode: number) {
 }
 
 /**
+ * proof inteface
+ */
+export interface IProof {
+  proof: string;
+  cid: string;
+}
+
+
+/**
  * e2e runner config
  */
-export interface RunnerConfig {
+export interface IRunnerConfig {
   filecoindotRpc: string;
   id: string;
   suri: string;
   ws: string;
+  proof: IProof;
 }
 
 /**
  * e2e runner
  */
 export default class Runner {
-  config: RunnerConfig;
+  config: IRunnerConfig;
 
-  constructor(config: RunnerConfig) {
+  constructor(config: IRunnerConfig) {
     this.config = config;
   }
 
@@ -88,6 +98,12 @@ export default class Runner {
   private async tests() {
     const { ws, filecoindotRpc, id, suri } = this.config;
     const api = await Api.New(ws, suri);
+
+    // test verifying proof
+    if (!(await api.verifyProof(this.config.proof.proof, this.config.proof.cid)).toHuman()) {
+      throw "verify proof failed"
+    }
+
     await api.insertAuthor(id);
     await api.setEndpoint(filecoindotRpc);
     await api.addRelayer();

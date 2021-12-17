@@ -1533,9 +1533,12 @@ version = "0.0.1"
 dependencies = [
  "derive_more",
  "filecoindot-proofs",
+ "forest_cid",
+ "hex",
  "jsonrpc-core",
  "jsonrpc-core-client",
  "jsonrpc-derive",
+ "parity-scale-codec",
  "parking_lot 0.10.2",
  "sp-core",
  "sp-offchain",
