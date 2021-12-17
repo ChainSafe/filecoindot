@@ -39,7 +39,7 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
     // decode endpoints
     let endpoints: Vec<&str> = urls
         .iter()
-        .map(|url_bytes| core::str::from_utf8(&url_bytes))
+        .map(|url_bytes| core::str::from_utf8(url_bytes))
         .collect::<core::result::Result<Vec<_>, _>>()
         .map_err(|_| Error::FormatBytesFailed)?;
 
