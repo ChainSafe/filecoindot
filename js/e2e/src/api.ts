@@ -7,7 +7,7 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import { rpc as filecoindotRpc, types } from "@filecoindot/types";
 import { EventRecord, Event, Phase } from "@polkadot/types/interfaces";
 import { Balance } from "@polkadot/types/interfaces/runtime";
-import { BN, u8aToHex, hexToU8a, stringToU8a } from "@polkadot/util";
+import { BN, u8aToHex } from "@polkadot/util";
 
 /**
  * filecoindot api
