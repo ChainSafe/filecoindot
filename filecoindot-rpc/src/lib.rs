@@ -18,7 +18,7 @@ mod result;
 pub trait FilecoindotApi {
     /// set filecoin rpc endpoint for filecoindot
     #[rpc(name = "filecoindot_setRpcEndpoint")]
-    fn set_rpc_endpoint(&self, urls: String) -> Result<()>;
+    fn set_rpc_endpoint(&self, urls: Vec<String>) -> Result<()>;
 
     // verify receipt
     #[rpc(name = "filecoindot_verifyReceipt")]
@@ -48,20 +48,24 @@ impl<T> FilecoindotApi for Filecoindot<T>
 where
     T: OffchainStorage + 'static,
 {
-    fn set_rpc_endpoint(&self, urls: String) -> Result<()> {
+    fn set_rpc_endpoint(&self, urls: Vec<String>) -> Result<()> {
         if urls.is_empty()
             || urls
-                .split(',')
-                .collect::<Vec<&str>>()
                 .iter()
                 .any(|url| !url.starts_with("http") || Url::parse(url).is_err())
         {
             return Err(Error::InvalidEndpoint);
         }
 
-        self.storage
-            .write()
-            .set(sp_offchain::STORAGE_PREFIX, FILECOIN_RPC, &urls.encode());
+        self.storage.write().set(
+            sp_offchain::STORAGE_PREFIX,
+            FILECOIN_RPC,
+            &urls
+                .iter()
+                .map(|url| url.as_bytes().to_vec())
+                .collect::<Vec<Vec<u8>>>()
+                .encode(),
+        );
         Ok(())
     }
 

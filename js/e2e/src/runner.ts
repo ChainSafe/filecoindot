@@ -32,7 +32,7 @@ function killAll(ps: ChildProcess, exitCode: number) {
  * e2e runner config
  */
 export interface RunnerConfig {
-  filecoindotRpc: string;
+  filecoindotRpc: string[];
   id: string;
   suri: string;
   ws: string;
@@ -101,7 +101,8 @@ export default class Runner {
   private listenStderr(ps: ChildProcess, started: boolean) {
     if (ps.stderr) {
       ps.stderr.on("data", async (chunk: Buffer) => {
-        chunk.includes(OCW) && process.stderr.write(chunk.toString());
+        // chunk.includes(OCW) &&
+          process.stderr.write(chunk.toString());
         if (!started && chunk.includes(OCW_PREPARED)) {
           await this.tests();
           started = true;

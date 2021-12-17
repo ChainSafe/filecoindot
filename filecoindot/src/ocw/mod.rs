@@ -32,16 +32,16 @@ pub const FILECOIN_RPC: &[u8] = b"FILECOIN_RPC";
 pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
     // get encoded urls from storage
     let urls = StorageValueRef::persistent(FILECOIN_RPC)
-        .get::<Vec<u8>>()
+        .get::<Vec<Vec<u8>>>()
         .map_err(|_| Error::GetStorageFailed)?
         .ok_or(Error::FilecoinRpcNotSet)?;
 
     // decode endpoints
-    let endpoints = core::str::from_utf8(&urls)
-        .map_err(|_| Error::FormatBytesFailed)?
-        .split(',')
-        .map(|s| s.trim())
-        .collect::<Vec<&str>>();
+    let endpoints: Vec<&str> = urls
+        .iter()
+        .map(|url_bytes| core::str::from_utf8(&url_bytes))
+        .collect::<core::result::Result<Vec<_>, _>>()
+        .map_err(|_| Error::FormatBytesFailed)?;
 
     // check if endpoints is empty
     if endpoints.is_empty() {
