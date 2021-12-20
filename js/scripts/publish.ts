@@ -27,13 +27,14 @@ async function updateVersion(loc: string): Promise<void> {
 /**
  * build and publish package
  */
-function buildAndPublish(loc: string): void {
+function buildAndPublish(loc: string) {
   if (!CommandExists.sync("npm")) {
     throw "npm not installed";
   }
 
-  spawnSync("npm", ["run", "publish"], {
+  return spawnSync("npm", ["run", "publish"], {
     cwd: loc,
+    stdio: "inherit"
   });
 }
 
@@ -44,8 +45,17 @@ async function main() {
   const root  = path.resolve(String(await findUp("Cargo.toml")), "..");
   const types = path.resolve(root, "js/types");
   await updateVersion(types);
+
+  const result = buildAndPublish(types);
+  if (result.status != 0) {
+    throw "Error: publish package failed";
+  }
 }
 
 (async () => {
-  await main();
+  try {
+    await main();
+  } catch (e) {
+    console.error(e);
+  }
 })();
