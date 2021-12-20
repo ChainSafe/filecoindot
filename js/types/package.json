@@ -11,6 +11,7 @@
   "author": "clearloop",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --strict"
+    "build": "tsc --strict",
+    "publish": "npm run build && npm publish"
   }
 }

@@ -4,6 +4,8 @@
 import fs from "fs";
 import findUp from "find-up";
 import path from "path";
+import CommandExists from "command-exists"
+import { spawnSync } from "child_process"
 
 
 
@@ -20,6 +22,19 @@ async function updateVersion(loc: string): Promise<void> {
   // reset version
   pkg.version = version;
   fs.writeFileSync(pkgJson, JSON.stringify(pkg, null, 2));
+}
+
+/**
+ * build and publish package
+ */
+function buildAndPublish(loc: string): void {
+  if (!CommandExists.sync("npm")) {
+    throw "npm not installed";
+  }
+
+  spawnSync("npm", ["run", "publish"], {
+    cwd: loc,
+  });
 }
 
 /**

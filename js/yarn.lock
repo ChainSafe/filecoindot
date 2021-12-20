@@ -361,6 +361,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/command-exists@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.npmmirror.com/@types/command-exists/download/@types/command-exists-1.2.0.tgz#d97e0ed10097090e4ab0367ed425b0312fad86f3"
+  integrity sha1-2X4O0QCXCQ5KsDZ+1CWwMS+thvM=
+
 "@types/find-up@^4.0.0":
   version "4.0.0"
   resolved "https://registry.npmmirror.com/@types/find-up/download/@types/find-up-4.0.0.tgz#6b74a76670477a23f0793cfaf2dafc86df59723a"
@@ -449,6 +454,11 @@ combined-stream@^1.0.8:
   integrity sha1-w9RaizT9cwYxoRCoolIGgrMdWn8=
   dependencies:
     delayed-stream "~1.0.0"
+
+command-exists@^1.2.9:
+  version "1.2.9"
+  resolved "https://registry.npmmirror.com/command-exists/download/command-exists-1.2.9.tgz#c50725af3808c8ab0260fd60b01fbfa25b954f69"
+  integrity sha1-xQclrzgIyKsCYP1gsB+/oluVT2k=
 
 create-hash@^1.2.0:
   version "1.2.0"
