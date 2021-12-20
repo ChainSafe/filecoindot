@@ -4,7 +4,7 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { rpc as filecoindotRpc, types } from "@filecoindot/types";
+import { rpc as filecoindotRpc, types } from "@chainsafe/filecoindot-types";
 import { EventRecord, Event, Phase } from "@polkadot/types/interfaces";
 import { Balance } from "@polkadot/types/interfaces/runtime";
 import { BN, u8aToHex } from "@polkadot/util";
