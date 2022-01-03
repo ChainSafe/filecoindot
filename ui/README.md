@@ -1,6 +1,8 @@
-# Getting Started with Create React App
+# Getting Started with Filecoindot UI
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+You need to setup an environment variable `REACT_APP_WS_PROVIDER` or rename `.env.exemple` into `.env` to use the default localhost value: "ws://localhost:9944"
 
 ## Available Scripts
 

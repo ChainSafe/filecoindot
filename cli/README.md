@@ -5,7 +5,13 @@ Filecoindot Command Line Interface.
 ## Installation
 
 ```
-cargo install --git https://github.com/ChainSafe/filecoindot --branch main  filecoindot-cli
+cargo +nightly install --git https://github.com/ChainSafe/filecoindot --branch main filecoindot-cli
+```
+
+or from the root of the project
+
+```
+cargo +nightly install --path ./ filecoindot-cli
 ```
 
 ## Usage

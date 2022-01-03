@@ -58,9 +58,9 @@ const getaccountList = async (): Promise<undefined> => {
 
     setAccountList(accountList);
 
-    // if (accountList.length > 0) {
-    //     setSelected(accountList[0].address);
-    // }
+    if (accountList.length > 0) {
+        setSelected(accountList[0].address);
+    }
 
     setIsAccountLoading(false);
     return;
@@ -89,7 +89,7 @@ const selectAccount = (address: string) => {
 const useAccountList = () => {
   const context = useContext(AccountContext)
   if (context === undefined) {
-    throw new Error("useUser must be used within a UserProvider")
+    throw new Error("useAccountList must be used within a AccountContextProvider")
   }
   return context
 }

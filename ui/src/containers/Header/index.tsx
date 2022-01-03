@@ -1,17 +1,35 @@
 import AppBar from '@mui/material/AppBar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Avatar, Box, Button, Container, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
 import { AccountSelect } from '../AccountSelect';
 import { Identicon } from '@polkadot/react-identicon';
 import { Link } from 'react-router-dom';
 import { useAccountList } from '../../contexts/AccountsContext';
+import { useApi } from '../../contexts/ApiContext';
 
 export const Header: React.FC = () => {
   const {selected} = useAccountList()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const {api, isApiReady} = useApi()
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
+
+  console.log('render')
+  useEffect(() => {
+    if (!isApiReady) return
+
+    let unsubscribe: () => void;
+ 
+    // use the api
+    api.derive.chain.bestNumber((number) => {
+        console.log(number.toNumber());
+    })
+        .then(unsub => {unsubscribe = unsub;})
+        .catch(console.error);
+
+    return () => unsubscribe && unsubscribe();
+  })
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);

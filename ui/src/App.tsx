@@ -2,18 +2,19 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Home } from './pages/Home';
-import { Settings } from './containers/Settings';
+// import { Settings } from './containers/Settings';
 import { Header } from './containers/Header';
 import Container from '@mui/material/Container';
 import { MintNFT } from './pages/MintNFT';
 import { UserSpace } from './containers/UserSpace';
 import { AccountContextProvider } from './contexts/AccountsContext';
+import { ApiContextProvider } from './contexts/ApiContext';
 
 function App() {
   return (
     <BrowserRouter>
-      {/* <Provider store={store}> */}
       <AccountContextProvider>
+        <ApiContextProvider>
         <Header />
         <Container fixed sx={{ paddingTop: '6rem' }}>
           <UserSpace>
@@ -23,9 +24,9 @@ function App() {
             </Routes>
           </UserSpace>
         </Container>
-        <Settings />
+        {/* <Settings /> */}
+        </ApiContextProvider>
       </AccountContextProvider>
-      {/* </Provider> */}
     </BrowserRouter>
   );
 }
