@@ -22,10 +22,9 @@ const ApiContext = createContext<IApiContext | undefined>(undefined)
 
 const ApiContextProvider = ({ children, types }: ApiContextProps) => {
   const WS_PROVIDER = process.env.REACT_APP_WS_PROVIDER;
-
-    const provider = new WsProvider(WS_PROVIDER);
+  const provider = new WsProvider(WS_PROVIDER);
   const [apiPromise, setApiPromise] = useState<ApiPromise>(
-    new ApiPromise({ provider, types })
+    new ApiPromise({ provider, types, rpc })
   );
   const [isReady, setIsReady] = useState(false);
 
