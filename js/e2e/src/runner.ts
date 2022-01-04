@@ -31,7 +31,7 @@ function killAll(ps: ChildProcess, exitCode: number) {
 /**
  * e2e runner config
  */
-export interface RunnerConfig {
+export interface IRunnerConfig {
   filecoindotRpc: string;
   id: string;
   suri: string;
@@ -42,9 +42,9 @@ export interface RunnerConfig {
  * e2e runner
  */
 export default class Runner {
-  config: RunnerConfig;
+  config: IRunnerConfig;
 
-  constructor(config: RunnerConfig) {
+  constructor(config: IRunnerConfig) {
     this.config = config;
   }
 
@@ -77,7 +77,7 @@ export default class Runner {
         `\t${event.section}:${event.method}:: (phase=${phase.toString()})`
       );
       console.log(`\t\t${event.meta.docs.toString()}`);
-      console.log("votes from ocw has been accepted!");
+      console.log("setup completed!");
       process.exit(0);
     }
   }
@@ -85,7 +85,7 @@ export default class Runner {
   /**
    * init offchain worker
    */
-  private async tests() {
+  public async setup() {
     const { ws, filecoindotRpc, id, suri } = this.config;
     const api = await Api.New(ws, suri);
     await api.insertAuthor(id);
@@ -103,7 +103,7 @@ export default class Runner {
       ps.stderr.on("data", async (chunk: Buffer) => {
         chunk.includes(OCW) && process.stderr.write(chunk.toString());
         if (!started && chunk.includes(OCW_PREPARED)) {
-          await this.tests();
+          await this.setup();
           started = true;
         }
       });

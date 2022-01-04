@@ -7,6 +7,8 @@ import path from "path";
 import CommandExists from "command-exists"
 import { spawnSync } from "child_process"
 
+
+
 /**
  * update minor version
  */
@@ -22,27 +24,34 @@ async function updateVersion(loc: string): Promise<void> {
   fs.writeFileSync(pkgJson, JSON.stringify(pkg, null, 2));
 }
 
+
 /**
- * login npm
+ * handle the result of spawnSync
  */
-function loginNpm() {
+function handleResult(step: string, result: any) {
+  if (result.status && result.status != 0) {
+    if (result.error) {
+      throw result.error
+    } else {
+      throw `Error: ${step} failed`
+    }
+  }
+}
+
+/**
+ * build package
+ */
+function build(loc: string) {
   if (!CommandExists.sync("npm")) {
     throw "npm not installed";
   }
 
-  return spawnSync("npm", ["login", "--scope=@chainsafe", "--registry=https://npm.pkg.github.com"], {
-    stdio: "inherit"
-  });
-}
-
-/**
- * build and publish package
- */
-function buildAndPublish(loc: string) {
-  return spawnSync("npm", ["run", "publish"], {
+  const buildResult = spawnSync("npm", ["run", "build"], {
     cwd: loc,
-    stdio: "inherit"
+    stdio: "inherit",
+    env: process.env,
   });
+  handleResult("build package", buildResult);
 }
 
 /**
@@ -53,11 +62,7 @@ async function main() {
   const types = path.resolve(root, "js/types");
   await updateVersion(types);
 
-  loginNpm();
-  const result = buildAndPublish(types);
-  if (result.status != 0) {
-    throw "Error: publish package failed";
-  }
+  build(types);
 }
 
 (async () => {
@@ -65,5 +70,6 @@ async function main() {
     await main();
   } catch (e) {
     console.error(e);
+    process.exit(1);
   }
 })();

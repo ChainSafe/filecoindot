@@ -16,12 +16,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Setup Nodejs
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: 16
-          always-auth: true
+          node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
+      - name: Build 
+        run: cd js && yarn run pre-publish
+      - name: Publish
+        run: cd js/types && npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-      - name: Build and Publish
-        run: cd js && yarn && yarn run publish

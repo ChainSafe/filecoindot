@@ -14,6 +14,7 @@
   },
   "scripts": {
     "e2e": "ts-node e2e/index.ts",
-    "publish": "ts-node scripts/publish.ts"
+    "pre-publish": "npm install && ts-node scripts/pre-publish.ts",
+    "setup": "ts-node e2e/setup.ts"
   }
 }
