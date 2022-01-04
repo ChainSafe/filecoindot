@@ -23,7 +23,5 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-      - name: Login NPM
-        run: npm login
       - name: Build and Publish
         run: cd js && yarn && yarn run publish

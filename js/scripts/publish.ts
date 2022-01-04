@@ -7,8 +7,6 @@ import path from "path";
 import CommandExists from "command-exists"
 import { spawnSync } from "child_process"
 
-
-
 /**
  * update minor version
  */
@@ -25,13 +23,22 @@ async function updateVersion(loc: string): Promise<void> {
 }
 
 /**
- * build and publish package
+ * login npm
  */
-function buildAndPublish(loc: string) {
+function loginNpm() {
   if (!CommandExists.sync("npm")) {
     throw "npm not installed";
   }
 
+  return spawnSync("npm", ["login", "--scope=@chainsafe", "--registry=https://npm.pkg.github.com"], {
+    stdio: "inherit"
+  });
+}
+
+/**
+ * build and publish package
+ */
+function buildAndPublish(loc: string) {
   return spawnSync("npm", ["run", "publish"], {
     cwd: loc,
     stdio: "inherit"
@@ -46,6 +53,7 @@ async function main() {
   const types = path.resolve(root, "js/types");
   await updateVersion(types);
 
+  loginNpm();
   const result = buildAndPublish(types);
   if (result.status != 0) {
     throw "Error: publish package failed";
