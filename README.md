@@ -100,15 +100,15 @@ Or with [@polkadot/api](https://polkadot.js.org/docs/), you can use the code bel
 
 ```typescript
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { rpc, types } from "@filecoindot/types";
+import { rpc, types } from "@chainsafe/fileconidot-types";
 import { Keyring } from "@polkadot/keyring";
 
 (async () => {
-    // setup api
+    // setup the api
     const provider = new WsProvider("http://0.0.0.0:9944");
     const api = await ApiPromise.create({ provider, types, rpc });
     
-    // setup singer
+    // setup the signer
     const keyring = new Keyring({ type: "sr25519" });
     const signer = keyring.addFromUri("//Alice");
     

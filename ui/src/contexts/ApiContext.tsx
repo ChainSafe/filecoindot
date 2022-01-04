@@ -3,7 +3,7 @@ import { ApiOptions } from "@polkadot/api/types";
 import { TypeRegistry } from '@polkadot/types';
 import { useState, useEffect, createContext, useContext } from "react"
 import { useDidUpdateEffect } from "../hooks/useDidUpdateEffect";
-
+import { rpc } from "@chainsafe/filecoindot-types";
 
 type ApiContextProps = {
   children: React.ReactNode | React.ReactNode[]
@@ -33,7 +33,7 @@ const ApiContextProvider = ({ children, types }: ApiContextProps) => {
     // We want to fetch all the information again each time we reconnect. We
     // might be connecting to a different node, or the node might have changed
     // settings.
-    setApiPromise(new ApiPromise({ provider, types }));
+    setApiPromise(new ApiPromise({ provider, types, rpc }));
 
     setIsReady(false);
   }, [provider]);

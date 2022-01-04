@@ -6,6 +6,7 @@ import { Identicon } from '@polkadot/react-identicon';
 import { Link } from 'react-router-dom';
 import { useAccountList } from '../../contexts/AccountsContext';
 import { useApi } from '../../contexts/ApiContext';
+import {proofJSON} from '../../proof' 
 
 export const Header: React.FC = () => {
   const {selected} = useAccountList()
@@ -14,10 +15,12 @@ export const Header: React.FC = () => {
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
+  const {proof, cid} = proofJSON
 
-  console.log('render')
   useEffect(() => {
     if (!isApiReady) return
+
+    (api.rpc as any).filecoindot.verifyState(proof, cid).then((res: any) => console.log('res', res))
 
     let unsubscribe: () => void;
  
