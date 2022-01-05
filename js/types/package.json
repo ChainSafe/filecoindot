@@ -6,6 +6,9 @@
   "types": "lib/index.d.ts",
   "author": "tianyi@chainsafe.io",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "scripts": {
     "build": "tsc --strict"
   }
