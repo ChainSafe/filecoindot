@@ -21,8 +21,8 @@ const rpc = {
       description: "set filecoin rpc http endpoint",
       params: [
         {
-          name: "url",
-          type: "String",
+          name: "urls",
+          type: "Vec<String>",
         },
       ],
       type: "()",

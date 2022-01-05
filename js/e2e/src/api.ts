@@ -81,8 +81,8 @@ export default class Api {
   /**
    * 0.1. set filecoindot rpc endpoint
    */
-  public async setEndpoint(url: string) {
-    return await (this._.rpc as any).filecoindot.setRpcEndpoint(url);
+  public async setEndpoint(urls: string[]) {
+    return await (this._.rpc as any).filecoindot.setRpcEndpoint(urls);
   }
 
   /**
