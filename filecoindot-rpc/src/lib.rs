@@ -7,6 +7,7 @@ use parking_lot::RwLock;
 use result::{Error, Result};
 use sp_core::{offchain::OffchainStorage, Decode, Encode};
 use std::sync::Arc;
+use url::Url;
 
 /// filecoin rpc config
 pub const FILECOIN_RPC: &[u8] = b"FILECOIN_RPC";
@@ -24,7 +25,7 @@ pub fn decode_proof_from_hex(hex: &str) -> Result<Vec<Vec<u8>>> {
 pub trait FilecoindotApi {
     /// set filecoin rpc endpoint for filecoindot
     #[rpc(name = "filecoindot_setRpcEndpoint")]
-    fn set_rpc_endpoint(&self, url: String) -> Result<()>;
+    fn set_rpc_endpoint(&self, urls: Vec<String>) -> Result<()>;
 
     // verify receipt
     #[rpc(name = "filecoindot_verifyReceipt")]
@@ -54,15 +55,25 @@ impl<T> FilecoindotApi for Filecoindot<T>
 where
     T: OffchainStorage + 'static,
 {
-    fn set_rpc_endpoint(&self, url: String) -> Result<()> {
-        if url.starts_with("http") {
-            self.storage
-                .write()
-                .set(sp_offchain::STORAGE_PREFIX, FILECOIN_RPC, &url.encode());
-            Ok(())
-        } else {
-            Err(Error::InvalidEndpoint)
+    fn set_rpc_endpoint(&self, urls: Vec<String>) -> Result<()> {
+        if urls.is_empty()
+            || urls
+                .iter()
+                .any(|url| !url.starts_with("http") || Url::parse(url).is_err())
+        {
+            return Err(Error::InvalidEndpoint);
         }
+
+        self.storage.write().set(
+            sp_offchain::STORAGE_PREFIX,
+            FILECOIN_RPC,
+            &urls
+                .iter()
+                .map(|url| url.as_bytes().to_vec())
+                .collect::<Vec<Vec<u8>>>()
+                .encode(),
+        );
+        Ok(())
     }
 
     // verify receipt

@@ -5,7 +5,7 @@ use derive_more::Display;
 
 #[derive(Debug, Display, PartialEq, Eq)]
 pub enum Error {
-    #[display(fmt = "failed to display bytes as str")]
+    #[display(fmt = "failed to parse bytes as str")]
     FormatBytesFailed,
     #[display(fmt = "get offchain worker storage failed")]
     GetStorageFailed,

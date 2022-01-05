@@ -17,9 +17,11 @@ jsonrpc-derive = "18"
 derive_more = "^0.99"
 thiserror = "^1"
 parking_lot = "^0.10"
+url = "2.2.2"
 codec = { package = "parity-scale-codec", version = "2.3.1" }
 
 # substrate dependencies
+frame-support =  { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13'}
 sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sp-offchain = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 
