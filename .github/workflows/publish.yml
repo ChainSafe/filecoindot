@@ -21,7 +21,7 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
       - name: Build 
-        run: cd js && yarn run pre-publish
+        run: yarn build
       - name: Publish
         run: cd js/types && yarn publish --access public
         env:
