@@ -1,6 +1,6 @@
 {
   "name": "@filecoindot/e2e",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "e2e testing for filecoindot",
   "main": "index.js",
   "repository": "https://github.com/chainSafe/filecoindot/",
