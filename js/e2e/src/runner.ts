@@ -29,13 +29,23 @@ function killAll(ps: ChildProcess, exitCode: number) {
 }
 
 /**
+ * proof inteface
+ */
+export interface IProof {
+  proof: string;
+  cid: string;
+}
+
+
+/**
  * e2e runner config
  */
 export interface IRunnerConfig {
-  filecoindotRpc: string;
+  filecoindotRpc: string[];
   id: string;
   suri: string;
   ws: string;
+  proof: IProof;
 }
 
 /**
@@ -88,6 +98,12 @@ export default class Runner {
   public async setup() {
     const { ws, filecoindotRpc, id, suri } = this.config;
     const api = await Api.New(ws, suri);
+
+    // test verifying proof
+    if (!(await api.verifyProof(this.config.proof.proof, this.config.proof.cid)).toHuman()) {
+      throw "verify proof failed"
+    }
+
     await api.insertAuthor(id);
     await api.setEndpoint(filecoindotRpc);
     await api.addRelayer();
@@ -101,7 +117,7 @@ export default class Runner {
   private listenStderr(ps: ChildProcess, started: boolean) {
     if (ps.stderr) {
       ps.stderr.on("data", async (chunk: Buffer) => {
-        chunk.includes(OCW) && process.stderr.write(chunk.toString());
+         chunk.includes(OCW) && process.stderr.write(chunk.toString());
         if (!started && chunk.includes(OCW_PREPARED)) {
           await this.setup();
           started = true;

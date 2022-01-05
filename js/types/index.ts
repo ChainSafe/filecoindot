@@ -21,8 +21,8 @@ const rpc = {
       description: "set filecoin rpc http endpoint",
       params: [
         {
-          name: "url",
-          type: "String",
+          name: "urls",
+          type: "Vec<String>",
         },
       ],
       type: "()",
@@ -32,28 +32,28 @@ const rpc = {
       params: [
         {
           name: "proof",
-          type: "Vec<u8>",
+          type: "String",
         },
         {
           name: "cid",
-          type: "Vec<u8>",
+          type: "String",
         },
       ],
-      type: "()",
+      type: "bool",
     },
     verifyState: {
       description: "verify filecoin state",
       params: [
         {
           name: "proof",
-          type: "Vec<u8>",
+          type: "String",
         },
         {
           name: "cid",
-          type: "Vec<u8>",
+          type: "String",
         },
       ],
-      type: "()",
+      type: "bool",
     },
   },
 };

@@ -11,7 +11,6 @@ use crate::{
     Call, Config,
 };
 use frame_support::{
-    log,
     sp_runtime::offchain::{storage::StorageValueRef, Timestamp},
     sp_std::vec::Vec,
     traits::Get,
@@ -31,31 +30,40 @@ pub const FILECOIN_RPC: &[u8] = b"FILECOIN_RPC";
 
 /// offchain worker entry
 pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
-    let url = StorageValueRef::persistent(FILECOIN_RPC)
-        .get::<Vec<u8>>()
+    // get encoded urls from storage
+    let urls = StorageValueRef::persistent(FILECOIN_RPC)
+        .get::<Vec<Vec<u8>>>()
         .map_err(|_| Error::GetStorageFailed)?
         .ok_or(Error::FilecoinRpcNotSet)?;
 
-    // log errors from ocw
-    bootstrap::<T>(
-        block_number,
-        core::str::from_utf8(&url).map_err(|_| Error::FormatBytesFailed)?,
-    )?;
+    // decode endpoints
+    let endpoints: Vec<&str> = urls
+        .iter()
+        .map(|url_bytes| core::str::from_utf8(url_bytes))
+        .collect::<core::result::Result<Vec<_>, _>>()
+        .map_err(|_| Error::FormatBytesFailed)?;
+
+    // check if endpoints is empty
+    if endpoints.is_empty() {
+        return Err(Error::FilecoinRpcNotSet);
+    }
+
+    // bootstrap ocw
+    bootstrap::<T>(block_number, &endpoints)?;
 
     Ok(())
 }
 
 /// bootstrap filcoindot ocw
-fn bootstrap<T: Config>(_: T::BlockNumber, url: &str) -> Result<()> {
+fn bootstrap<T: Config>(_: T::BlockNumber, urls: &[&str]) -> Result<()> {
     let signer = Signer::<T, T::AuthorityId>::any_account();
-    vote_on_chain_head(signer, url)
+    vote_on_chain_head(signer, urls)
 }
 
-fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, url: &str) -> Result<()> {
-    log::info!("bootstrap ocw with rpc endpoint: {}", url);
+fn vote_on_chain_head<T: Config>(signer: Signer<T, T::AuthorityId>, urls: &[&str]) -> Result<()> {
     let pairs = ChainHead
-        .req(
-            url,
+        .iter_req(
+            urls,
             Vec::new(),
             Timestamp::from_unix_millis(T::OffchainWorkerTimeout::get()),
         )
