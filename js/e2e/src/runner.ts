@@ -41,7 +41,7 @@ export interface IProof {
  * e2e runner config
  */
 export interface IRunnerConfig {
-  filecoindotRpc: string;
+  filecoindotRpc: string[];
   id: string;
   suri: string;
   ws: string;
@@ -105,7 +105,7 @@ export default class Runner {
     }
 
     await api.insertAuthor(id);
-    await api.setEndpoint([filecoindotRpc]);
+    await api.setEndpoint(filecoindotRpc);
     await api.addRelayer();
     await api.depositFund(1000);
     api.events(this.checkEvents);
@@ -117,8 +117,7 @@ export default class Runner {
   private listenStderr(ps: ChildProcess, started: boolean) {
     if (ps.stderr) {
       ps.stderr.on("data", async (chunk: Buffer) => {
-        // chunk.includes(OCW) &&
-          process.stderr.write(chunk.toString());
+         chunk.includes(OCW) && process.stderr.write(chunk.toString());
         if (!started && chunk.includes(OCW_PREPARED)) {
           await this.setup();
           started = true;
