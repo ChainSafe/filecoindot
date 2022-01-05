@@ -160,5 +160,62 @@ impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 }
 ```
 
+### 5. integrate NFT pallet
+We need to configure both ORML nft pallet and filecoindot-nft pallet.
+```rust
+// config orml_ft
+parameter_types! {
+    pub MaxClassMetadata: u32 = 1024;
+    pub MaxTokenMetadata: u32 = 1024;
+}
+
+impl orml_nft::Config for Runtime {
+    type ClassId = u32;
+    type TokenId = u32;
+    type ClassData = ClassData;
+    type TokenData = TokenData;
+    type MaxClassMetadata = MaxClassMetadata;
+    type MaxTokenMetadata = MaxTokenMetadata;
+}
+
+// config filecoindot_nft
+parameter_types! {
+    pub DefaultClassId: u32 = 0;
+}
+
+impl filecoindot_nft::Config for Runtime {
+    type Event = Event;
+    type DefaultClassId = DefaultClassId;
+    type WeightInfo = ();
+}
+
+// integrate with Runtime
+construct_runtime!(
+    pub enum Runtime where
+        Block = Block,
+    NodeBlock = opaque::Block,
+    UncheckedExtrinsic = UncheckedExtrinsic
+    {
+        NFT: orml_nft::{Pallet, Config<T>, Storage},
+        FilecoindotNFT: filecoindot_nft::{Pallet, Call, Config<T>, Event<T>},
+    }
+);
+
+// config chain spec for genesis build
+fn testnet_genesis(
+    wasm_binary: &[u8],
+    initial_authorities: Vec<(AuraId, GrandpaId)>,
+    root_key: AccountId,
+    endowed_accounts: Vec<AccountId>,
+    _enable_println: bool,
+) -> GenesisConfig {
+    GenesisConfig {
+        nft: NFTConfig { tokens: vec![] },
+        filecoindot_nft: FilecoindotNFTConfig {
+            default_class: (get_account_id_from_seed::<sr25519::Public>("Alice"), vec![]),
+        },
+    }
+}
+```
 
 [0]: https://docs.substrate.io/rustdocs/latest/frame_system/offchain/trait.CreateSignedTransaction.html

@@ -1,0 +1,68 @@
+[package]
+name = 'filecoindot-nft'
+authors = ['matthias@chainsafe.io']
+description = 'Pallet that bridges Filecoin to substrate based chains.'
+version = '0.0.1'
+license = "GPL-3.0"
+homepage = 'https://github.com/ChainSafe/filecoindot'
+repository = 'https://github.com/ChainSafe/filecoindot'
+edition = "2021"
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
+[dependencies]
+codec = { package = "parity-scale-codec", version = "2.3.1", default-features = false }
+serde = { version = "1.0.130", features = [ "derive" ], default-features = false }
+serde_json = { version = "1.0", features = [ "alloc" ], default-features = false }
+derive_more = "^0.99"
+
+# substrate dependencies
+frame-benchmarking = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false, optional = true }
+frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
+frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
+sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
+scale-info = { version = "1.0", default-features = false, features = ["derive"] }
+
+# filecoindot related
+filecoindot-io = { path = "../filecoindot-io", default-features = false }
+
+# orml dependencies
+orml-nft = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.13" }
+
+[dev-dependencies]
+serde = "1.0.130"
+bincode = "1.3.3"
+reqwest = { version = "0.11.6", features = [ "json" ] }
+parking_lot = "0.11"
+futures = "0.3"
+tokio = { version = "1.14", features = [ "full" ] }
+thiserror = "1.0.30"
+dirs = "4.0.0"
+
+sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
+sp-runtime = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
+sp-io = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
+sp-keystore = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
+ipld_hamt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
+ipld_amt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
+ipld_blockstore = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
+cid = { package = "forest_cid", version = "0.3" }
+serde_cbor = { version = "0.12", features = ["tags"], package = "cs_serde_cbor" }
+filecoindot-proofs = { path = "../filecoindot-proofs", default-features = false }
+
+[features]
+default = ['std']
+runtime-benchmarks = [
+	'frame-benchmarking',
+	'frame-support/runtime-benchmarks',
+	'frame-system/runtime-benchmarks',
+]
+std = [
+	'codec/std',
+	"scale-info/std",
+	'frame-support/std',
+	'frame-system/std',
+	'frame-benchmarking/std',
+	'filecoindot-io/std',
+]

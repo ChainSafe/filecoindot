@@ -1,8 +1,8 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
 use node_template_runtime::{
-    AccountId, AuraConfig, BalancesConfig, FilecoindotConfig, GenesisConfig, GrandpaConfig,
-    Signature, SudoConfig, SystemConfig, WASM_BINARY,
+    AccountId, AuraConfig, BalancesConfig, FilecoindotConfig, FilecoindotNFTConfig, GenesisConfig,
+    GrandpaConfig, NFTConfig, Signature, SudoConfig, SystemConfig, WASM_BINARY,
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -165,6 +165,10 @@ fn testnet_genesis(
             vote_threshold: 1,
             vote_period: 5,
             relayers: endowed_accounts,
+        },
+        nft: NFTConfig { tokens: vec![] },
+        filecoindot_nft: FilecoindotNFTConfig {
+            default_class: (get_account_id_from_seed::<sr25519::Public>("Alice"), vec![]),
         },
     }
 }
