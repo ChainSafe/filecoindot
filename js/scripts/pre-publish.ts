@@ -14,8 +14,20 @@ import { spawnSync } from "child_process"
  */
 async function updateVersion(loc: string): Promise<void> {
   const pkgJson: string = path.resolve(loc, "package.json");
-  let pkg: any = (await import(pkgJson)).default;
-  const version: string = pkg.version.replace(/\d+$/, (v: string) => {
+  const pkg: any = (await import(pkgJson)).default;
+  const name = pkg.name;
+
+  const view = handleResult("get package info", spawnSync("npm", ["view", name, "--json"], {
+    cwd: loc,
+    stdio: "pipe",
+  }));
+
+  const viewJson = JSON.parse(view.stdout.toString());
+  if (!view || !viewJson["dist-tags"] || !viewJson["dist-tags"].latest) {
+    throw "Error: get package info failed";
+  }
+
+  const version: string = viewJson["dist-tags"].latest.replace(/\d+$/, (v: string) => {
     return String(Number.parseInt(v) + 1);
   });
 
@@ -36,6 +48,8 @@ function handleResult(step: string, result: any) {
       throw `Error: ${step} failed`
     }
   }
+
+  return result;
 }
 
 /**
