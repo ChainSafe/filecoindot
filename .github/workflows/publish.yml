@@ -23,6 +23,6 @@ jobs:
       - name: Build 
         run: cd js && yarn run pre-publish
       - name: Publish
-        run: cd js/types && npm publish
+        run: cd js/types && yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
