@@ -7,5 +7,5 @@ members = [
     # node-example
     "substrate-node-example/node",
     "substrate-node-example/runtime",
-    "cli",
+    "filecoindot-cli",
 ]

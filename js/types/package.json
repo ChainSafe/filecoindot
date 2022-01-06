@@ -1,9 +1,15 @@
 {
-  "name": "@filecoindot/types",
-  "version": "0.1.0",
+  "name": "@chainsafe/filecoindot-types",
+  "version": "0.1.15",
   "description": "Types bundle for filecoindot",
-  "main": "index.ts",
-  "repository": "https://github.com/chainSafe/filecoindot/",
-  "author": "clearloop",
-  "license": "MIT"
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "author": "tianyi@chainsafe.io",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "tsc --strict"
+  }
 }

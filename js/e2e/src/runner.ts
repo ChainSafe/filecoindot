@@ -100,7 +100,7 @@ export default class Runner {
     const api = await Api.New(ws, suri);
 
     // test verifying proof
-    if (!(await api.verifyProof(this.config.proof.proof, this.config.proof.cid)).toHuman()) {
+    if ((await api.verifyProof(this.config.proof.proof, this.config.proof.cid)).toHuman() === false) {
       throw "verify proof failed"
     }
 
