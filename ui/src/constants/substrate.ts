@@ -1,1 +1,1 @@
-export const DAPP_NAME = 'filecoindot';
+export const DAPP_NAME = "filecoindot"

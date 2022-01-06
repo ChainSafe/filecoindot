@@ -1,6 +1,6 @@
-import { Box, Button, TextField } from '@mui/material';
-import React from 'react';
-import { Center } from '../components/layout/Center';
+import { Box, Button, TextField } from "@mui/material"
+import React from "react"
+import { Center } from "../components/layout/Center"
 
 export const MintNFT: React.FC = () => {
   return (
@@ -8,12 +8,19 @@ export const MintNFT: React.FC = () => {
       <h1>Mint new token</h1>
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          '& .MuiTextField-root': { marginBottom: '2rem', width: '30rem' },
+          display: "flex",
+          flexDirection: "column",
+          "& .MuiTextField-root": { marginBottom: "2rem", width: "30rem" }
         }}
       >
-        <TextField autoFocus fullWidth required id="name" label="Name" placeholder="Awesome NFT!" />
+        <TextField
+          autoFocus
+          fullWidth
+          required
+          id="name"
+          label="Name"
+          placeholder="Awesome NFT!"
+        />
         <TextField
           fullWidth
           required
@@ -25,4 +32,4 @@ export const MintNFT: React.FC = () => {
       </Box>
     </Center>
   )
-};
+}
