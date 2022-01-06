@@ -30,11 +30,6 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@chainsafe/filecoindot-types@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@chainsafe/filecoindot-types/-/filecoindot-types-0.1.0.tgz#7f55b173024fc39d25909f1cd12f7f98497ea923"
-  integrity sha512-j3PvwA1FD0AcXseHl37zE2NL/1wjQM3oQtLno11J3ZDcpKGvldPa6ppHSMHnn8opESKngLomk6exzIlXQYnWFQ==
-
 "@cspotcode/source-map-consumer@0.8.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@cspotcode/source-map-consumer/-/source-map-consumer-0.8.0.tgz#33bf4b7b39c178821606f669bbc447a6a629786b"

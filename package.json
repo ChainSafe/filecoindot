@@ -15,7 +15,7 @@
   "scripts": {
     "build": "yarn && lerna run build",
     "publish": "lerna run publish",
-    "e2e": "ts-node e2e/index.ts",
+    "e2e": "yarn && ts-node js/e2e/index.ts",
     "setup": "ts-node e2e/setup.ts"
   },
   "name": "js"

@@ -7,7 +7,7 @@
   "author": "clearloop",
   "license": "MIT",
   "dependencies": {
-    "@chainsafe/filecoindot-types": "0.1.0",
+    "@chainsafe/filecoindot-types": "0.1.15",
     "@polkadot/api": "^6.9.2",
     "@polkadot/keyring": "^8.2.2",
     "@polkadot/types": "^6.9.2",
