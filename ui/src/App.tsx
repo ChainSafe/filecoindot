@@ -1,7 +1,7 @@
 import React from "react"
 import "./App.css"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import { Home } from "./pages/Home"
+import { NFTList } from "./pages/NFTList"
 // import { Settings } from './containers/Settings';
 import { Header } from "./containers/Header"
 import Container from "@mui/material/Container"
@@ -23,10 +23,12 @@ function App() {
               <Routes>
                 <Route
                   path="/"
-                  element={<Home />} />
+                  element={<MintNFT />}
+                />
                 <Route
-                  path="/add"
-                  element={<MintNFT />} />
+                  path="/list"
+                  element={<NFTList />}
+                />
               </Routes>
             </UserSpace>
           </Container>

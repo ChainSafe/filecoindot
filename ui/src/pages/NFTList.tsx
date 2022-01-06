@@ -1,7 +1,7 @@
 import { Card, CardContent, CardMedia, Grid, Typography } from "@mui/material"
 import React, { useState } from "react"
 
-export const Home: React.FC = () => {
+export const NFTList: React.FC = () => {
   const [selected, setSelected] = useState(-1)
   const handleClick = (index: number) => () => {
     if (selected === index) setSelected(-1)

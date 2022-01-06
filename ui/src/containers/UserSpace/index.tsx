@@ -1,11 +1,13 @@
 import React from "react"
 import { Center } from "../../components/layout/Center"
-import { Button } from "@mui/material"
+import { Box, Button, CircularProgress } from "@mui/material"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import { AccountSelect } from "../AccountSelect"
 import { useAccountList } from "../../contexts/AccountsContext"
+import { useApi } from "../../contexts/ApiContext"
 
 export const UserSpace: React.FC = ({ children }) => {
+  const { isApiReady } = useApi()
   const { extensionNotFound, isAccountListEmpty, isAccountLoading, selected } = useAccountList()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -15,26 +17,41 @@ export const UserSpace: React.FC = ({ children }) => {
     setAnchorElUser(null)
   }
 
-  if (selected) return <>{children}</>
-
-  if(isAccountLoading)
+  if(!isApiReady || isAccountLoading)
     return (
-      <Center>
-        <h1>Loading...</h1>
-      </Center>
+      <Box sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        "&: first-child": {
+          marginBottom: "1rem"
+        }
+      }}
+      >
+        <CircularProgress />
+        Connecting to the node
+      </Box>
     )
+
+  if (selected) return <>{children}</>
 
   if(extensionNotFound)
     return (
       <Center>
-        <h1>Please install the extension</h1>
+        <h1>Please install the <a
+          href="https://polkadot.js.org/extension/"
+          target={"_blank"}
+          rel="noreferrer">
+            Polkadot.js extension
+        </a>
+        </h1>
       </Center>
     )
 
   if(isAccountListEmpty)
     return (
       <Center>
-        <h1>Please create at least an account</h1>
+        <h1>Please create at least an account in the extension</h1>
       </Center>
     )
 

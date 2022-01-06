@@ -6,7 +6,6 @@ import { Identicon } from "@polkadot/react-identicon"
 import { Link } from "react-router-dom"
 import { useAccountList } from "../../contexts/AccountsContext"
 import { useApi } from "../../contexts/ApiContext"
-import { proofJSON } from "../../proof"
 
 export const Header: React.FC = () => {
   const { selected } = useAccountList()
@@ -15,12 +14,9 @@ export const Header: React.FC = () => {
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget)
   }
-  const { proof, cid } = proofJSON
 
   useEffect(() => {
     if (!isApiReady) return
-
-    (api.rpc as any).filecoindot.verifyState(proof, cid).then((res: any) => console.log("res", res))
 
     let unsubscribe: () => void
 
@@ -48,7 +44,7 @@ export const Header: React.FC = () => {
             component="div"
             sx={{ flexGrow: 1 }}
           >
-            Filecoin Substrate pallet demo
+            Filecoindot pallet demo
           </Typography>
           {selected && (
             <>
@@ -56,17 +52,17 @@ export const Header: React.FC = () => {
                 <Button
                   component={Link}
                   to="/"
+                  sx={{ my: 2, color: "white", display: "block" }}
+                >
+                  Verify cid
+                </Button>
+                {/* <Button
+                  component={Link}
+                  to="/"
                   sx={{ my: 2, color: "white", display: "block" }}>
                   Show my NFTs
-                </Button>
-                <Button
-                  component={Link}
-                  to="/add"
-                  sx={{ my: 2, color: "white", display: "block" }}>
-                  Mint new NFT
-                </Button>
+                </Button> */}
               </Box>
-
               <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Select Account">
                   <IconButton
@@ -86,9 +82,10 @@ export const Header: React.FC = () => {
                   PaperProps={{
                     elevation: 0,
                     sx: {
-                      overflow: "visible",
                       filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
                       mt: 1.5,
+                      maxHeight: "100%",
+                      overflow: "auto",
                       "& .MuiAvatar-root": {
                         width: 32,
                         height: 32,
