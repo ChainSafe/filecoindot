@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "workspaces": [
+    "js/*"
+  ],
+  "devDependencies": {
+    "@types/command-exists": "^1.2.0",
+    "@types/find-up": "^4.0.0",
+    "command-exists": "^1.2.9",
+    "find-up": "^5.0.0",
+    "lerna": "^4.0.0",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  },
+  "scripts": {
+    "build": "yarn && lerna run build",
+    "publish": "lerna run publish",
+    "e2e": "yarn && ts-node js/e2e/index.ts",
+    "setup": "ts-node e2e/setup.ts"
+  },
+  "name": "js"
+}
