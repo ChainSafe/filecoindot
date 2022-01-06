@@ -6,9 +6,9 @@ use filecoindot_proofs::{
     deserialize_to_node, Amt, ForestAdaptedBlockStorage, ForestAdaptedHashAlgo,
     ForestAdaptedHashedBits, ForestAdaptedNode, ForestAmtAdaptedNode, GetCid, HAMTNodeType, Hamt,
 };
-use frame_support::assert_ok;
+use frame_support::{assert_err, assert_ok};
 
-use crate::tests::mock::*;
+use crate::{tests::mock::*, Error};
 use ipld_amt::Amt as ForestAmt;
 use ipld_blockstore::MemoryDB;
 use ipld_hamt::Hamt as ForestHamt;
@@ -62,15 +62,117 @@ pub fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
 #[test]
 fn verify_state_works() {
     let (proof, cid) = hamt_proof_generation();
+
+    let block_cid = vec![0, 1];
+    let message_cid = vec![0, 1];
     ExtBuilder::default().build().execute_with(|| {
-        assert_ok!(FileCoinModule::verify_state_inner(proof, cid.to_bytes()));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER1),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER2),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER3),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::verify_state_inner(
+            proof,
+            block_cid,
+            cid.to_bytes()
+        ));
+    });
+}
+
+#[test]
+fn verify_state_fails_invalid_block_cid() {
+    let (proof, cid) = amt_proof_generation(100);
+
+    let block_cid = vec![0, 1];
+    let message_cid = vec![0, 1];
+    ExtBuilder::default().build().execute_with(|| {
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER1),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER2),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER3),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_err!(
+            FileCoinModule::verify_state_inner(proof, vec![0, 2], cid.to_bytes()),
+            Error::<Test>::VerificationError
+        );
     });
 }
 
 #[test]
 fn verify_receipt_works() {
     let (proof, cid) = amt_proof_generation(100);
+
+    let block_cid = vec![0, 1];
+    let message_cid = vec![0, 1];
     ExtBuilder::default().build().execute_with(|| {
-        assert_ok!(FileCoinModule::verify_receipt_inner(proof, cid.to_bytes()));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER1),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER2),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER3),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::verify_receipt_inner(
+            proof,
+            block_cid,
+            cid.to_bytes()
+        ));
+    });
+}
+
+#[test]
+fn verify_receipt_fails_invalid_block_cid() {
+    let (proof, cid) = amt_proof_generation(100);
+
+    let block_cid = vec![0, 1];
+    let message_cid = vec![0, 1];
+    ExtBuilder::default().build().execute_with(|| {
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER1),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER2),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_ok!(FileCoinModule::submit_block_vote(
+            Origin::signed(RELAYER3),
+            block_cid.clone(),
+            message_cid.clone()
+        ));
+        assert_err!(
+            FileCoinModule::verify_receipt_inner(proof, vec![0, 2], cid.to_bytes()),
+            Error::<Test>::VerificationError
+        );
     });
 }
