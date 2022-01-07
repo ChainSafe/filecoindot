@@ -111,7 +111,7 @@ fn should_submit_vote_in_ocw() {
     t.execute_with(|| {
         // set rpc endpoint
         let rpc = StorageValueRef::persistent("FILECOIN_RPC".as_bytes());
-        rpc.set(&FILECOIN_API.as_bytes());
+        rpc.set(&vec![FILECOIN_API.as_bytes().to_vec()]);
 
         // bootstrap ocw on block 1
         offchain_worker::<Test>(1u32.into()).unwrap();

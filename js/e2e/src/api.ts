@@ -4,7 +4,7 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { rpc as filecoindotRpc, types } from "@filecoindot/types";
+import { rpc as filecoindotRpc, types } from "@chainsafe/filecoindot-types";
 import { EventRecord, Event, Phase } from "@polkadot/types/interfaces";
 import { Balance } from "@polkadot/types/interfaces/runtime";
 import { BN, u8aToHex } from "@polkadot/util";
@@ -66,7 +66,9 @@ export default class Api {
   }
 
   /**
-   * 0. insert author key
+   * tests for ocw
+   *
+   * 0.0. insert author key
    */
   public async insertAuthor(id: string) {
     return await this._.rpc.author.insertKey(
@@ -77,14 +79,14 @@ export default class Api {
   }
 
   /**
-   * 1. set filecoindot rpc endpoint
+   * 0.1. set filecoindot rpc endpoint
    */
-  public async setEndpoint(url: string) {
-    return await (this._.rpc as any).filecoindot.setRpcEndpoint(url);
+  public async setEndpoint(urls: string[]) {
+    return await (this._.rpc as any).filecoindot.setRpcEndpoint(urls);
   }
 
   /**
-   * 2. depoit some fund to the testing account
+   * 0.2. depoit some fund to the testing account
    */
   public async depositFund(value: number) {
     const UNIT: Balance = this._.createType(
@@ -97,11 +99,20 @@ export default class Api {
   }
 
   /**
-   * 3. add relayer
+   * 0.3. add relayer
    */
   public async addRelayer() {
     return await this._.tx.sudo
       .sudo(this._.tx.filecoindot.addRelayer(this.testSigner.address))
       .signAndSend(this.signer, { nonce: 1 });
+  }
+
+  /**
+   * verification testing
+   *
+   * 1.0. verify proof
+   */
+  public async verifyProof(proofHex: string, cid: string) {
+    return await (this._.rpc as any).filecoindot.verifyState(proofHex, cid);
   }
 }

@@ -29,22 +29,32 @@ function killAll(ps: ChildProcess, exitCode: number) {
 }
 
 /**
+ * proof inteface
+ */
+export interface IProof {
+  proof: string;
+  cid: string;
+}
+
+
+/**
  * e2e runner config
  */
-export interface RunnerConfig {
-  filecoindotRpc: string;
+export interface IRunnerConfig {
+  filecoindotRpc: string[];
   id: string;
   suri: string;
   ws: string;
+  proof: IProof;
 }
 
 /**
  * e2e runner
  */
 export default class Runner {
-  config: RunnerConfig;
+  config: IRunnerConfig;
 
-  constructor(config: RunnerConfig) {
+  constructor(config: IRunnerConfig) {
     this.config = config;
   }
 
@@ -77,7 +87,7 @@ export default class Runner {
         `\t${event.section}:${event.method}:: (phase=${phase.toString()})`
       );
       console.log(`\t\t${event.meta.docs.toString()}`);
-      console.log("votes from ocw has been accepted!");
+      console.log("setup completed!");
       process.exit(0);
     }
   }
@@ -85,9 +95,15 @@ export default class Runner {
   /**
    * init offchain worker
    */
-  private async tests() {
+  public async setup() {
     const { ws, filecoindotRpc, id, suri } = this.config;
     const api = await Api.New(ws, suri);
+
+    // test verifying proof
+    if ((await api.verifyProof(this.config.proof.proof, this.config.proof.cid)).toHuman() === false) {
+      throw "verify proof failed"
+    }
+
     await api.insertAuthor(id);
     await api.setEndpoint(filecoindotRpc);
     await api.addRelayer();
@@ -101,9 +117,9 @@ export default class Runner {
   private listenStderr(ps: ChildProcess, started: boolean) {
     if (ps.stderr) {
       ps.stderr.on("data", async (chunk: Buffer) => {
-        chunk.includes(OCW) && process.stderr.write(chunk.toString());
+         chunk.includes(OCW) && process.stderr.write(chunk.toString());
         if (!started && chunk.includes(OCW_PREPARED)) {
-          await this.tests();
+          await this.setup();
           started = true;
         }
       });

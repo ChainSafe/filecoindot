@@ -39,13 +39,30 @@ pub struct Req<T> {
 /// Abstract filecoin api requests
 pub trait Api: Sized {
     const METHOD: &'static str;
-    type Params: Serialize + Send + Sync;
+    type Params: Serialize + Send + Sync + Clone;
     type Result: Serialize + DeserializeOwned + core::fmt::Debug;
+
+    fn iter_req(
+        &self,
+        endpoints: &[&str],
+        params: Self::Params,
+        deadline: Timestamp,
+    ) -> Result<Self::Result, Error> {
+        let mut result = Err(Error::IoError);
+        for endpoint in endpoints {
+            result = self.req(endpoint, params.clone(), deadline);
+            if result.is_ok() {
+                return result;
+            }
+        }
+
+        result
+    }
 
     /// Request method with params
     fn req(
         &self,
-        base: &str,
+        endpoint: &str,
         params: Self::Params,
         deadline: Timestamp,
     ) -> Result<Self::Result, Error> {
@@ -58,7 +75,7 @@ pub trait Api: Sized {
         .map_err(|_| Error::IoError)?;
 
         // build request
-        let req = Request::post(base, vec![body])
+        let req = Request::post(endpoint, vec![body])
             .add_header("Content-Type", "application/json")
             .deadline(deadline);
 
