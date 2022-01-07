@@ -32,18 +32,21 @@ Secret phrase `brief outside human axis reveal boat warm amateur dish sample enr
 and then, post your account to the node
 
 ```
-$ curl -X POST 'http://localhost:9933' -H "Content-Type:application/json;charset=utf-8" \
-  -d '{
-    "jsonrpc":2.0,
-    "id":1,
-    "method":"author_insertKey",
-    "params": [
+curl -X POST -H "Content-type: application/json"  http://localhost:9933 -d '
+{
+  "method": "author_insertKey",
+  "jsonrpc": "2.0",
+  "id": 0,
+  "params": [
       "fdot",
       "brief outside human axis reveal boat warm amateur dish sample enroll moment",
       "0x0676a4b19c66b31e12d15fe31ccbc775d3d2cda6e1c8686e395118f808eaa118"
-    ]
-  }'
+  ]
+}
+'
 ```
+
+Make sure you transfer some funds to this account. E.g using polkadot.js/apps and using some funds from the dev accounts.
 
 #### 2. set filecoin rpc endpoint to your node
 
@@ -96,15 +99,15 @@ Or with [@polkadot/api](https://polkadot.js.org/docs/), you can use the code bel
 
 ```typescript
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { rpc, types } from "@filecoindot/types";
+import { rpc, types } from "@chainsafe/fileconidot-types";
 import { Keyring } from "@polkadot/keyring";
 
 (async () => {
-    // setup api
+    // setup the api
     const provider = new WsProvider("http://0.0.0.0:9944");
     const api = await ApiPromise.create({ provider, types, rpc });
     
-    // setup singer
+    // setup the signer
     const keyring = new Keyring({ type: "sr25519" });
     const signer = keyring.addFromUri("//Alice");
     
