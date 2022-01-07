@@ -3,7 +3,7 @@
 
 //! Benchmarking setup for filecoindot
 
-use crate::tests::mock::{Origin, Test, ALICE, RELAYER4};
+use crate::tests::mock::{Origin, Test, ALICE, RELAYER1, RELAYER2, RELAYER3, RELAYER4};
 use crate::tests::verify::{amt_proof_generation, hamt_proof_generation};
 use crate::*;
 
@@ -43,15 +43,49 @@ benchmarks! {
     }
 
     verify_receipt {
+        let block_cid = vec![0, 1];
+        let message_cid = vec![0, 1];
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER1),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER2),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER3),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
         let (proof, cid) = amt_proof_generation(100);
     }: {
-        Pallet::<Test>::verify_receipt(Origin::signed(ALICE), proof, cid.to_bytes())?;
+        Pallet::<Test>::verify_receipt(Origin::signed(ALICE), proof, block_cid, cid.to_bytes())?;
     }
 
     verify_state {
+        let block_cid = vec![0, 1];
+        let message_cid = vec![0, 1];
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER1),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER2),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER3),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
         let (proof, cid) = hamt_proof_generation();
     }: {
-        Pallet::<Test>::verify_state(Origin::signed(ALICE), proof, cid.to_bytes())?;
+        Pallet::<Test>::verify_state(Origin::signed(ALICE), proof, block_cid, cid.to_bytes())?;
     }
 }
 
