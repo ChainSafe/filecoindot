@@ -371,6 +371,18 @@ pub mod pallet {
             ensure_signed(origin)?;
             Self::verify_state_inner(proof, block_cid, cid)
         }
+
+        /// Verify the state of the filecoin
+        #[pallet::weight(T::WeightInfo::verify_message())]
+        pub fn verify_message(
+            origin: OriginFor<T>,
+            proof: Vec<Vec<u8>>,
+            block_cid: BlockCid,
+            cid: Vec<u8>,
+        ) -> DispatchResult {
+            ensure_signed(origin)?;
+            Self::verify_message_inner(proof, block_cid, cid)
+        }
     }
 
     impl<T: Config> Pallet<T> {
@@ -380,6 +392,18 @@ pub mod pallet {
             cid: Vec<u8>,
         ) -> DispatchResult {
             forest_proof_verify::verify_receipt(proof, cid).ok_or(Error::<T>::VerificationError)?;
+            Self::verified_block(&block_cid)
+                .then(|| ())
+                .ok_or(Error::<T>::VerificationError)?;
+            Ok(())
+        }
+
+        pub fn verify_message_inner(
+            proof: Vec<Vec<u8>>,
+            block_cid: BlockCid,
+            cid: Vec<u8>,
+        ) -> DispatchResult {
+            forest_proof_verify::verify_message(proof, cid).ok_or(Error::<T>::VerificationError)?;
             Self::verified_block(&block_cid)
                 .then(|| ())
                 .ok_or(Error::<T>::VerificationError)?;
@@ -561,6 +585,7 @@ pub mod pallet {
         fn close_block_proposal() -> Weight;
         fn verify_receipt() -> Weight;
         fn verify_state() -> Weight;
+        fn verify_message() -> Weight;
     }
 
     /// For backwards compatibility and tests
@@ -596,5 +621,7 @@ pub mod pallet {
         fn verify_state() -> Weight {
             Default::default()
         }
+
+        fn verify_message() -> Weight { Default::default() }
     }
 }

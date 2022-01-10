@@ -87,6 +87,29 @@ benchmarks! {
     }: {
         Pallet::<Test>::verify_state(Origin::signed(ALICE), proof, block_cid, cid.to_bytes())?;
     }
+
+    verify_message {
+        let block_cid = vec![0, 1];
+        let message_cid = vec![0, 1];
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER1),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER2),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
+        Pallet::<Test>::submit_block_vote(
+            Origin::signed(RELAYER3),
+            block_cid.clone(),
+            message_cid.clone()
+        ).unwrap();
+        let (proof, cid) = hamt_proof_generation();
+    }: {
+        Pallet::<Test>::verify_message(Origin::signed(ALICE), proof, block_cid, cid.to_bytes())?;
+    }
 }
 
 impl_benchmark_test_suite!(

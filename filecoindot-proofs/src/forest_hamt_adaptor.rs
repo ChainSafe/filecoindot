@@ -303,6 +303,9 @@ pub fn serialize_to_slice<
 pub type HAMTNodeType =
     ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
 
+pub type MessageNodeType =
+    ForestAdaptedNode<usize, String, ForestAdaptedHashAlgo, ForestAdaptedHashedBits>;
+
 #[cfg(test)]
 mod tests {
     use super::*;
