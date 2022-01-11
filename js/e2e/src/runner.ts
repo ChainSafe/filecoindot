@@ -100,8 +100,12 @@ export default class Runner {
     const api = await Api.New(ws, suri);
 
     // test verifying proof
-    if ((await api.verifyProof(this.config.proof.proof, this.config.proof.cid)).toHuman() === false) {
-      throw "verify proof failed"
+    if (this.config.proof) {
+      if ((await api.verifyProof(this.config.proof.proof, this.config.proof.cid)).toHuman() === false) {
+        throw "verify proof failed"
+      }
+    } else {
+      console.log("WARN: not proof field found in config, skipping testing proof");
     }
 
     await api.insertAuthor(id);
