@@ -12,6 +12,9 @@ pub use self::pallet::*;
 
 mod types;
 
+#[cfg(test)]
+mod tests;
+
 #[frame_support::pallet]
 pub mod pallet {
     pub use crate::types::{ClassData, TokenData};
@@ -127,7 +130,23 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         /// Get the balance of the account
         pub fn balance(who: &T::AccountId) -> u128 {
-            orml_nft::TokensByOwner::<T>::iter_prefix((who,)).count() as u128
+            orml_nft::TokensByOwner::<T>::iter_prefix((who, T::DefaultClassId::get())).count()
+                as u128
+        }
+
+        /// Get the list of token ids owned by the account.
+        /// Quite expensive, invoke with care. Should use indexer for this.
+        pub fn tokens(who: &T::AccountId) -> Vec<TokenIdOf<T>> {
+            orml_nft::TokensByOwner::<T>::iter_prefix((who, T::DefaultClassId::get()))
+                .map(|t| t.0)
+                .collect::<Vec<_>>()
+        }
+
+        /// Get the details of a specific token
+        pub fn token_detail(token_id: TokenIdOf<T>) -> Result<TokenData, Error<T>> {
+            let token = orml_nft::Pallet::<T>::tokens(T::DefaultClassId::get(), token_id)
+                .ok_or(Error::<T>::TokenIdNotFound)?;
+            Ok(token.data)
         }
     }
 
