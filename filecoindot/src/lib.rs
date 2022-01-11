@@ -622,6 +622,8 @@ pub mod pallet {
             Default::default()
         }
 
-        fn verify_message() -> Weight { Default::default() }
+        fn verify_message() -> Weight {
+            Default::default()
+        }
     }
 }

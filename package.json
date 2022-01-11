@@ -16,7 +16,7 @@
     "build": "yarn && lerna run build",
     "publish": "lerna run publish",
     "e2e": "yarn && ts-node js/e2e/index.ts",
-    "setup": "ts-node e2e/setup.ts"
+    "setup": "ts-node js/e2e/setup.ts"
   },
   "name": "js"
 }

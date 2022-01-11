@@ -199,9 +199,11 @@ fn verify_message_works() {
             block_cid.clone(),
             message_cid.clone()
         ));
-        assert_ok!(
-            FileCoinModule::verify_message_inner(proof, block_cid, cid.to_bytes())
-        );
+        assert_ok!(FileCoinModule::verify_message_inner(
+            proof,
+            block_cid,
+            cid.to_bytes()
+        ));
     });
 }
 
