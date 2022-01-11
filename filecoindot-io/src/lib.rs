@@ -16,4 +16,9 @@ pub trait ForestProofVerify {
         use filecoindot_proofs::{HAMTNodeType, ProofVerify, Verify};
         ProofVerify::verify_proof::<HAMTNodeType>(proof, cid).ok()
     }
+
+    fn verify_message(proof: Vec<Vec<u8>>, cid: Vec<u8>) -> Option<()> {
+        use filecoindot_proofs::{MessageNodeType, ProofVerify, Verify};
+        ProofVerify::verify_proof::<MessageNodeType>(proof, cid).ok()
+    }
 }
