@@ -9,8 +9,8 @@ import { proofJSON } from "../proof"
 // type Step = "verification" | "minting"
 
 export const MintNFT = () => {
-  const [cid, setCid] = useState("")
-  const [proof, setProof] = useState("")
+  const [cid, setCid] = useState(proofJSON.cid)
+  const [proof, setProof] = useState(proofJSON.proof)
   const { api, isApiReady } = useApi()
   const [isLoading, setIsLoading] = useState(false)
   const [isValid, setIsValid] = useState<boolean | null>(null)
