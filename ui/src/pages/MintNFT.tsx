@@ -16,7 +16,7 @@ export const MintNFT = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isValid, setIsValid] = useState<boolean | null>(null)
   const [error, setError] = useState("")
-  const { selected } = useAccountList()
+  const { selectedAddress, getAccountByAddress } = useAccountList()
   const [mintedBlock, setMintedBlock] = useState("")
   const [isMinting, setIsMinting] = useState(false)
 
@@ -59,16 +59,20 @@ export const MintNFT = () => {
   }, [api, cid, isApiReady, proof])
 
   const onMint = useCallback(async () => {
-    if (!selected) return
+    if (!selectedAddress) return
+
+    const signerAccount = getAccountByAddress(selectedAddress)
+
+    if (!signerAccount) return
 
     setError("")
     setIsMinting(true)
 
-    const injector = await web3FromSource(selected.meta.source)
+    const injector = await web3FromSource(signerAccount.meta.source)
 
     api.tx.filecoindotNFT
       .mint(cid, [proof])
-      .signAndSend(selected.address, { signer: injector.signer }, ({ status }) => {
+      .signAndSend(signerAccount.address, { signer: injector.signer }, ({ status }) => {
         console.log("status", status)
 
         if(status.isInBlock) {
@@ -81,7 +85,7 @@ export const MintNFT = () => {
         setIsMinting(false)
       })
 
-  }, [api, cid, proof, selected])
+  }, [api, cid, getAccountByAddress, proof, selectedAddress])
 
   return (
     <Center>
