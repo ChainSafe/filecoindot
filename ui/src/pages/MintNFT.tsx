@@ -1,12 +1,13 @@
-import { Box, Button, TextField, Typography } from "@mui/material"
+import { Box, Button, CircularProgress, TextField, Typography } from "@mui/material"
 import React, { ChangeEvent, useCallback, useState } from "react"
 import { Center } from "../components/layout/Center"
 import { useApi } from "../contexts/ApiContext"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome"
 import CancelIcon from "@mui/icons-material/Cancel"
 import { proofJSON } from "../proof"
-
-// type Step = "verification" | "minting"
+import { web3FromSource } from "@polkadot/extension-dapp"
+import { useAccountList } from "../contexts/AccountsContext"
 
 export const MintNFT = () => {
   const [cid, setCid] = useState(proofJSON.cid)
@@ -15,12 +16,15 @@ export const MintNFT = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isValid, setIsValid] = useState<boolean | null>(null)
   const [error, setError] = useState("")
-  // const [step, setStep] = useState<Step>("verification")
+  const { selected } = useAccountList()
+  const [mintedBlock, setMintedBlock] = useState("")
+  const [isMinting, setIsMinting] = useState(false)
 
   const resetState = useCallback(() => {
     setIsValid(null)
-    // setStep("minting")
     setError("")
+    setMintedBlock("")
+    setIsMinting(false)
   }, [])
 
   const onChangeCid = useCallback((cid: ChangeEvent<HTMLInputElement>) => {
@@ -54,11 +58,30 @@ export const MintNFT = () => {
       .finally(() => setIsLoading(false))
   }, [api, cid, isApiReady, proof])
 
-  const onMint = useCallback(() => {
-    (api.tx as any).mint(cid, proof)
-      .then((r: any) => console.log("res", r))
-      .catch(console.error)
-  }, [api.tx, cid, proof])
+  const onMint = useCallback(async () => {
+    if (!selected) return
+
+    setError("")
+    setIsMinting(true)
+
+    const injector = await web3FromSource(selected.meta.source)
+
+    api.tx.filecoindotNFT
+      .mint(cid, [proof])
+      .signAndSend(selected.address, { signer: injector.signer }, ({ status }) => {
+        console.log("status", status)
+
+        if(status.isInBlock) {
+          setMintedBlock(status.asInBlock.toString())
+        }
+      })
+      .catch((e: Error) => {
+        setError(e.message)
+        console.error(e)
+        setIsMinting(false)
+      })
+
+  }, [api, cid, proof, selected])
 
   return (
     <Center>
@@ -67,7 +90,7 @@ export const MintNFT = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          "& .MuiTextField-root": { marginBottom: "2rem", width: "30rem" }
+          "& .MuiTextField-root": { marginBottom: "2rem" }
         }}
       >
         <TextField
@@ -118,7 +141,6 @@ export const MintNFT = () => {
                 ? "Verifying"
                 : "Verify"
               }
-
             </Button>
           )
           : <Typography
@@ -132,18 +154,24 @@ export const MintNFT = () => {
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "column",
-              "&:first-child": { marginBottom: "1rem" }
+              "&:first-of-type": { marginBottom: "1rem" }
             }}
           >
-            {
+            {!mintedBlock && !isMinting && (
               isValid
                 ? (
                   <>
-                    <CheckCircleIcon fontSize="large"/>
-                    This proof is valid for this cid!
+                    {!error &&
+                      <>
+                        <CheckCircleIcon fontSize="large"/>
+                        This proof is valid for this cid!
+                      </>
+                    }
                     <Button
                       variant="contained"
                       onClick={onMint}
+                      disabled={isMinting}
+                      sx={{ marginTop: "1rem" }}
                     >
                       Mint an NFT
                     </Button>
@@ -154,11 +182,37 @@ export const MintNFT = () => {
                     <CancelIcon fontSize="large" />
                     This proof is not valid for this cid!
                   </>
-                )
+                ))
             }
-
+            {!mintedBlock && isMinting && (
+              <Box sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                "&: last-child": {
+                  marginTop: "1rem",
+                  color: "black"
+                }
+              }}
+              >
+                <CircularProgress />
+                Minting your NFT...
+              </Box>
+            )}
+            {mintedBlock &&
+              <>
+                <AutoAwesomeIcon fontSize="large"/>
+                  NFT minted at block: {mintedBlock}
+                <Button
+                  variant="contained"
+                  onClick={resetState}
+                  sx={{ marginTop: "1rem" }}
+                >
+                  Verify and Mint another NFT
+                </Button>
+              </>
+            }
           </Typography>
-
         }
       </Box>
     </Center>

@@ -8,7 +8,7 @@ type AccountContextProps = {
 }
 
 export interface IAccountContext {
-  selected: string
+  selected?: InjectedAccountWithMeta
   accountList?: InjectedAccountWithMeta[]
   selectAccount: (address: string) => void
   isAccountLoading: boolean
@@ -20,7 +20,7 @@ const AccountContext = createContext<IAccountContext | undefined>(undefined)
 
 
 const AccountContextProvider = ({ children }: AccountContextProps) => {
-  const [selected, setSelected] = useState("")
+  const [selected, setSelected] = useState<InjectedAccountWithMeta | undefined>()
   const [accountList, setAccountList] = useState<InjectedAccountWithMeta[]>([])
   const [isAccountLoading, setIsAccountLoading] = useState(false)
   const [extensionNotFound, setExtensionNotFound] = useState(false)
@@ -59,7 +59,7 @@ const AccountContextProvider = ({ children }: AccountContextProps) => {
     setAccountList(accountList)
 
     if (accountList.length > 0) {
-      setSelected(accountList[0].address)
+      setSelected(accountList[0])
     }
 
     setIsAccountLoading(false)
@@ -67,7 +67,7 @@ const AccountContextProvider = ({ children }: AccountContextProps) => {
   }
 
   const selectAccount = (address: string) => {
-    setSelected(address)
+    setSelected(accountList.find(account => account.address === address))
   }
 
   return (

@@ -23,7 +23,7 @@ export const UserSpace: React.FC = ({ children }) => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        "&: first-child": {
+        "&:first-of-type": {
           marginBottom: "1rem"
         }
       }}
@@ -91,7 +91,7 @@ export const UserSpace: React.FC = ({ children }) => {
         variant="outlined"
         endIcon={<KeyboardArrowDownIcon />}
         onClick={handleOpenUserMenu}>
-        Select an account
+      Select an account
       </Button>
       <AccountSelect
         anchorEl={anchorElUser}

@@ -70,7 +70,7 @@ export const Header: React.FC = () => {
                     sx={{ p: 0 }}>
                     <Avatar sx={{ bgcolor: "background.paper" }}>
                       <Identicon
-                        value={selected}
+                        value={selected.address}
                         theme="substrate"
                         size={32} />
                     </Avatar>
