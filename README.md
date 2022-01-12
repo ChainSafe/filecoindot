@@ -56,7 +56,8 @@ curl -X POST -H "Content-type: application/json"  http://localhost:9933 -d '
 {
   "method": "filecoindot_setRpcEndpoint",
   "jsonrpc": "2.0",
-  "params": { "urls": ["https://api.node.glif.io"] }
+  "id": 0,
+  "params": [ ["https://api.node.glif.io"] ]
 }
 '
 ```
