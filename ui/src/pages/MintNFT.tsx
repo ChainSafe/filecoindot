@@ -85,7 +85,7 @@ export const MintNFT = () => {
 
   return (
     <Center>
-      <h1>Verify your cid to before minting an NFT</h1>
+      <h1>Verify a cid to mint an NFT</h1>
       <Box
         sx={{
           display: "flex",

@@ -1060,10 +1060,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@chainsafe/filecoindot-types@^0.1.15":
-  version "0.1.15"
-  resolved "https://registry.yarnpkg.com/@chainsafe/filecoindot-types/-/filecoindot-types-0.1.15.tgz#259beab4dbf990c003328999d455699eec3d0536"
-  integrity sha512-1xBnv7j4nSiL4MGE+JCPAJj+Er6Mzo3ryn7iOHNHYAluZ8AkAbie5zSvhjws2OnNLh10ZMwbA9/UdZB83b1t4A==
+"@chainsafe/filecoindot-types@^0.1.20":
+  version "0.1.20"
+  resolved "https://registry.yarnpkg.com/@chainsafe/filecoindot-types/-/filecoindot-types-0.1.20.tgz#11835d49980c3092c32bfb8c6ccdaf3db9aa482d"
+  integrity sha512-kK1R/ZlXSfFUo2reRdgjJ9uswPTkcn2shj6LjfhUmnKZT95+sRAtDj/lN25pEYJbKtj+QjJiEpxGGcV4FePquw==
 
 "@csstools/normalize.css@*":
   version "12.0.0"

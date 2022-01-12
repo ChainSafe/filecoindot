@@ -10,14 +10,16 @@ export const UserSpace: React.FC = ({ children }) => {
   const { isApiReady } = useApi()
   const { extensionNotFound, isAccountListEmpty, isAccountLoading, selected } = useAccountList()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
+
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget)
   }
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null)
   }
 
-  if(!isApiReady || isAccountLoading)
+  if(!isApiReady || isAccountLoading){
     return (
       <Box sx={{
         display: "flex",
@@ -32,7 +34,9 @@ export const UserSpace: React.FC = ({ children }) => {
         Connecting to the node
       </Box>
     )
+  }
 
+  console.log("selected", selected)
   if (selected) return <>{children}</>
 
   if(extensionNotFound)
