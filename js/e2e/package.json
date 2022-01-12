@@ -1,13 +1,16 @@
 {
   "name": "@filecoindot/e2e",
-  "version": "0.1.15",
+  "version": "0.1.20",
   "description": "e2e testing for filecoindot",
   "main": "index.js",
+  "files": [
+    "lib/*"
+  ],
   "repository": "https://github.com/chainSafe/filecoindot/",
   "author": "clearloop",
   "license": "MIT",
   "dependencies": {
-    "@chainsafe/filecoindot-types": "0.1.15",
+    "@chainsafe/filecoindot-types": "0.1.20",
     "@polkadot/api": "^6.9.2",
     "@polkadot/keyring": "^8.2.2",
     "@polkadot/types": "^6.9.2",

@@ -1,9 +1,12 @@
 {
   "name": "@chainsafe/filecoindot-types",
-  "version": "0.1.15",
+  "version": "0.1.20",
   "description": "Types bundle for filecoindot",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "files": [
+    "lib/*"
+  ],
   "author": "tianyi@chainsafe.io",
   "license": "MIT",
   "publishConfig": {
