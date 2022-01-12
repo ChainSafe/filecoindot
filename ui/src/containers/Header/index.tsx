@@ -8,7 +8,7 @@ import { useAccountList } from "../../contexts/AccountsContext"
 import { useApi } from "../../contexts/ApiContext"
 
 export const Header: React.FC = () => {
-  const { selected } = useAccountList()
+  const { selectedAddress } = useAccountList()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const { api, isApiReady } = useApi()
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -46,7 +46,7 @@ export const Header: React.FC = () => {
           >
             Filecoindot pallet demo
           </Typography>
-          {selected && (
+          {selectedAddress && (
             <>
               <Box sx={{ flexGrow: 1, display: "flex" }}>
                 <Button
@@ -70,7 +70,7 @@ export const Header: React.FC = () => {
                     sx={{ p: 0 }}>
                     <Avatar sx={{ bgcolor: "background.paper" }}>
                       <Identicon
-                        value={selected}
+                        value={selectedAddress}
                         theme="substrate"
                         size={32} />
                     </Avatar>

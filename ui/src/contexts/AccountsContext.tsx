@@ -1,16 +1,19 @@
-import React, { useState, useEffect, createContext, useContext } from "react"
+import React, { useState, useEffect, createContext, useContext, useCallback } from "react"
 import { web3Accounts, web3Enable } from "@polkadot/extension-dapp"
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types"
 import { DAPP_NAME } from "../constants/substrate"
+
+const LOCALSTORAGE_KEY = "fsb.selectedAccount"
 
 type AccountContextProps = {
   children: React.ReactNode | React.ReactNode[]
 }
 
 export interface IAccountContext {
-  selected: string
+  selectedAddress?: string
   accountList?: InjectedAccountWithMeta[]
   selectAccount: (address: string) => void
+  getAccountByAddress: (address: string) => InjectedAccountWithMeta | undefined
   isAccountLoading: boolean
   extensionNotFound: boolean
   isAccountListEmpty: boolean
@@ -18,21 +21,19 @@ export interface IAccountContext {
 
 const AccountContext = createContext<IAccountContext | undefined>(undefined)
 
-
 const AccountContextProvider = ({ children }: AccountContextProps) => {
-  const [selected, setSelected] = useState("")
+  const [selectedAddress, setSelected] = useState<string>("")
   const [accountList, setAccountList] = useState<InjectedAccountWithMeta[]>([])
   const [isAccountLoading, setIsAccountLoading] = useState(false)
   const [extensionNotFound, setExtensionNotFound] = useState(false)
   const [isAccountListEmpty, setIsAccountListEmpty] = useState(false)
 
-  useEffect(() => {
-    if (!accountList.length) {
-      getaccountList()
-    }
-  }, [accountList.length])
+  const selectAccount = useCallback((address: string) => {
+    localStorage.setItem(LOCALSTORAGE_KEY, address)
+    setSelected(address)
+  }, [])
 
-  const getaccountList = async (): Promise<undefined> => {
+  const getaccountList = useCallback(async (): Promise<undefined> => {
     const extensions = await web3Enable(DAPP_NAME)
 
     if (extensions.length === 0) {
@@ -51,34 +52,42 @@ const AccountContextProvider = ({ children }: AccountContextProps) => {
       return
     }
 
-    // if addresses need to be encoded
-    // accountList.forEach((account) => {
-    //     account.address = encodeAddress(account.address) || account.address;
-    // });
-
     setAccountList(accountList)
 
     if (accountList.length > 0) {
-      setSelected(accountList[0].address)
+      const previousAccountAddress = localStorage.getItem(LOCALSTORAGE_KEY)
+
+      if(!previousAccountAddress){
+        selectAccount(accountList[0].address)
+      } else {        selectAccount(previousAccountAddress)
+      }
+
     }
 
     setIsAccountLoading(false)
     return
-  }
+  }, [selectAccount])
 
-  const selectAccount = (address: string) => {
-    setSelected(address)
-  }
+  const getAccountByAddress = useCallback((address: string) => {
+    return accountList.find(account => account.address === address)
+  }, [accountList])
+
+  useEffect(() => {
+    if (!accountList.length) {
+      getaccountList()
+    }
+  }, [accountList, getaccountList])
 
   return (
     <AccountContext.Provider
       value={{
-        selected,
+        selectedAddress,
         accountList,
         selectAccount,
         isAccountLoading,
         extensionNotFound,
-        isAccountListEmpty
+        isAccountListEmpty,
+        getAccountByAddress
       }}
     >
       {children}

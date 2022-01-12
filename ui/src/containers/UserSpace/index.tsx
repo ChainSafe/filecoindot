@@ -1,29 +1,30 @@
 import React from "react"
 import { Center } from "../../components/layout/Center"
-import { Box, Button, CircularProgress } from "@mui/material"
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
-import { AccountSelect } from "../AccountSelect"
+import { Box, CircularProgress } from "@mui/material"
+// import { AccountSelect } from "../AccountSelect"
 import { useAccountList } from "../../contexts/AccountsContext"
 import { useApi } from "../../contexts/ApiContext"
 
 export const UserSpace: React.FC = ({ children }) => {
   const { isApiReady } = useApi()
-  const { extensionNotFound, isAccountListEmpty, isAccountLoading, selected } = useAccountList()
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget)
-  }
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null)
-  }
+  const { extensionNotFound, isAccountListEmpty, isAccountLoading, selectedAddress } = useAccountList()
+  // const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
 
-  if(!isApiReady || isAccountLoading)
+  // const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+  //   setAnchorElUser(event.currentTarget)
+  // }
+
+  // const handleCloseUserMenu = () => {
+  //   setAnchorElUser(null)
+  // }
+
+  if(!isApiReady || isAccountLoading){
     return (
       <Box sx={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        "&: first-child": {
+        "&:first-of-type": {
           marginBottom: "1rem"
         }
       }}
@@ -32,8 +33,10 @@ export const UserSpace: React.FC = ({ children }) => {
         Connecting to the node
       </Box>
     )
+  }
 
-  if (selected) return <>{children}</>
+  console.log("selected", selectedAddress)
+  if (selectedAddress) return <>{children}</>
 
   if(extensionNotFound)
     return (
@@ -41,8 +44,9 @@ export const UserSpace: React.FC = ({ children }) => {
         <h1>Please install the <a
           href="https://polkadot.js.org/extension/"
           target={"_blank"}
-          rel="noreferrer">
-            Polkadot.js extension
+          rel="noreferrer"
+        >
+          Polkadot.js extension
         </a>
         </h1>
       </Center>
@@ -86,16 +90,28 @@ export const UserSpace: React.FC = ({ children }) => {
   //   );
 
   return (
-    <Center>
-      <Button
-        variant="outlined"
-        endIcon={<KeyboardArrowDownIcon />}
-        onClick={handleOpenUserMenu}>
-        Select an account
-      </Button>
-      <AccountSelect
-        anchorEl={anchorElUser}
-        onClose={handleCloseUserMenu} />
-    </Center>
+    <Box sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      "&:first-of-type": {
+        marginBottom: "1rem"
+      }
+    }}
+    >
+      <CircularProgress />
+      Loading accounts...
+    </Box>
+    // <Center>
+    //   <Button
+    //     variant="outlined"
+    //     endIcon={<KeyboardArrowDownIcon />}
+    //     onClick={handleOpenUserMenu}>
+    //   Select an account
+    //   </Button>
+    //   <AccountSelect
+    //     anchorEl={anchorElUser}
+    //     onClose={handleCloseUserMenu} />
+    // </Center>
   )
 }
