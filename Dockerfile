@@ -22,7 +22,7 @@ RUN useradd -m -u 1000 -U -s /bin/sh -d /pint pint && \
     mkdir /data && \
     chown -R pint:pint /data && \
     ln -s /data /pint/.local/share/filecoindot-template && \
-    rm -rf /usr/bin /usr/sbin \
+    rm -rf /usr/bin /usr/sbin
 RUN update-ca-certificates
 USER pint
 # 30333 for p2p traffic
