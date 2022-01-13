@@ -18,7 +18,7 @@ docker run ghcr.io/chainsafe/filecoindot-template --tmp --dev --ws-external --rp
 
 After the node start emiting logs, run
 
-```
+```shell
 # /filecoindot
 sh scripts/setup.sh
 ```
@@ -26,7 +26,7 @@ sh scripts/setup.sh
 to setup our filecoindot node, the setup config by default is 
 
 
-```
+```json
 {
   "filecoindotRpc": ["https://api.node.glif.io"],
   "id": "fdot",
