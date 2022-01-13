@@ -17,13 +17,13 @@ RUN --mount=type=cache,target=/usr/local/cargo/git \
 FROM debian:buster-slim
 LABEL description="The docker image of filecoindot template"
 COPY --from=builder /filecoindot-template /usr/local/bin/
-RUN useradd -m -u 1000 -U -s /bin/sh -d /pint pint && \
+RUN apt install ca-certificates && \
+    useradd -m -u 1000 -U -s /bin/sh -d /pint pint && \
     mkdir -p /pint/.local/share && \
     mkdir /data && \
     chown -R pint:pint /data && \
     ln -s /data /pint/.local/share/filecoindot-template && \
     rm -rf /usr/bin /usr/sbin
-RUN update-ca-certificates
 USER pint
 # 30333 for p2p traffic
 # 9933 for RPC call
