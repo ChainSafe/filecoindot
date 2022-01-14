@@ -17,14 +17,20 @@ RUN --mount=type=cache,target=/usr/local/cargo/git \
 FROM debian:buster-slim
 LABEL description="The docker image of filecoindot template"
 COPY --from=builder /filecoindot-template /usr/local/bin/
-RUN apt install ca-certificates && \
-    useradd -m -u 1000 -U -s /bin/sh -d /pint pint && \
-    mkdir -p /pint/.local/share && \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    useradd -m -u 1000 -U -s /bin/sh -d /filecoindot filecoindot && \
+    mkdir -p /filecoindot/.local/share && \
     mkdir /data && \
-    chown -R pint:pint /data && \
-    ln -s /data /pint/.local/share/filecoindot-template && \
-    rm -rf /usr/bin /usr/sbin
-USER pint
+    chown -R filecoindot:filecoindot /data && \
+    ln -s /data /filecoindot/.local/share/filecoindot-template && \
+    rm -rf /usr/bin /usr/sbin && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+USER filecoindot
 # 30333 for p2p traffic
 # 9933 for RPC call
 # 9944 for Websocket
