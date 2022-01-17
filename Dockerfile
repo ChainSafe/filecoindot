@@ -18,17 +18,12 @@ FROM debian:buster-slim
 ENV DEBIAN_FRONTEND=noninteractive
 LABEL description="The docker image of filecoindot template"
 COPY --from=builder /filecoindot-template /usr/local/bin/
-RUN apt update && \
-    apt install -y --no-install-recommends ca-certificates && \
-    useradd -m -u 1000 -U -s /bin/sh -d /filecoindot filecoindot && \
+RUN useradd -m -u 1000 -U -s /bin/sh -d /filecoindot filecoindot && \
     mkdir -p /filecoindot/.local/share && \
     mkdir /data && \
     chown -R filecoindot:filecoindot /data && \
     ln -s /data /filecoindot/.local/share/filecoindot-template && \
-    rm -rf /usr/bin /usr/sbin && \
-    apt autoremove -y && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /usr/bin /usr/sbin
 
 USER filecoindot
 # 30333 for p2p traffic
