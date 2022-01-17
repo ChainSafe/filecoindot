@@ -20,15 +20,15 @@ LABEL description="The docker image of filecoindot template"
 COPY --from=builder /filecoindot-template /usr/local/bin/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
     useradd -m -u 1000 -U -s /bin/sh -d /filecoindot filecoindot && \
     mkdir -p /filecoindot/.local/share && \
     mkdir /data && \
     chown -R filecoindot:filecoindot /data && \
     ln -s /data /filecoindot/.local/share/filecoindot-template && \
-    rm -rf /usr/bin /usr/sbin && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /usr/bin /usr/sbin
 
 USER filecoindot
 # 30333 for p2p traffic
