@@ -10,20 +10,25 @@ ENV CARGO_TERM_COLOR=always
 RUN --mount=type=cache,target=/usr/local/cargo/git \
     --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,sharing=private,target=target \
-    cargo +nightly build --release \
-    && mv target/release/filecoindot-template /filecoindot-template
+    cargo +nightly build --release && \
+    mv target/release/filecoindot-template /filecoindot-template
 
 # Release
 FROM debian:buster-slim
 ENV DEBIAN_FRONTEND=noninteractive
 LABEL description="The docker image of filecoindot template"
 COPY --from=builder /filecoindot-template /usr/local/bin/
-RUN useradd -m -u 1000 -U -s /bin/sh -d /filecoindot filecoindot && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    useradd -m -u 1000 -U -s /bin/sh -d /filecoindot filecoindot && \
     mkdir -p /filecoindot/.local/share && \
     mkdir /data && \
     chown -R filecoindot:filecoindot /data && \
     ln -s /data /filecoindot/.local/share/filecoindot-template && \
-    rm -rf /usr/bin /usr/sbin
+    rm -rf /usr/bin /usr/sbin && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 USER filecoindot
 # 30333 for p2p traffic
