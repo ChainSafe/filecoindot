@@ -7,6 +7,7 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@mui/icons-material": "^5.2.5",
+    "@mui/lab": "^5.0.0-alpha.64",
     "@mui/material": "^5.2.8",
     "@mui/styled-engine-sc": "^5.1.0",
     "@polkadot/api": "^7.3.1",
