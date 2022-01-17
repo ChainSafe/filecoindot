@@ -13,7 +13,7 @@ framework, including Polkadot parachains.
 We recommend to use our docker image for the quick start of the features filecoindot provide
 
 ```
-docker run ghcr.io/chainsafe/filecoindot-template --tmp --dev --usafe-ws-external --unsafe-rpc-external --rpc-methods unsafe
+docker run -p 9933:9933 -p 9944:9944 ghcr.io/chainsafe/filecoindot-template --tmp --dev --usafe-ws-external --unsafe-rpc-external --rpc-methods unsafe
 ```
 
 After the node start emiting logs, run
