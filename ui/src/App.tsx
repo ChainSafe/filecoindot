@@ -5,7 +5,7 @@ import { NFTList } from "./pages/NFTList"
 // import { Settings } from './containers/Settings';
 import { Header } from "./containers/Header"
 import Container from "@mui/material/Container"
-import { MintNFT } from "./pages/MintNFT"
+import { MintNFT } from "./pages/VerifyBlock"
 import { UserSpace } from "./containers/UserSpace"
 import { AccountContextProvider } from "./contexts/AccountsContext"
 import { ApiContextProvider } from "./contexts/ApiContext"

@@ -1,24 +1,27 @@
-import { Box, Button, CircularProgress, TextField, Typography } from "@mui/material"
-import React, { ChangeEvent, useCallback, useState } from "react"
+/* eslint-disable max-len */
+import { Box, CircularProgress, TextField, Typography } from "@mui/material"
+import LoadingButton from "@mui/lab/LoadingButton"
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react"
 import { Center } from "../components/layout/Center"
 import { useApi } from "../contexts/ApiContext"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome"
+// import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome"
 import CancelIcon from "@mui/icons-material/Cancel"
-import { proofJSON } from "../proof"
-import { web3FromSource } from "@polkadot/extension-dapp"
-import { useAccountList } from "../contexts/AccountsContext"
+// import { proofJSON } from "../proof"
+// import { web3FromSource } from "@polkadot/extension-dapp"
+// import { useAccountList } from "../contexts/AccountsContext"
 
 export const MintNFT = () => {
-  const [cid, setCid] = useState(proofJSON.cid)
-  const [proof, setProof] = useState(proofJSON.proof)
+  const [cid, setCid] = useState("")
+  // const [proof, setProof] = useState(proofJSON.proof)
   const { api, isApiReady } = useApi()
   const [isLoading, setIsLoading] = useState(false)
   const [isValid, setIsValid] = useState<boolean | null>(null)
   const [error, setError] = useState("")
-  const { selectedAddress, getAccountByAddress } = useAccountList()
+  // const { selectedAddress, getAccountByAddress } = useAccountList()
   const [mintedBlock, setMintedBlock] = useState("")
   const [isMinting, setIsMinting] = useState(false)
+  const [cidMap, setCidMap] = useState<string[]>([])
 
   const resetState = useCallback(() => {
     setIsValid(null)
@@ -32,10 +35,30 @@ export const MintNFT = () => {
     resetState()
   }, [resetState])
 
-  const onChangeProof = useCallback((proof: ChangeEvent<HTMLInputElement>) => {
-    setProof(proof.currentTarget.value)
-    resetState()
-  }, [resetState])
+  const refreshCidMap = useCallback(() =>
+    api.query.filecoindot.verifiedBlocks.entries()
+      .then((res) => {
+        const arr = res.map(([res1]) => (res1.toHuman() as string[])[0])
+        setCidMap(arr)
+        // console.log("res2", res2)
+        return arr
+      })
+      .catch((e: any) => {
+        setError(e.message)
+        console.error(e)
+      })
+  , [api])
+
+  useEffect(() => {
+    if(isApiReady && !cidMap.length) {
+      refreshCidMap()
+    }
+  }, [cidMap, isApiReady, refreshCidMap])
+
+  // const onChangeProof = useCallback((proof: ChangeEvent<HTMLInputElement>) => {
+  //   setProof(proof.currentTarget.value)
+  //   resetState()
+  // }, [resetState])
 
   const onVerify = useCallback(() => {
     if (!isApiReady) {
@@ -44,52 +67,58 @@ export const MintNFT = () => {
       return
     }
 
-    setIsLoading(true);
+    setIsLoading(true)
 
-    (api.rpc as any).filecoindot.verifyState(proof, cid)
-      .then((res: any) => {
-        console.log(Boolean(res))
-        setIsValid(!!res.toHuman())
+    const isThereAlready = !!cidMap.find(c => cid === c)
+
+    if(isThereAlready) {
+      setIsValid(true)
+      setIsLoading(false)
+      return
+    }
+
+    refreshCidMap()
+      .then((arr) => {
+        if(!arr) return
+
+        setIsValid(!!arr.find(c => cid === c))
+        setIsLoading(false)
       })
-      .catch((e: any) => {
-        setError(e.message)
-        console.error(e)
-      })
-      .finally(() => setIsLoading(false))
-  }, [api, cid, isApiReady, proof])
+  }, [cid, cidMap, isApiReady, refreshCidMap])
 
-  const onMint = useCallback(async () => {
-    if (!selectedAddress) return
+  // const onMint = useCallback(async () => {
+  //   if (!selectedAddress) return
 
-    const signerAccount = getAccountByAddress(selectedAddress)
+  //   const signerAccount = getAccountByAddress(selectedAddress)
 
-    if (!signerAccount) return
+  //   if (!signerAccount) return
 
-    setError("")
-    setIsMinting(true)
+  //   setError("")
+  //   setIsMinting(true)
 
-    const injector = await web3FromSource(signerAccount.meta.source)
+  // const injector = await web3FromSource(signerAccount.meta.source)
 
-    api.tx.filecoindotNFT
-      .mint(cid, [proof])
-      .signAndSend(signerAccount.address, { signer: injector.signer }, ({ status }) => {
-        console.log("status", status)
+  // api.tx.filecoindotNFT
+  //   .mint(cid, [proof])
+  //   .signAndSend(signerAccount.address, { signer: injector.signer }, ({ status }) => {
+  //     console.log("status", status)
 
-        if(status.isInBlock) {
-          setMintedBlock(status.asInBlock.toString())
-        }
-      })
-      .catch((e: Error) => {
-        setError(e.message)
-        console.error(e)
-        setIsMinting(false)
-      })
+  //     if(status.isInBlock) {
+  //       setMintedBlock(status.asInBlock.toString())
+  //     }
+  //   })
+  //   .catch((e: Error) => {
+  //     setError(e.message)
+  //     console.error(e)
+  //     setIsMinting(false)
+  //   })
 
-  }, [api, cid, getAccountByAddress, proof, selectedAddress])
+  // }, [getAccountByAddress, selectedAddress])
 
   return (
     <Center>
-      <h1>Verify a cid to mint an NFT</h1>
+      <h1>Verify a Filecoin block</h1>
+      <h4>indexed cid: {cidMap.length || <CircularProgress size={14}/>}</h4>
       <Box
         sx={{
           display: "flex",
@@ -105,10 +134,9 @@ export const MintNFT = () => {
           label="cid"
           placeholder="cid"
           onChange={onChangeCid}
-          // value={cid}
-          value={proofJSON.cid}
+          value={cid}
         />
-        <TextField
+        {/* <TextField
           fullWidth
           required
           id="proof"
@@ -117,7 +145,7 @@ export const MintNFT = () => {
           onChange={onChangeProof}
           // value={proof}
           value={proofJSON.proof}
-        />
+        /> */}
         {error && (
           <Typography
             variant="h6"
@@ -136,16 +164,18 @@ export const MintNFT = () => {
         )}
         {!error && isValid === null
           ? (
-            <Button
+            <LoadingButton
               variant="contained"
               onClick={onVerify}
-              disabled={!cid || !proof || !isApiReady || isLoading}
+              disabled={!cid || !isApiReady || isLoading}
+              loading={!!isLoading}
+              loadingPosition="center"
             >
               {isLoading
                 ? "Verifying"
                 : "Verify"
               }
-            </Button>
+            </LoadingButton>
           )
           : <Typography
             variant="h6"
@@ -163,32 +193,20 @@ export const MintNFT = () => {
           >
             {!mintedBlock && !isMinting && (
               isValid
-                ? (
-                  <>
-                    {!error &&
+                ? (!error &&
                       <>
                         <CheckCircleIcon fontSize="large"/>
-                        This proof is valid for this cid!
+                        This block&apos;s cid was found!
                       </>
-                    }
-                    <Button
-                      variant="contained"
-                      onClick={onMint}
-                      disabled={isMinting}
-                      sx={{ marginTop: "1rem" }}
-                    >
-                      Mint an NFT
-                    </Button>
-                  </>
                 )
                 : (
                   <>
                     <CancelIcon fontSize="large" />
-                    This proof is not valid for this cid!
+                    This cid wasn&apos;t found in our data set :(
                   </>
                 ))
             }
-            {!mintedBlock && isMinting && (
+            {/* {!mintedBlock && isMinting && (
               <Box sx={{
                 display: "flex",
                 flexDirection: "column",
@@ -215,7 +233,7 @@ export const MintNFT = () => {
                   Verify and Mint another NFT
                 </Button>
               </>
-            }
+            } */}
           </Typography>
         }
       </Box>
