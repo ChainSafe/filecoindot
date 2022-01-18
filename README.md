@@ -8,6 +8,34 @@ filecoindot
 A Substrate pallet to bridge from Filecoin to any blockchain built using the [Substrate](https://www.substrate.io/)
 framework, including Polkadot parachains.
 
+## Quick Start
+
+We recommend to use our docker image for the quick start of the features filecoindot provide
+
+```
+docker run -p 9933:9933 -p 9944:9944 ghcr.io/chainsafe/filecoindot-template --tmp --dev --usafe-ws-external --unsafe-rpc-external --rpc-methods unsafe
+```
+
+After the node start emiting logs, run
+
+```shell
+# /filecoindot
+sh scripts/setup.sh
+```
+
+to setup our filecoindot node, the setup config by default is 
+
+
+```json
+{
+  "filecoindotRpc": ["https://api.node.glif.io"],
+  "id": "fdot",
+  "suri": "brief outside human axis reveal boat warm amateur dish sample enroll moment",
+  "ws": "ws://0.0.0.0:9944"
+}
+```
+
+
 ## How to integrate the Filecoin bridge pallet into a runtime?
 
 #### 0. configure `filecoindot` into your node

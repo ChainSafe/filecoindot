@@ -105,7 +105,7 @@ export default class Runner {
         throw "verify proof failed"
       }
     } else {
-      console.log("WARN: not proof field found in config, skipping testing proof");
+      console.log("WARN: no proof field found in config, skipping testing proof");
     }
 
     await api.insertAuthor(id);
