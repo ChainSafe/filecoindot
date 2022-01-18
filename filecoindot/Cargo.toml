@@ -30,7 +30,7 @@ filecoindot-io = { path = "../filecoindot-io", default-features = false }
 [dev-dependencies]
 serde = "1.0.130"
 bincode = "1.3.3"
-reqwest = { version = "0.11.6", features = [ "json" ] }
+reqwest = { version = "0.11.9", features = [ "json" ] }
 parking_lot = "0.11"
 futures = "0.3"
 tokio = { version = "1.14", features = [ "full" ] }

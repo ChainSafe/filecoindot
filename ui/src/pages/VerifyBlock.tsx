@@ -54,6 +54,7 @@ export const MintNFT = () => {
       refreshCidMap()
     }
   }, [cidMap, isApiReady, refreshCidMap])
+
   // const onChangeProof = useCallback((proof: ChangeEvent<HTMLInputElement>) => {
   //   setProof(proof.currentTarget.value)
   //   resetState()

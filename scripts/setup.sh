@@ -2,7 +2,6 @@
 
 # paths
 readonly ROOT="$(dirname $(cd $(dirname $0) && pwd))"
-readonly JS="${ROOT}/js"
 readonly SCRIPTS="${ROOT}/scripts"
 readonly CONFIG="${SCRIPTS}/setup.json"
 
@@ -20,7 +19,7 @@ run_setup_script() {
 
 # run program
 main() {
-    cd "${JS}"
+    cd $ROOT
 
     run_setup_script $CONFIG
 
