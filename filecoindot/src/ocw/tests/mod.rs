@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 mod data;
 mod ext;
-// mod get_tip_set_by_height;
+mod get_tip_set_by_height;
 
 use crate::ocw::api::{Api, ChainHead};
 use ext::OffchainExt;
