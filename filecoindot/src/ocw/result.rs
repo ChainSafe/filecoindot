@@ -19,6 +19,8 @@ pub enum Error {
     OffchainSignedTxError,
     #[display(fmt = "no tx result yet")]
     NoTxResult,
+    #[display(fmt = "no relayer found")]
+    NoRelayerFound,
 }
 
 pub type Result<T> = core::result::Result<T, Error>;

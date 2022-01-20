@@ -4,18 +4,25 @@
 #![allow(dead_code)]
 
 use crate::{
+    crypto::FilecoindotId,
     ocw::{
         api::{Api, ChainHead},
         result::{Error, Result},
     },
-    Call, Config,
+    Call, Config, Relayers,
 };
 use frame_support::{
-    sp_runtime::offchain::{storage::StorageValueRef, Timestamp},
+    codec::Encode,
+    sp_runtime::{
+        offchain::{storage::StorageValueRef, Timestamp},
+        traits::Verify,
+        RuntimeAppPublic,
+    },
     sp_std::vec::Vec,
     traits::Get,
 };
 use frame_system::offchain::{SendSignedTransaction, Signer};
+use sp_core::sr25519::Signature as Sr25519Signature;
 
 pub mod api;
 mod de;
@@ -56,7 +63,29 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
 
 /// bootstrap filcoindot ocw
 fn bootstrap<T: Config>(_: T::BlockNumber, urls: &[&str]) -> Result<()> {
+    // get public keys from keystore
+    let all_public: Vec<Vec<u8>> = <FilecoindotId as frame_system::offchain::AppCrypto<
+        <Sr25519Signature as Verify>::Signer,
+        Sr25519Signature,
+    >>::RuntimeAppPublic::all()
+    .into_iter()
+    .map(|key| key.encode())
+    .collect();
+
+    // check if keystore has key listed in Relayers
+    let mut no_relayer = true;
+    for relayer in Relayers::<T>::iter() {
+        let key = relayer.encode();
+        if all_public.contains(&key) {
+            no_relayer = false;
+        }
+    }
+
     let signer = Signer::<T, T::AuthorityId>::any_account();
+    if !signer.can_sign() || no_relayer {
+        return Err(Error::NoRelayerFound);
+    }
+
     vote_on_chain_head(signer, urls)
 }
 
