@@ -76,8 +76,9 @@ export const MintNFT: React.FC = () => {
           name
         })
       })
-      .catch((e) => {
-        setError(e)
+      .catch((e: any) => {
+        setError(e.message)
+        setTimeout(() => setError(""), 5000)
         console.error(e)
       })
       .finally(() => {
