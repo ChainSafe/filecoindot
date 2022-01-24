@@ -63,21 +63,18 @@ pub fn offchain_worker<T: Config>(block_number: T::BlockNumber) -> Result<()> {
 
 /// bootstrap filcoindot ocw
 fn bootstrap<T: Config>(_: T::BlockNumber, urls: &[&str]) -> Result<()> {
-    // get public keys from keystore
-    let mut all_public = <FilecoindotId as frame_system::offchain::AppCrypto<
+    let all_public: Vec<Vec<u8>> = <FilecoindotId as frame_system::offchain::AppCrypto<
         <Sr25519Signature as Verify>::Signer,
         Sr25519Signature,
     >>::RuntimeAppPublic::all()
     .into_iter()
-    .map(|key| key.encode());
+    .map(|key| key.encode())
+    .collect();
 
     // check if keystore has key listed in Relayers
     let mut no_relayer = true;
-    for relayer in Relayers::<T>::iter() {
-        let relayer_key = relayer.encode();
-        if all_public.any(|key| key == relayer_key) {
-            no_relayer = false;
-        }
+    if Relayers::<T>::iter().any(|relayer| all_public.contains(&relayer.encode())) {
+        no_relayer = false;
     }
 
     let signer = Signer::<T, T::AuthorityId>::any_account();
