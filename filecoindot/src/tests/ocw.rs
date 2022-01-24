@@ -8,6 +8,7 @@ use crate::{
         types::TipSet,
     },
     tests::mock::*,
+    Relayers,
 };
 use sp_core::{
     offchain::{testing, OffchainDbExt, OffchainWorkerExt, TransactionPoolExt},
@@ -69,13 +70,10 @@ fn should_submit_vote_in_ocw() {
     // set keystore
     let keystore = KeyStore::new();
 
-    // set up signer
-    SyncCryptoStore::sr25519_generate_new(
-        &keystore,
-        crate::crypto::Public::ID,
-        Some(&format!("{}/ocw", PHRASE)),
-    )
-    .unwrap();
+    // set up relayer
+    let relayer =
+        SyncCryptoStore::sr25519_generate_new(&keystore, crate::crypto::Public::ID, Some(PHRASE))
+            .unwrap();
 
     // set expected response
     {
@@ -109,6 +107,9 @@ fn should_submit_vote_in_ocw() {
 
     // execute in test env
     t.execute_with(|| {
+        // add inserted key as relayer
+        Relayers::<Test>::insert(&relayer, ());
+
         // set rpc endpoint
         let rpc = StorageValueRef::persistent("FILECOIN_RPC".as_bytes());
         rpc.set(&vec![FILECOIN_API.as_bytes().to_vec()]);
