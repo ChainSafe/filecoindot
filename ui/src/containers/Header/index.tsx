@@ -56,12 +56,12 @@ export const Header: React.FC = () => {
                 >
                   Verify cid
                 </Button>
-                {/* <Button
+                <Button
                   component={Link}
-                  to="/"
+                  to="/nft"
                   sx={{ my: 2, color: "white", display: "block" }}>
-                  Show my NFTs
-                </Button> */}
+                  Mint NFTs
+                </Button>
               </Box>
               <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Select Account">
