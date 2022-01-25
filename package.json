@@ -1,8 +1,6 @@
 {
   "private": true,
-  "workspaces": [
-    "js/*"
-  ],
+  "workspaces": ["js/e2e", "js/types", "ui"],
   "devDependencies": {
     "@types/command-exists": "^1.2.0",
     "@types/find-up": "^4.0.0",
@@ -16,7 +14,12 @@
     "build": "yarn && lerna run build",
     "publish": "lerna run publish",
     "e2e": "yarn && ts-node js/e2e/index.ts",
-    "setup": "ts-node js/e2e/setup.ts"
+    "setup": "ts-node js/e2e/setup.ts",
+    "build:ui": "yarn workspace filecoindot-demo build",
+    "start:ui": "yarn workspace filecoindot-demo start"
   },
-  "name": "js"
+  "name": "js",
+  "nohoist": [
+    "**/react-scripts"
+  ]
 }
