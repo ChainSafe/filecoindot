@@ -48,8 +48,8 @@
     "lint": "eslint 'src/**/*.{js,ts,tsx}'",
     "lint:types": "tsc --pretty",
     "lint:fix": "yarn run lint --fix",
-    "generate:types": "yarn polkadot-types-from-chain --endpoint ws://localhost:9944 --output ./src/interfaces"
-
+    "generate:types-from-chain": "yarn polkadot-types-from-chain --endpoint ws://localhost:9944 --output ./src/interfaces",
+    "generate:type-from-defs": "yarn polkadot-types-from-defs --endpoint ./filecoindot-metadata.json --input ./src/interfaces"
   },
   "browserslist": {
     "production": [
