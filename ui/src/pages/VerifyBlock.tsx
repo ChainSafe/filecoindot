@@ -187,14 +187,14 @@ export const VerifyBlock = () => {
             display: "flex",
             alignItems: "center",
             height: "5rem",
-            maxWidth: "30% !important"
+            maxWidth: "650px !important"
           }}>
           <Container
             sx={{
+              textAlign: "center",
               "& img": {
                 maxWidth: "8rem",
-                height: "auto",
-                display: "block"
+                height: "auto"
               }
             }}
           >
@@ -206,6 +206,7 @@ export const VerifyBlock = () => {
           <Container
             sx={{
               height: "100%",
+              textAlign: "center",
               "& img": {
                 height: "100%"
               } }}
@@ -218,9 +219,9 @@ export const VerifyBlock = () => {
           <Container
             sx={{
               height: "100%",
+              textAlign: "center",
               "& img": {
-                height: "100%",
-                display: "block"
+                height: "100%"
               }
             }}
           >
@@ -230,10 +231,10 @@ export const VerifyBlock = () => {
               rel="noreferrer"><img src={chainSafeImage}/></a>
           </Container>
           <Container sx={{
+            textAlign: "center",
             "& img": {
               height: "auto",
-              maxWidth: "8rem",
-              display: "block"
+              maxWidth: "8rem"
             }
           }}>
             <a
