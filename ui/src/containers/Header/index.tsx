@@ -1,6 +1,6 @@
 import AppBar from "@mui/material/AppBar"
 import React, { useEffect } from "react"
-import { Avatar, Box, Button, Container, IconButton, Toolbar, Tooltip, Typography } from "@mui/material"
+import { Box, Button, Container, Toolbar, Tooltip, Typography } from "@mui/material"
 import { AccountSelect } from "../AccountSelect"
 import { Identicon } from "@polkadot/react-identicon"
 import { Link } from "react-router-dom"
@@ -8,7 +8,7 @@ import { useAccountList } from "../../contexts/AccountsContext"
 import { useApi } from "../../contexts/ApiContext"
 
 export const Header: React.FC = () => {
-  const { selectedAddress } = useAccountList()
+  const { selectedAddress, getAccountByAddress } = useAccountList()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const { api, isApiReady } = useApi()
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -52,29 +52,37 @@ export const Header: React.FC = () => {
                 <Button
                   component={Link}
                   to="/"
-                  sx={{ my: 2, color: "white", display: "block" }}
+                  sx={{ my: 2, color: "white", display: "block", "&:hover": { backgroundColor: "white", color: "black" } }}
                 >
                   Verify cid
                 </Button>
                 <Button
                   component={Link}
                   to="/nft"
-                  sx={{ my: 2, color: "white", display: "block" }}>
+                  sx={{ my: 2, color: "white", display: "block", "&:hover": { backgroundColor: "white", color: "black" }  }}>
                   Mint NFTs
                 </Button>
               </Box>
               <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Select Account">
-                  <IconButton
+                  <Button
                     onClick={handleOpenUserMenu}
-                    sx={{ p: 0 }}>
-                    <Avatar sx={{ bgcolor: "background.paper" }}>
-                      <Identicon
-                        value={selectedAddress}
-                        theme="substrate"
-                        size={32} />
-                    </Avatar>
-                  </IconButton>
+                    sx={{ background: "white",
+                      padding: "0.5rem 1rem",
+                      borderRadius: "4px",
+                      "&:hover": {
+                        backgroundColor: "white",
+                        color: "black"
+                      }
+                    }}
+                    startIcon={<Identicon
+                      value={selectedAddress}
+                      theme="substrate"
+                      size={32}
+                    />}
+                  >
+                    {getAccountByAddress(selectedAddress)?.meta.name}
+                  </Button>
                 </Tooltip>
                 <AccountSelect
                   anchorEl={anchorElUser}

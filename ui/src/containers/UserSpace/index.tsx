@@ -30,7 +30,7 @@ export const UserSpace: React.FC = ({ children }) => {
       }}
       >
         <CircularProgress />
-        Connecting to the node
+        Connecting to the node at {process.env.REACT_APP_WS_PROVIDER}
       </Box>
     )
   }

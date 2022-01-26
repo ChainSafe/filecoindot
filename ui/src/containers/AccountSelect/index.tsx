@@ -27,7 +27,8 @@ export const AccountSelect: React.FC<Props> = ({ anchorEl, onClose, ...props }) 
       anchorEl={anchorEl}
       open={Boolean(anchorEl)}
       onClose={onClose}
-      {...props}>
+      {...props}
+    >
       {accountList.map((account) => (
         <MenuItem
           key={account.address}
@@ -38,7 +39,8 @@ export const AccountSelect: React.FC<Props> = ({ anchorEl, onClose, ...props }) 
                 <Identicon
                   value={account.address}
                   theme="substrate"
-                  size={40} />
+                  size={40}
+                />
               </IconButton>
             }
             title={account.meta.name}

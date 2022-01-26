@@ -2,7 +2,7 @@
 import axios from "axios"
 import { useCallback, useEffect, useState } from "react"
 
-const COLLECTION_METADATA_BUCKET_NAME = "filecoindot-collection-metadata"
+// const COLLECTION_METADATA_BUCKET_NAME = "filecoindot-collection-metadata"
 const NFT_METADATA_BUCKET_NAME = "filecoindot-nft-metadata"
 const NFT_IMAGES_BUCKET_NAME = "filecoindot-nft-images"
 
@@ -10,7 +10,7 @@ const STORAGE_API_TOKEN = process.env.REACT_APP_STORAGE_TOKEN || "eyJhbGciOiJFUz
 const API = "https://stage.imploy.site/api/v1"
 
 const useBuckets = () => {
-  const [collectionMetaBucketId, setCollectionMetaBucketId] = useState("")
+  // const [collectionMetaBucketId, setCollectionMetaBucketId] = useState("")
   const [nftMetaBucketId, setNftMetaBucketId] = useState("")
   const [nftImagesBucketId, setNftImagesBucketId] = useState("")
 
@@ -96,15 +96,15 @@ const useBuckets = () => {
   }, [createBucket, getBuckets])
 
   useEffect(() => {
-    if(!collectionMetaBucketId) setOrCreateBucket(COLLECTION_METADATA_BUCKET_NAME, setCollectionMetaBucketId)
+    // if(!collectionMetaBucketId) setOrCreateBucket(COLLECTION_METADATA_BUCKET_NAME, setCollectionMetaBucketId)
 
     if(!nftMetaBucketId) setOrCreateBucket(NFT_METADATA_BUCKET_NAME, setNftMetaBucketId)
 
     if(!nftImagesBucketId) setOrCreateBucket(NFT_IMAGES_BUCKET_NAME, setNftImagesBucketId)
-  }, [collectionMetaBucketId, nftImagesBucketId, nftMetaBucketId, setOrCreateBucket])
+  }, [nftImagesBucketId, nftMetaBucketId, setOrCreateBucket])
 
 
-  return { collectionMetaBucketId, nftImagesBucketId, nftMetaBucketId, uploadFile }
+  return { nftImagesBucketId, nftMetaBucketId, uploadFile }
 }
 
 export default useBuckets
