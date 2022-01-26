@@ -14,7 +14,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@polkadot/types/lookup": ["./src/interfaces/types-lookup.ts"],
+      "@polkadot/api/augment": ["./src/interfaces/augment-api.ts"],
+      "@polkadot/types/augment": ["./src/interfaces/augment-types.ts"]
+    },
   },
   "include": ["src"]
 }
