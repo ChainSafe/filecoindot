@@ -10,9 +10,15 @@ framework, including Polkadot parachains.
 
 ## Quick Start
 
+
+
 We recommend to use our docker image for the quick start of the features filecoindot provide
 
 ```
+# NOTE: If you are trying to run `filecoindot-template` on mac with apple silicon, please run `cargo build --release` to build the binary yourselves,
+# then run `./target/release/filecoindot-template --tmp --dev --usafe-ws-external --unsafe-rpc-external --rpc-methods unsafe`
+#
+# see https://docs.docker.com/desktop/mac/apple-silicon/#known-issues
 docker run -p 9933:9933 -p 9944:9944 ghcr.io/chainsafe/filecoindot-template --tmp --dev --usafe-ws-external --unsafe-rpc-external --rpc-methods unsafe
 ```
 
