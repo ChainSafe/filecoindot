@@ -124,7 +124,7 @@ If you can see the logs below in your terminal
 the filecoindot offchain worker has been set up!
 
 
-#### 3. set the the offchain worker's account as relayer
+#### 3. set the offchain worker's account as relayer
 
 In the provided [substrate-node-example](./substrate-node-example/README.md), we configured the `type ManagerOrigin` of `filecoindot` with `frame_system::EnsureRoot<AccountId>`, so here we need to `add_relayer` with sudo access.
 
