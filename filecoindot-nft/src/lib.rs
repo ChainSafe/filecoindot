@@ -18,6 +18,7 @@ mod tests;
 #[frame_support::pallet]
 pub mod pallet {
     pub use crate::types::{ClassData, TokenData};
+    use codec::alloc::vec;
     use frame_support::{pallet_prelude::*, sp_std::prelude::*};
     use frame_system::pallet_prelude::*;
 

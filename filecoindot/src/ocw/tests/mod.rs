@@ -1,5 +1,6 @@
 // Copyright 2021 ChainSafe Systems
 // SPDX-License-Identifier: LGPL-3.0-only
+#![allow(unused_imports)]
 mod data;
 mod ext;
 mod get_tip_set_by_height;

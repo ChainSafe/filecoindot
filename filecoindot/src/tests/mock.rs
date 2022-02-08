@@ -3,12 +3,14 @@
 
 use crate as pallet;
 use frame_support::construct_runtime;
-use frame_support::pallet_prelude::{EnsureOrigin, GenesisBuild};
+use frame_support::pallet_prelude::EnsureOrigin;
+#[cfg(test)]
+use frame_support::pallet_prelude::GenesisBuild;
 use frame_support::sp_runtime::{
     testing::TestXt,
     traits::{Extrinsic as ExtrinsicT, Verify},
 };
-use frame_support::{parameter_types, sp_std};
+use frame_support::{parameter_types, sp_runtime, sp_std};
 use frame_system::ensure_signed;
 use sp_core::{
     sr25519::{Public, Signature},
@@ -73,7 +75,7 @@ impl frame_system::Config for Test {
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
-    type Hashing = ::sp_runtime::traits::BlakeTwo256;
+    type Hashing = sp_runtime::traits::BlakeTwo256;
     type AccountId = sp_core::sr25519::Public;
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
@@ -146,6 +148,7 @@ impl Default for ExtBuilder {
     }
 }
 
+#[cfg(test)]
 impl ExtBuilder {
     pub fn build(self) -> sp_io::TestExternalities {
         let mut t = frame_system::GenesisConfig::default()

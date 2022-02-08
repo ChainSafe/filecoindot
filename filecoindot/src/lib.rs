@@ -20,10 +20,8 @@ pub use self::{
 
 mod crypto;
 mod ocw;
-mod types;
-
-#[cfg(feature = "runtime-benchmarks")]
 mod tests;
+mod types;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;

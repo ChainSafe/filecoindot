@@ -21,14 +21,16 @@ pub trait ForestProofVerify {
         use filecoindot_proofs::{MessageNodeType, ProofVerify, Verify};
         ProofVerify::verify_proof::<MessageNodeType>(proof, cid).ok()
     }
+}
 
-    #[cfg(feature = "runtime-benchmarks")]
-    pub fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
+#[cfg(feature = "runtime-benchmarks")]
+#[runtime_interface]
+pub trait Benchmarking {
+    fn hamt_proof_generation() -> (Vec<Vec<u8>>, Vec<u8>) {
         filecoindot_proofs::benchmarking::hamt_proof_generation()
     }
 
-    #[cfg(feature = "runtime-benchmarks")]
-    pub fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
-        filecoindot_proofs::benchmarking::amt_proof_generation(n)
+    fn amt_proof_generation(n: u64) -> (Vec<Vec<u8>>, Vec<u8>) {
+        filecoindot_proofs::benchmarking::amt_proof_generation(n as usize)
     }
 }

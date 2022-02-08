@@ -13,14 +13,13 @@ sp-std = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v
 sp-runtime-interface = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
 
 # fileconidot deps
-filecoindot-proofs = { path = "../filecoindot-proofs", optional = true }
+filecoindot-proofs = { path = "../filecoindot-proofs", default-features = false }
 
 [features]
 default = [ "std" ]
 std = [
   "sp-runtime-interface/std",
   "sp-std/std",
-  "filecoindot-proofs"
 ]
 runtime-benchmarks = [
   "filecoindot-proofs/runtime-benchmarks",

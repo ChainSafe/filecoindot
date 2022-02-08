@@ -5,13 +5,12 @@ use crate::{
     deserialize_to_node, Amt, ForestAdaptedBlockStorage, ForestAdaptedHashAlgo,
     ForestAdaptedHashedBits, ForestAdaptedNode, ForestAmtAdaptedNode, GetCid, HAMTNodeType, Hamt,
 };
-use cid::Cid;
 use ipld_amt::Amt as ForestAmt;
 use ipld_blockstore::MemoryDB;
 use ipld_hamt::Hamt as ForestHamt;
 use serde_cbor::from_slice;
 
-pub fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
+pub fn hamt_proof_generation() -> (Vec<Vec<u8>>, Vec<u8>) {
     let bs = MemoryDB::default();
     let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);
 
@@ -34,10 +33,10 @@ pub fn hamt_proof_generation() -> (Vec<Vec<u8>>, Cid) {
     p.reverse();
     let raw_node = p.get(0).unwrap();
     let node: HAMTNodeType = deserialize_to_node(None, raw_node).unwrap();
-    (p, node.cid().unwrap())
+    (p, node.cid().unwrap().to_bytes())
 }
 
-pub fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
+pub fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Vec<u8>) {
     let bs = MemoryDB::default();
     let mut famt = ForestAmt::new(&bs);
 
@@ -53,5 +52,5 @@ pub fn amt_proof_generation(n: usize) -> (Vec<Vec<u8>>, Cid) {
     let p = amt.generate_proof(n).unwrap();
     let raw_node = p.get(0).unwrap();
     let node: ForestAmtAdaptedNode<String> = from_slice(raw_node).unwrap();
-    (p, node.cid().unwrap())
+    (p, node.cid().unwrap().to_bytes())
 }

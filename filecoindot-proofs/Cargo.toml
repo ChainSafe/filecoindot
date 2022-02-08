@@ -23,5 +23,6 @@ ipld_blockstore = { git = "https://github.com/willeslau/forest", branch = "wille
 serde_cbor = { version = "0.12", features = ["tags"], package = "cs_serde_cbor" }
 
 [features]
-default = []
+default = [ "std" ]
+std = []
 runtime-benchmarks = []
