@@ -13,6 +13,9 @@ mod hamt;
 mod traits;
 mod verify;
 
+#[cfg(feature = "runtime-benchmarks")]
+pub mod benchmarking;
+
 pub use crate::amt::Amt;
 pub use crate::forest_amt_adaptor::*;
 pub use crate::forest_hamt_adaptor::*;

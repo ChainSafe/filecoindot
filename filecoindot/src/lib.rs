@@ -22,8 +22,11 @@ mod crypto;
 mod ocw;
 mod types;
 
-#[cfg(test)]
+#[cfg(feature = "runtime-benchmarks")]
 mod tests;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {

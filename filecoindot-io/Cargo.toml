@@ -22,3 +22,6 @@ std = [
   "sp-std/std",
   "filecoindot-proofs"
 ]
+runtime-benchmarks = [
+  "filecoindot-proofs/runtime-benchmarks",
+]

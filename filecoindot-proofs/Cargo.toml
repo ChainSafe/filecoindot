@@ -21,3 +21,7 @@ forest_hash_utils = { version = "0.1" }
 forest_db = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
 ipld_blockstore = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
 serde_cbor = { version = "0.12", features = ["tags"], package = "cs_serde_cbor" }
+
+[features]
+default = []
+runtime-benchmarks = []
