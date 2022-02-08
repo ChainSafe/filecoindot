@@ -7,14 +7,12 @@ mod errors;
 mod forest_hamt_adaptor;
 
 mod amt;
+pub mod benchmarking;
 mod forest_amt_adaptor;
 mod generate;
 mod hamt;
 mod traits;
 mod verify;
-
-#[cfg(feature = "runtime-benchmarks")]
-pub mod benchmarking;
 
 pub use crate::amt::Amt;
 pub use crate::forest_amt_adaptor::*;

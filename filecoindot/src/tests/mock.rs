@@ -6,10 +6,6 @@ use frame_support::construct_runtime;
 use frame_support::pallet_prelude::EnsureOrigin;
 #[cfg(test)]
 use frame_support::pallet_prelude::GenesisBuild;
-use frame_support::sp_runtime::{
-    testing::TestXt,
-    traits::{Extrinsic as ExtrinsicT, Verify},
-};
 use frame_support::{parameter_types, sp_runtime, sp_std};
 use frame_system::ensure_signed;
 use sp_core::{
@@ -17,6 +13,10 @@ use sp_core::{
     H256,
 };
 use sp_runtime::{testing::Header, traits::IdentityLookup};
+use sp_runtime::{
+    testing::TestXt,
+    traits::{Extrinsic as ExtrinsicT, Verify},
+};
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
@@ -65,7 +65,7 @@ impl EnsureOrigin<<Test as frame_system::Config>::Origin> for MockedRelayerAdmin
 
     #[cfg(feature = "runtime-benchmarks")]
     fn successful_origin() -> <Test as frame_system::Config>::Origin {
-        Origin::signed(Default::default())
+        Origin::signed(ALICE)
     }
 }
 

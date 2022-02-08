@@ -23,7 +23,6 @@ pub trait ForestProofVerify {
     }
 }
 
-#[cfg(feature = "runtime-benchmarks")]
 #[runtime_interface]
 pub trait Benchmarking {
     fn hamt_proof_generation() -> (Vec<Vec<u8>>, Vec<u8>) {

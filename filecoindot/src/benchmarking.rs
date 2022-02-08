@@ -3,112 +3,151 @@
 
 //! Benchmarking setup for filecoindot
 
-use crate::tests::mock::{Origin, Test, ALICE, RELAYER1, RELAYER2, RELAYER3, RELAYER4};
 use crate::*;
 use filecoindot_io::benchmarking::{amt_proof_generation, hamt_proof_generation};
-
-#[allow(unused)]
-use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, vec, whitelisted_caller};
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, vec};
+use frame_support::traits::EnsureOrigin;
+use frame_system::RawOrigin;
 
 benchmarks! {
     add_relayer {
+        let caller = T::ManagerOrigin::successful_origin();
+        let relayer: T::AccountId = account("relayer", 0, 0);
     }: {
-        Pallet::<Test>::add_relayer(Origin::signed(ALICE), RELAYER4)?;
+        Pallet::<T>::add_relayer(caller, relayer.clone())?;
     } verify {
-        assert!(Relayers::<Test>::contains_key(&RELAYER4));
+        assert!(Relayers::<T>::contains_key(&relayer));
     }
 
     remove_relayer {
-        Pallet::<Test>::add_relayer(Origin::signed(ALICE), RELAYER4)?;
+        let caller = T::ManagerOrigin::successful_origin();
+        let relayer: T::AccountId = account("relayer", 0, 0);
+
+        Pallet::<T>::add_relayer(caller.clone(), relayer.clone())?;
     }: {
-        Pallet::<Test>::remove_relayer(Origin::signed(ALICE), RELAYER4)?;
+        Pallet::<T>::remove_relayer(caller, relayer.clone())?;
     } verify {
-        assert!(!Relayers::<Test>::contains_key(&RELAYER4));
+        assert!(!Relayers::<T>::contains_key(&relayer));
     }
 
     set_vote_threshold {
     }: {
-        Pallet::<Test>::set_vote_threshold(Origin::signed(ALICE), 2)?;
+        Pallet::<T>::set_vote_threshold(T::ManagerOrigin::successful_origin(), 2)?;
     } verify {
-        assert_eq!(VoteThreshold::<Test>::get(), 2);
+        assert_eq!(VoteThreshold::<T>::get(), 2);
     }
 
     submit_block_vote_approve {
-        Pallet::<Test>::add_relayer(Origin::signed(ALICE), ALICE)?;
-        Pallet::<Test>::set_vote_threshold(Origin::signed(ALICE), 1)?;
+        let caller = T::ManagerOrigin::successful_origin();
+        let relayer: T::AccountId = account("relayer", 0, 0);
+
+        Pallet::<T>::add_relayer(caller.clone(), relayer.clone())?;
+        Pallet::<T>::set_vote_threshold(caller.clone(), 1)?;
     }: {
-        Pallet::<Test>::submit_block_vote(Origin::signed(ALICE), vec![0], vec![0])?;
+        Pallet::<T>::submit_block_vote(RawOrigin::Signed(relayer).into(), vec![0], vec![0])?;
     } verify {
-        assert!(!BlockSubmissionProposals::<Test>::contains_key(&vec![0]));
+        assert!(!BlockSubmissionProposals::<T>::contains_key(&vec![0]));
     }
 
     verify_receipt {
+        let caller = T::ManagerOrigin::successful_origin();
+        let alice: T::AccountId = account("alice", 0, 0);
+        let bob: T::AccountId = account("bob", 0, 1);
+        let charlie: T::AccountId = account("charlie", 0, 2);
+
+        Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
+        Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
+        Pallet::<T>::add_relayer(caller.clone(), charlie.clone())?;
+
         let block_cid = vec![0, 1];
         let message_cid = vec![0, 1];
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER1),
+
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(alice).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER2),
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(bob).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER3),
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(charlie).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
         let (proof, cid) = amt_proof_generation(100);
     }: {
-        Pallet::<Test>::verify_receipt(Origin::signed(ALICE), proof, block_cid, cid)?;
+        Pallet::<T>::verify_receipt(caller, proof, block_cid, cid)?;
     }
 
     verify_state {
+        let caller = T::ManagerOrigin::successful_origin();
+        let alice: T::AccountId = account("alice", 0, 0);
+        let bob: T::AccountId = account("bob", 0, 1);
+        let charlie: T::AccountId = account("charlie", 0, 2);
+
+        Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
+        Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
+        Pallet::<T>::add_relayer(caller.clone(), charlie.clone())?;
+
         let block_cid = vec![0, 1];
         let message_cid = vec![0, 1];
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER1),
+
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(alice).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER2),
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(bob).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER3),
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(charlie).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
+
         let (proof, cid) = hamt_proof_generation();
     }: {
-        Pallet::<Test>::verify_state(Origin::signed(ALICE), proof, block_cid, cid)?;
+        Pallet::<T>::verify_state(caller, proof, block_cid, cid)?;
     }
 
     verify_message {
+        let caller = T::ManagerOrigin::successful_origin();
+        let alice: T::AccountId = account("alice", 0, 0);
+        let bob: T::AccountId = account("bob", 0, 1);
+        let charlie: T::AccountId = account("charlie", 0, 2);
+
+        Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
+        Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
+        Pallet::<T>::add_relayer(caller.clone(), charlie.clone())?;
+
         let block_cid = vec![0, 1];
         let message_cid = vec![0, 1];
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER1),
+
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(alice).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER2),
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(bob).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
-        Pallet::<Test>::submit_block_vote(
-            Origin::signed(RELAYER3),
+        Pallet::<T>::submit_block_vote(
+            RawOrigin::Signed(charlie).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
+
         let (proof, cid) = hamt_proof_generation();
     }: {
-        Pallet::<Test>::verify_message(Origin::signed(ALICE), proof, block_cid, cid)?;
+        Pallet::<T>::verify_message(caller, proof, block_cid, cid)?;
     }
 }
 

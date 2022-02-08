@@ -20,6 +20,7 @@ pub use self::{
 
 mod crypto;
 mod ocw;
+#[cfg(test)]
 mod tests;
 mod types;
 

@@ -47,7 +47,7 @@ ipld_blockstore = { git = "https://github.com/willeslau/forest", branch = "wille
 cid = { package = "forest_cid", version = "0.3" }
 serde_cbor = { version = "0.12", features = ["tags"], package = "cs_serde_cbor" }
 filecoindot-proofs = { path = "../filecoindot-proofs", default-features = false }
-filecoindot-io = { path = "../filecoindot-io", features = ["runtime-benchmarks"] }
+filecoindot-io = { path = "../filecoindot-io" }
 
 [features]
 default = ['std']
@@ -55,7 +55,6 @@ runtime-benchmarks = [
 	'frame-benchmarking',
 	'frame-support/runtime-benchmarks',
 	'frame-system/runtime-benchmarks',
-    'filecoindot-io/runtime-benchmarks',
 ]
 std = [
 	'codec/std',

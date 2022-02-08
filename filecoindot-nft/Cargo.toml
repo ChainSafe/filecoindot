@@ -57,7 +57,6 @@ runtime-benchmarks = [
 	'frame-benchmarking',
 	'frame-support/runtime-benchmarks',
 	'frame-system/runtime-benchmarks',
-    'filecoindot-io/runtime-benchmarks'
 ]
 std = [
 	'codec/std',
