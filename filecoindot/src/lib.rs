@@ -583,7 +583,6 @@ pub mod pallet {
         fn remove_relayer() -> Weight;
         fn submit_block_vote() -> Weight;
         fn set_vote_threshold() -> Weight;
-        fn new_submission() -> Weight;
         fn close_block_proposal() -> Weight;
         fn verify_receipt() -> Weight;
         fn verify_state() -> Weight;
@@ -605,10 +604,6 @@ pub mod pallet {
         }
 
         fn set_vote_threshold() -> Weight {
-            Default::default()
-        }
-
-        fn new_submission() -> Weight {
             Default::default()
         }
 

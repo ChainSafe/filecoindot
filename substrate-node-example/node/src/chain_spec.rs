@@ -162,7 +162,7 @@ fn testnet_genesis(
             key: root_key,
         },
         filecoindot: FilecoindotConfig {
-            vote_threshold: 1,
+            vote_threshold: 3,
             vote_period: 5,
             relayers: endowed_accounts,
         },

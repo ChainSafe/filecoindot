@@ -5,6 +5,8 @@
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
 #![recursion_limit = "256"]
 
+mod weights;
+
 // Make the WASM binary available.
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
@@ -288,7 +290,7 @@ type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
 impl filecoindot::Config for Runtime {
     type ManagerOrigin = ManagerOrigin;
     type Event = Event;
-    type WeightInfo = ();
+    type WeightInfo = weights::filecoindot::WeightInfo<Self>;
     type AuthorityId = filecoindot::FilecoindotId;
     type OffchainWorkerTimeout = OffchainWorkerTimeout;
 }
@@ -576,7 +578,7 @@ impl_runtime_apis! {
             list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
             list_benchmark!(list, extra, pallet_balances, Balances);
             list_benchmark!(list, extra, pallet_timestamp, Timestamp);
-            list_benchmark!(list, extra, pallet_filecoindot, Filecoindot);
+            list_benchmark!(list, extra, filecoindot, Filecoindot);
 
             let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -610,7 +612,7 @@ impl_runtime_apis! {
             add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
             add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-            add_benchmark!(params, batches, pallet_filecoindot, Filecoindot);
+            add_benchmark!(params, batches, filecoindot, Filecoindot);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)

@@ -37,7 +37,7 @@ benchmarks! {
         assert_eq!(VoteThreshold::<T>::get(), 2);
     }
 
-    submit_block_vote_approve {
+    submit_block_vote {
         let caller = T::ManagerOrigin::successful_origin();
         let relayer: T::AccountId = account("relayer", 0, 0);
 
@@ -49,11 +49,29 @@ benchmarks! {
         assert!(!BlockSubmissionProposals::<T>::contains_key(&vec![0]));
     }
 
+    close_block_proposal {
+        let caller = T::ManagerOrigin::successful_origin();
+        let relayer: T::AccountId = account("relayer", 0, 0);
+
+        Pallet::<T>::add_relayer(caller.clone(), relayer.clone())?;
+        Pallet::<T>::submit_block_vote(RawOrigin::Signed(relayer).into(), vec![0], vec![0])?;
+
+        let now = frame_system::Pallet::<T>::block_number();
+        frame_system::Pallet::<T>::set_block_number(now + VotingPeriod::<T>::get() + 1u32.into());
+    }: {
+        Pallet::<T>::close_block_proposal(caller, vec![0])?;
+    } verify {
+        assert_eq!(
+            BlockSubmissionProposals::<T>::get(vec![0]),
+            None,
+        );
+    }
+
     verify_receipt {
         let caller = T::ManagerOrigin::successful_origin();
         let alice: T::AccountId = account("alice", 0, 0);
-        let bob: T::AccountId = account("bob", 0, 1);
-        let charlie: T::AccountId = account("charlie", 0, 2);
+        let bob: T::AccountId = account("bob", 1, 1);
+        let charlie: T::AccountId = account("charlie", 2, 2);
 
         Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
         Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
@@ -63,7 +81,7 @@ benchmarks! {
         let message_cid = vec![0, 1];
 
         Pallet::<T>::submit_block_vote(
-            RawOrigin::Signed(alice).into(),
+            RawOrigin::Signed(alice.clone()).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
@@ -79,14 +97,14 @@ benchmarks! {
         ).unwrap();
         let (proof, cid) = amt_proof_generation(100);
     }: {
-        Pallet::<T>::verify_receipt(caller, proof, block_cid, cid)?;
+        Pallet::<T>::verify_receipt(RawOrigin::Signed(alice).into(), proof, block_cid, cid)?;
     }
 
     verify_state {
         let caller = T::ManagerOrigin::successful_origin();
         let alice: T::AccountId = account("alice", 0, 0);
-        let bob: T::AccountId = account("bob", 0, 1);
-        let charlie: T::AccountId = account("charlie", 0, 2);
+        let bob: T::AccountId = account("bob", 1, 1);
+        let charlie: T::AccountId = account("charlie", 2, 2);
 
         Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
         Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
@@ -96,7 +114,7 @@ benchmarks! {
         let message_cid = vec![0, 1];
 
         Pallet::<T>::submit_block_vote(
-            RawOrigin::Signed(alice).into(),
+            RawOrigin::Signed(alice.clone()).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
@@ -113,14 +131,14 @@ benchmarks! {
 
         let (proof, cid) = hamt_proof_generation();
     }: {
-        Pallet::<T>::verify_state(caller, proof, block_cid, cid)?;
+        Pallet::<T>::verify_state(RawOrigin::Signed(alice).into(), proof, block_cid, cid)?;
     }
 
     verify_message {
         let caller = T::ManagerOrigin::successful_origin();
         let alice: T::AccountId = account("alice", 0, 0);
-        let bob: T::AccountId = account("bob", 0, 1);
-        let charlie: T::AccountId = account("charlie", 0, 2);
+        let bob: T::AccountId = account("bob", 1, 1);
+        let charlie: T::AccountId = account("charlie", 2, 2);
 
         Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
         Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
@@ -130,7 +148,7 @@ benchmarks! {
         let message_cid = vec![0, 1];
 
         Pallet::<T>::submit_block_vote(
-            RawOrigin::Signed(alice).into(),
+            RawOrigin::Signed(alice.clone()).into(),
             block_cid.clone(),
             message_cid.clone()
         ).unwrap();
@@ -147,7 +165,7 @@ benchmarks! {
 
         let (proof, cid) = hamt_proof_generation();
     }: {
-        Pallet::<T>::verify_message(caller, proof, block_cid, cid)?;
+        Pallet::<T>::verify_message(RawOrigin::Signed(alice).into(), proof, block_cid, cid)?;
     }
 }
 
