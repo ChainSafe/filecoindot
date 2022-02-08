@@ -10,6 +10,7 @@ use ipld_blockstore::MemoryDB;
 use ipld_hamt::Hamt as ForestHamt;
 use serde_cbor::from_slice;
 
+#[allow(clippy::type_complexity)]
 pub fn hamt_proof_generation() -> (Vec<Vec<u8>>, Vec<u8>) {
     let bs = MemoryDB::default();
     let mut fhamt: ForestHamt<_, _, usize> = ForestHamt::new(&bs);

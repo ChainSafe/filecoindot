@@ -42,7 +42,7 @@ benchmarks! {
         let relayer: T::AccountId = account("relayer", 0, 0);
 
         Pallet::<T>::add_relayer(caller.clone(), relayer.clone())?;
-        Pallet::<T>::set_vote_threshold(caller.clone(), 1)?;
+        Pallet::<T>::set_vote_threshold(caller, 1)?;
     }: {
         Pallet::<T>::submit_block_vote(RawOrigin::Signed(relayer).into(), vec![0], vec![0])?;
     } verify {
@@ -75,7 +75,7 @@ benchmarks! {
 
         Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
         Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
-        Pallet::<T>::add_relayer(caller.clone(), charlie.clone())?;
+        Pallet::<T>::add_relayer(caller, charlie.clone())?;
 
         let block_cid = vec![0, 1];
         let message_cid = vec![0, 1];
@@ -93,7 +93,7 @@ benchmarks! {
         Pallet::<T>::submit_block_vote(
             RawOrigin::Signed(charlie).into(),
             block_cid.clone(),
-            message_cid.clone()
+            message_cid
         ).unwrap();
         let (proof, cid) = amt_proof_generation(100);
     }: {
@@ -108,7 +108,7 @@ benchmarks! {
 
         Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
         Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
-        Pallet::<T>::add_relayer(caller.clone(), charlie.clone())?;
+        Pallet::<T>::add_relayer(caller, charlie.clone())?;
 
         let block_cid = vec![0, 1];
         let message_cid = vec![0, 1];
@@ -126,7 +126,7 @@ benchmarks! {
         Pallet::<T>::submit_block_vote(
             RawOrigin::Signed(charlie).into(),
             block_cid.clone(),
-            message_cid.clone()
+            message_cid
         ).unwrap();
 
         let (proof, cid) = hamt_proof_generation();
@@ -142,7 +142,7 @@ benchmarks! {
 
         Pallet::<T>::add_relayer(caller.clone(), alice.clone())?;
         Pallet::<T>::add_relayer(caller.clone(), bob.clone())?;
-        Pallet::<T>::add_relayer(caller.clone(), charlie.clone())?;
+        Pallet::<T>::add_relayer(caller, charlie.clone())?;
 
         let block_cid = vec![0, 1];
         let message_cid = vec![0, 1];
@@ -160,7 +160,7 @@ benchmarks! {
         Pallet::<T>::submit_block_vote(
             RawOrigin::Signed(charlie).into(),
             block_cid.clone(),
-            message_cid.clone()
+            message_cid
         ).unwrap();
 
         let (proof, cid) = hamt_proof_generation();
