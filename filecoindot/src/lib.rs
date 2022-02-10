@@ -473,7 +473,7 @@ pub mod pallet {
 
         /// Checks if who is a relayer
         fn is_relayer(who: &T::AccountId) -> bool {
-            Relayers::<T>::get(who).map(|_| true).unwrap_or(false)
+            Relayers::<T>::contains_key(who)
         }
 
         // ============== Voting Related =============
