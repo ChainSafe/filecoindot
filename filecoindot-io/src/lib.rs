@@ -22,3 +22,14 @@ pub trait ForestProofVerify {
         ProofVerify::verify_proof::<MessageNodeType>(proof, cid).ok()
     }
 }
+
+#[runtime_interface]
+pub trait Benchmarking {
+    fn hamt_proof_generation() -> (Vec<Vec<u8>>, Vec<u8>) {
+        filecoindot_proofs::benchmarking::hamt_proof_generation()
+    }
+
+    fn amt_proof_generation(n: u64) -> (Vec<Vec<u8>>, Vec<u8>) {
+        filecoindot_proofs::benchmarking::amt_proof_generation(n as usize)
+    }
+}

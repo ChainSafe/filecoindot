@@ -24,6 +24,7 @@ impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
     type ExtendHostFunctions = (
         frame_benchmarking::benchmarking::HostFunctions,
         filecoindot_io::forest_proof_verify::HostFunctions,
+        filecoindot_io::benchmarking::HostFunctions,
     );
     /// Otherwise we only use the default Substrate host functions.
     #[cfg(not(feature = "runtime-benchmarks"))]

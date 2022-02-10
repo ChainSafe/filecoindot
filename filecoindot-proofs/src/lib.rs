@@ -7,6 +7,7 @@ mod errors;
 mod forest_hamt_adaptor;
 
 mod amt;
+pub mod benchmarking;
 mod forest_amt_adaptor;
 mod generate;
 mod hamt;
