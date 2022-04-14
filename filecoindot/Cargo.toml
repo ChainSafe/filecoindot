@@ -22,7 +22,7 @@ frame-benchmarking = { git = 'https://github.com/paritytech/substrate', branch =
 frame-support = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
 frame-system = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
 sp-core = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
-scale-info = { version = "1.0", default-features = false, features = ["derive"] }
+scale-info = { version = "2.1", default-features = false, features = ["derive"] }
 
 # filecoindot related
 filecoindot-io = { path = "../filecoindot-io", default-features = false }
