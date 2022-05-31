@@ -16,7 +16,7 @@ jsonrpc-core-client = "18"
 jsonrpc-derive = "18"
 derive_more = "^0.99"
 thiserror = "^1"
-parking_lot = "^0.10"
+parking_lot = "^0.12"
 url = "2.2.2"
 codec = { package = "parity-scale-codec", version = "2.3.1" }
 
