@@ -16,10 +16,10 @@ We recommend to use our docker image for the quick start of the features filecoi
 
 ```
 # NOTE: If you are trying to run `filecoindot-template` on mac with apple silicon, please run `cargo build --release` to build the binary yourselves,
-# then run `./target/release/filecoindot-template --tmp --dev --usafe-ws-external --unsafe-rpc-external --rpc-methods unsafe`
+# then run `./target/release/filecoindot-template --tmp --dev --unsafe-ws-external --unsafe-rpc-external --rpc-methods unsafe`
 #
 # see https://docs.docker.com/desktop/mac/apple-silicon/#known-issues
-docker run -p 9933:9933 -p 9944:9944 ghcr.io/chainsafe/filecoindot-template --tmp --dev --usafe-ws-external --unsafe-rpc-external --rpc-methods unsafe
+docker run -p 9933:9933 -p 9944:9944 ghcr.io/chainsafe/filecoindot-template --tmp --dev --unsafe-ws-external --unsafe-rpc-external --rpc-methods unsafe
 ```
 
 After the node start emiting logs, run
@@ -158,6 +158,10 @@ import { Keyring } from "@polkadot/keyring";
 
 See [the example runtime](./substrate-node-example/runtime/src/lib.rs) for a full example showing how to integrate the pallet into
 a substrate runtime.
+
+#### 5. Demo website 
+Once you have the node and container running you can test FSB going on https://filecoindot.chainsafe.io/ you will need to have the polkadot.js extention running and the substrate node https://polkadot.js.org/apps/#/explorer
+
 
 # ChainSafe Security Policy
 
