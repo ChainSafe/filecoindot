@@ -8,6 +8,9 @@ filecoindot
 A Substrate pallet to bridge from Filecoin to any blockchain built using the [Substrate](https://www.substrate.io/)
 framework, including Polkadot parachains.
 
+### The Specs
+The detailed specs are available [here](https://docs.google.com/document/d/16QgEXP8TMFMsquWvs8iXhZRZ7mScXWQmP7-FeMXXT50/edit?usp=sharing)
+
 ## Quick Start
 
 
