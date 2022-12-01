@@ -1,4 +1,4 @@
-filecoindot
+Filecoindot - FSB
 ======================
 
 [<img alt="github" src="https://img.shields.io/badge/github-ChainSafe/filecoindot-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/ChainSafe/filecoindot)
