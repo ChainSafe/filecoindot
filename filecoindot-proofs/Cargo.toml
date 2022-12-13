@@ -11,7 +11,7 @@ serde_bytes = { package = "cs_serde_bytes", version = "0.12" }
 thiserror = "1.0"
 sha2 = "0.9.1"
 once_cell = "1.5"
-parking_lot = "0.11"
+parking_lot = "0.12"
 num-traits = "0.2.14"
 ipld_hamt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
 ipld_amt = { git = "https://github.com/willeslau/forest", branch = "willes/filecoindot" }
